@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/login.qml</file>
+        <file>images/close.png</file>
+        <file>controls/LText.qml</file>
+        <file>js/UI.js</file>
+        <file>images/logo.png</file>
+        <file>js/login.js</file>
+        <file>js/API.js</file>
+    </qresource>
+</RCC>
