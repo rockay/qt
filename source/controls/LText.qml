@@ -4,7 +4,7 @@ import "qrc:/js/UI.js" as UI
 
 Text {
     id: txt
-    property int pointSize: UI.BigFontPointSize
+    property int pointSize: UI.LittleFontPointSize
     property color fcolor: UI.cBlack
     font.family: UI.defaultFontFamily
     font.pointSize: txt.pointSize

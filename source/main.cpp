@@ -29,7 +29,7 @@ int main(int argc,char* argv[])
 //    //将viewer设置为main.qml属性
 //    viwer.rootContext()->setContextProperty("mainwindow",&viwer);
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/qml/login.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
 
     return app.exec();
 }

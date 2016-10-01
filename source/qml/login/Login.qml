@@ -7,14 +7,14 @@ import "qrc:/js/API.js" as API
 import "qrc:/js/login.js" as LoginJS
 
 Window {
-    id:root
+    id:login
     visible: true
     width: 472
     height: 623
-    title: qsTr("Hello World")
+    title: qsTr("登录")
     flags: Qt.FramelessWindowHint | Qt.WindowSystemMenuHint
            | Qt.WindowMinimizeButtonHint| Qt.Window;
-    color:"#00000000"
+    color: UI.cTransparent
 
 
     MouseArea {
@@ -29,47 +29,57 @@ Window {
             //鼠标偏移量
             var delta = Qt.point(mouse.x-clickPos.x, mouse.y-clickPos.y)
             //如果mainwindow继承自QWidget,用setPos
-            root.x = root.x+delta.x
-            root.y = root.y+delta.y
+            login.x = login.x+delta.x
+            login.y = login.y+delta.y
         }
     }
 
     Rectangle{
         anchors.fill: parent;
-        radius: 10;
-        color: UI.cWhite
+        radius: 4;
+        color: UI.cLoginBg
     }
 
     //要置于MouseArea之后，否则无法响应鼠标点击
-    Rectangle{
+    LOperButton {
         id:closeBtn
-        height: 43
-        width: 43
+        height: UI.fWCloseButton+5
+        width: UI.fWCloseButton
         anchors.right: parent.right
-//        anchors.rightMargin: 5
         anchors.top: parent.top
-//        anchors.topMargin: 5
-        opacity: 1
-        Image {
-            id: close
-            anchors.fill: parent
-            source: "qrc:/images/close.png"
-        }
+        source: "qrc:/images/close.png";
         MouseArea{
             anchors.fill: parent
-            onClicked:
-            {
-                //Qt.quit()无法关闭窗口
+            onClicked: {
                 Qt.quit()
             }
         }
     }
+//    Rectangle{
+//        id:closeBtn
+//        height: 43
+//        width: 43
+//        anchors.right: parent.right
+//        anchors.top: parent.top
+//        color: UI.cTransparent
+//        Image {
+//            id: close
+//            anchors.centerIn: parent
+//            source: "qrc:/images/close.png"
+//        }
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked:
+//            {
+//                Qt.quit()
+//            }
+//        }
+//    }
 
     Rectangle{
         id:photo
-        width:150
-        height:150
-//        color: UI.cLightBlue
+        width:parent.width/3
+        height:width
         anchors.top: parent.top
         anchors.topMargin: 100
         anchors.left: parent.left
@@ -77,7 +87,7 @@ Window {
         Image {
             id: photop
             anchors.fill: parent
-            source: "qrc:/images/logo.png"
+            source: "qrc:/images/photo.png"
         }
     }
 
@@ -86,9 +96,10 @@ Window {
         width:photo.width
         height:txtName.contentHeight
         anchors.top: photo.bottom
-        anchors.topMargin: 55
+        anchors.topMargin: 20
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
+        color: UI.cTransparent
         LText{
             id:txtName
             text:qsTr("郭思佳")
@@ -98,11 +109,11 @@ Window {
 
     Rectangle{
         id:btnlogin
-        color: UI.cLoginBg
-        width:293
-        height:57
+        color: UI.cLoginBtnBg
+        width: parent.width*5/7
+        height: UI.fHLoginBtn
         anchors.top: name.bottom
-        anchors.topMargin: 55
+        anchors.topMargin: 20
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
         LText{
@@ -124,9 +135,10 @@ Window {
         width:photo.width
         height:title.contentHeight
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 60
+        anchors.bottomMargin: 40
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
+        color: UI.cTransparent
         LText{
             id:title
             text:qsTr("切换账号")
@@ -134,5 +146,4 @@ Window {
             color: UI.cExchange
         }
     }
-
 }

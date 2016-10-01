@@ -1,11 +1,24 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/login.qml</file>
         <file>images/close.png</file>
         <file>controls/LText.qml</file>
         <file>js/UI.js</file>
-        <file>images/logo.png</file>
         <file>js/login.js</file>
         <file>js/API.js</file>
+        <file>qml/MainWindow.qml</file>
+        <file>qml/Main.qml</file>
+        <file>qml/login/Login.qml</file>
+        <file>images/max.png</file>
+        <file>images/close_login.png</file>
+        <file>images/min.png</file>
+        <file>controls/LOperButton.qml</file>
+        <file>controls/LToolButton.qml</file>
+        <file>images/photo.png</file>
+        <file>images/cloud.png</file>
+        <file>images/friend.png</file>
+        <file>images/group.png</file>
+        <file>images/message.png</file>
+        <file>qml/message/Message.qml</file>
+        <file>qml/friend/Friend.qml</file>
     </qresource>
 </RCC>
