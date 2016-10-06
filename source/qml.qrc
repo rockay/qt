@@ -20,5 +20,16 @@
         <file>images/message.png</file>
         <file>qml/message/Message.qml</file>
         <file>qml/friend/Friend.qml</file>
+        <file>controls/LTextField.qml</file>
+        <file>qml/cloud/Cloud.qml</file>
+        <file>qml/group/Group.qml</file>
+        <file>controls/LIconTextField.qml</file>
+        <file>images/find.png</file>
+        <file>images/face.png</file>
+        <file>images/folder.png</file>
+        <file>images/image.png</file>
+        <file>controls/LButton.qml</file>
+        <file>controls/LTextArea.qml</file>
+        <file>controls/LFace.qml</file>
     </qresource>
 </RCC>

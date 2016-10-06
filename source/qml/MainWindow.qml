@@ -4,6 +4,8 @@ import QtQuick.Window 2.2
 import "qrc:/controls/"
 import "qrc:/qml/message/"
 import "qrc:/qml/friend/"
+import "qrc:/qml/group/"
+import "qrc:/qml/cloud/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 
@@ -44,6 +46,8 @@ Window {
                         onClicked: {
                             message.visible= true
                             friend.visible= false
+                            group.visible = false
+                            cloud.visible = false
                         }
                     }
                 }
@@ -53,6 +57,8 @@ Window {
                         onClicked: {
                             message.visible= false
                             friend.visible= true
+                            group.visible = false
+                            cloud.visible = false
                         }
                     }
                 }
@@ -60,6 +66,10 @@ Window {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
+                            message.visible= false
+                            friend.visible= false
+                            group.visible = true
+                            cloud.visible = false
                         }
                     }
                 }
@@ -67,6 +77,10 @@ Window {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
+                            message.visible= false
+                            friend.visible= false
+                            group.visible = false
+                            cloud.visible = true
                         }
                     }
                 }
@@ -82,15 +96,23 @@ Window {
             Message{
                 id: message
                 anchors.fill: parent
-                visible: false
+                visible: true
             }
             Friend{
                 id: friend
                 anchors.fill: parent
                 visible: false
             }
-
-
+            Group{
+                id:group
+                anchors.fill: parent
+                visible: false
+            }
+            Cloud{
+                id:cloud
+                anchors.fill: parent
+                visible: false
+            }
 
         }
 

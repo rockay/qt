@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick
+QT += qml quick quickcontrols2
 CONFIG += c++11
 
 SOURCES += main.cpp
@@ -14,4 +14,6 @@ RC_FILE = icon.rc
 
 # Default rules for deployment.
 include(deployment.pri)
+
+HEADERS +=
 

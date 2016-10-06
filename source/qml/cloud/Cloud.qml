@@ -1,5 +1,5 @@
 /****************************************************
- * 名称：联系人主窗体
+ * 名称：云主窗体
  * 作者：LT
  * 日期：2016.10.6
  * 修改记录：
@@ -33,7 +33,7 @@ Item {
             height: UI.fHRithTop
             color: UI.cTransparent
             LText{
-                text:qsTr("好友")
+                text:qsTr("云")
                 anchors.centerIn: parent
             }
 
