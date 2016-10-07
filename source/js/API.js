@@ -3,14 +3,31 @@
 var api_root = "http://www.2045kpt.com/";
 
 // token 测试用
-var token = "NvoV8I+kQY9LdrDLgKSuWkrx+SVR6RWcfp10gBCm8NehKdbrOh5dNZ4BdFjQ77o6rYN9uOdwEIqwDvfXqpJiXQ==";
+var token = "6EBB10896EBB5C1F4D754D755C1F26CC5C1F6EBB";
+var rong_token = "wF95F73D6ZTsWt1SYAMwQhjUT4yuNhCsE8yk4WJbGM26BuVaS2WNvdRI933kuN3GF3scOwpS24L1CoOfm/CrNlL53KtrtPF2"
+var weix_token = ""
+var user_id = "1012332"
+var user_mobile = "13550324665"
+var user_name = "刘涛"
+var user_wx_name = "刘裕"
+var user_photo = "http://wx.qlogo.cn/mmopen/q3auhgzwzm7lgvbfzdocibjyoxnwcqiccz7kxx7fxpxyzseun5avysevy2yml7lcag5vx8ibbxlhjfxgqqdfatkbg/0"
+var is_vip_user = "0"
+var is_company_user = "0"
 
-//登录
-var api_login = "/CompanyUser/AppLogin";
+// 登录相关
+var api_sndVcode = "api_v2/account/rndcode_send";       // 获取验证码
+var api_login = "api_v3/account/login_rndcode";         // 验证码登录
 
-// 获取验证码
-var api_sndVcode = "api_v2/account/rndcode_send";
+// 好友相关
+var api_friendlist = "api_v2/friends/friend_list"       //获取通讯录好友
+var api_companyflist = "api_v2/friends/get_company_friends"    //获取企业好友
 
+
+// 群组相关
+var api_grouplist = "api_v2/group/get_group"            // 获取群组列表
+
+// 云库相关
+var api_getcloudfile = "api_v2/chat/get_file"           // 获取云库文件
 
 
 

@@ -11,16 +11,18 @@ QtObject {
     property real defaultSpacing: 10
     property SystemPalette palette: SystemPalette { }
 
-    property var controlWindow:Login {
+    property var lWindow:Login {
         id:login
         visible: true
         width: 280
         height: 400
     }
-    property var testWindow:MainWindow {
+    property var mWindow:MainWindow {
         id:main
-        width: 850
-        height: 600
+        width: UI.fWMain
+        height: UI.fHMain
+        minimumWidth: UI.fWMain
+        minimumHeight: UI.fHMain
         visible: false
    }
 }

@@ -121,7 +121,7 @@ Item {
                 msg: "你好久过来"
             }
             ListElement {
-                name: "李四"
+                name: qsTr("李四")
                 src: "qrc:/images/photo.png"
                 msg: "再见理想 "
             }
@@ -188,6 +188,11 @@ Item {
                 id: topTitle
                 text:qsTr("消息")
                 anchors.centerIn: parent
+
+                MouseArea{
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor;
+                }
             }
 
             MouseArea {

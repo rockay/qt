@@ -31,5 +31,14 @@
         <file>controls/LButton.qml</file>
         <file>controls/LTextArea.qml</file>
         <file>controls/LFace.qml</file>
+        <file>images/contacts.png</file>
+        <file>controls/LTabButton.qml</file>
+        <file>js/Friend.js</file>
+        <file>js/Group.js</file>
+        <file>js/Cloud.js</file>
+        <file>images/officefile.png</file>
+        <file>images/otherfile.png</file>
+        <file>images/picfile.png</file>
+        <file>images/allfile.png</file>
     </qresource>
 </RCC>

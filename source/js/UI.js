@@ -33,6 +33,8 @@ var cTBBg = "#EFEFEF"           // 文本输入框背景
 var cFTB = "#818181"            // 搜索框placeholder字体色
 var cItem = "#EEEEEE"           // 列表项背景色
 var cItemSelected = "#CCCACB"   // 列表项选中后背景色
+var cButtonBG = "#0166FF"       // 按钮背景色
+var cTypeBG = "#0099FF"         // 企业类型背景
 
 // 窗体定义
 var fHLoginBtn = 35     // 登录窗体按钮高
@@ -49,7 +51,15 @@ var fWCloseButton = 35  // 关闭按钮宽度
 var fHsearch = 25       // 搜索框高
 var fMLsearch = 10      // 搜索框宽
 var fHItem = 63         // 列表项高
+var fHFItem = 60        // 好友列表项高
 var fHSendMsg = 145     // 发消息框高
 var fHSendTool = 40     // 消息发送框工具栏高
 var fHNormalBtn = 25    // 普通按钮高
 var fWNormalBtn = 65    // 普通按钮宽
+var fWCard = 240        // 好友名片宽
+var fHCard = 180         // 好友名片高
+var fMLCloud = 25       // 云库图片列表距左间距
+var fHCloudItem = 200   // 云文件项高
+var fWCloudItem = 180   // 云文件项宽
+var fWFile = 150        // 文件图片宽
+

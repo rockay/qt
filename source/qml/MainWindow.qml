@@ -11,8 +11,6 @@ import "qrc:/js/API.js" as API
 
 Window {
     id:mainform
-    width: 472
-    height: 623
     title: qsTr("圈图")
     flags: Qt.FramelessWindowHint | Qt.WindowSystemMenuHint
            | Qt.WindowMinimizeButtonHint| Qt.Window;
@@ -33,7 +31,8 @@ Window {
             Grid {
                 anchors.fill: parent
                 columns: 1
-                LToolButton { source: "qrc:/images/photo.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: API.user_photo ;//"qrc:/images/photo.png";
+                    width: parent.width; height: UI.fHToolButton
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {

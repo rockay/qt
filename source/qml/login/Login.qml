@@ -1,5 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Window 2.2
+import Qt.labs.settings 1.0
 
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
@@ -17,6 +18,19 @@ Window {
     color: UI.cTransparent
 
 
+    Settings {
+        id: settings
+        property string token: ""
+        property string rong_token: ""
+        property string weix_token: ""
+        property string user_id: ""
+        property string user_mobile: ""
+        property string user_name: ""
+        property string user_wx_name: ""
+        property string user_photo: ""
+        property string is_vip_user: ""
+        property string is_company_user: ""
+    }
     MouseArea {
         id: dragRegion
         anchors.fill: parent
@@ -87,7 +101,7 @@ Window {
         Image {
             id: photop
             anchors.fill: parent
-            source: "qrc:/images/photo.png"
+            source: API.user_photo //"qrc:/images/photo.png"
         }
     }
 
@@ -102,7 +116,7 @@ Window {
         color: UI.cTransparent
         LText{
             id:txtName
-            text:qsTr("郭思佳")
+            text: API.user_name//qsTr("郭思佳")
             anchors.centerIn: parent
         }
     }
