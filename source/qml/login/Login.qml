@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Window 2.2
 import Qt.labs.settings 1.0
+import QtGraphicalEffects 1.0
 
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
@@ -69,39 +70,67 @@ Window {
             }
         }
     }
-//    Rectangle{
-//        id:closeBtn
-//        height: 43
-//        width: 43
-//        anchors.right: parent.right
-//        anchors.top: parent.top
-//        color: UI.cTransparent
-//        Image {
-//            id: close
-//            anchors.centerIn: parent
-//            source: "qrc:/images/close.png"
-//        }
-//        MouseArea{
+
+    Rectangle{
+        anchors.left: parent.left
+        anchors.top: parent.top
+        width: UI.fHLoginM
+        height: UI.fHLoginM
+        radius: 4
+        color: UI.cTransparent
+        Image{
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+            source: "qrc:/images/left.png"
+        }
+
+//        LinearGradient {
 //            anchors.fill: parent
-//            onClicked:
-//            {
-//                Qt.quit()
+//            start: Qt.point(4, 4)
+//            end: Qt.point(100, 100)
+//            gradient: Gradient {
+//                GradientStop { position: 0.0; color: UI.cLoginLBg }
+//                GradientStop { position: 1.0; color: UI.cLoginLBD }
 //            }
 //        }
-//    }
+//        LText{
+//            anchors.left: parent.left
+//            anchors.top: parent.top
+//            text: qsTr("圈")
+//            font.pointSize: UI.LargeFontPointSize
+//            color: UI.cWhite
+//        }
+
+//        Canvas{
+//            anchors.fill: parent
+//            contextType: "2d";
+//            onPaint: {
+//                context.lineWidth = 2;
+//                context.strokeStyle = UI.cLoginLBD;
+//                context.fillStyle = UI.cLoginLBg;
+//                context.beginPath();
+//                context.moveTo(0 ,0);
+//                context.lineTo(0 , UI.fHLoginM);
+//                context.lineTo(UI.fHLoginM ,0);
+//                context.closePath();
+//                context.stroke();
+
+//            }
+//        }
+    }
 
     Rectangle{
         id:photo
         width:parent.width/3
         height:width
         anchors.top: parent.top
-        anchors.topMargin: 100
+        anchors.topMargin: UI.fHLoginM
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
         Image {
             id: photop
             anchors.fill: parent
-            source: API.user_photo //"qrc:/images/photo.png"
+            source: "qrc:/images/photo.png" //API.user_photo
         }
     }
 

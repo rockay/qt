@@ -11,24 +11,30 @@ TabButton{
     property string bdcolor: UI.cTBBorder
     property string bgcolor: UI.cMainBg
     property string color: UI.cBlack
-    property int fontSize: UI.LittleFontPointSize
-//    contentItem: Text {
-//        text: btn.text
-//        font: btn.font
-//        opacity: enabled ? 1.0 : 0.3
-//        color: btn.down ? UI.cBlack : UI.cLightBlue
-//        horizontalAlignment: Text.AlignHCenter
-//        verticalAlignment: Text.AlignVCenter
-//        elide: Text.ElideRight
-//    }
+    property int fontSize: UI.SmallFontPointSize
+    contentItem: LText {
+        text: btn.text
+        font.family: UI.defaultFontFamily
+        font.pointSize: UI.LittleFontPointSize
+        color: btn.checked ? UI.cTabCheckedF : UI.cBlack
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        elide: Text.ElideRight
+    }
 
-//    background: Rectangle {
-//        implicitWidth: 100
-//        implicitHeight: 40
-//        opacity: enabled ? 1 : 0.3
-//        color: UI.cTransparent
-//        border.color: btn.down ? "#17a81a" : "#21be2b"
-//        border.width: 0
-//        radius: 0
-//    }
+    background: Rectangle {
+        implicitWidth: 100
+        implicitHeight: 40
+        color: UI.cMainCBg
+        border.color: btn.checked ? UI.cTBBorder : UI.cTransparent
+        border.width: 0
+        radius: 0
+        Rectangle{
+            width: parent.width
+            height:2
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            color: btn.checked ? UI.cTabCheckedF : UI.cTabUncheckedB
+        }
+    }
 }

@@ -10,10 +10,10 @@ TextArea{
     property int maxLength: 200//最大输入长度
     onLengthChanged:
     {
-        if(comment.length > maxLength)
+        if(text.length > maxLength)
         {
             var prePosition = cursorPosition;
-            comment.text = comment.text.substring(0, maxLength);
+            text = text.substring(0, maxLength);
             cursorPosition = Math.min(prePosition, maxLength);
         }
     }

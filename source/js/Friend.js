@@ -1,4 +1,5 @@
-var allData = null
+var allContacts ;   // 所有通讯录好友
+var allCompany ;    // 所有企业好友
 
 // 获取通讯录好友
 function getContacts(){
@@ -14,6 +15,7 @@ function getContactsCB(data){
     console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取通讯录好友成功");
+        allContacts = data.friend;
         allmodel.append(data.friend);
     }else{
         console.log("获取通讯录好友失败");
@@ -34,6 +36,7 @@ function getCompanyCB(data){
     console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取企业好友成功");
+        allCompany = data.friend;
         busimodel.append(data.friend);
     }else{
         console.log("获取企业好友失败");
@@ -41,6 +44,21 @@ function getCompanyCB(data){
 }
 
 
-function search(txt) {
-    console.log("count:"+allmodel.count);
+function search(mode, name) {
+    var tempdata;
+    if(mode==0)
+    {
+        allmodel.clear();
+        tempdata = allContacts.filter(function(item){
+            return item.friend_name.indexOf(name)>=0;
+        });
+        allmodel.append(tempdata);
+    }
+    else{
+        busimodel.clear();
+        tempdata = allCompany.filter(function(item){
+            return  item.friend_name.indexOf(name)>=0;
+        });
+        busimodel.append(tempdata);
+    }
 }

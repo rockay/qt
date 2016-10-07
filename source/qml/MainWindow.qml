@@ -24,15 +24,19 @@ Window {
         Rectangle{
             id:leftbar
             width: UI.fWMainL
-            height: parent.height
+            height: mainform.height-50
             anchors.left: parent.left
             anchors.top: parent.top
             color: UI.cMainLBg
             Grid {
-                anchors.fill: parent
+                width: parent.width
+                height:parent.height-exit.height
+                anchors.left: parent.left
+                anchors.top: parent.top
+
                 columns: 1
-                LToolButton { source: API.user_photo ;//"qrc:/images/photo.png";
-                    width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/photo.png"; //API.user_photo ;
+                    width: parent.width; height: UI.fHToolButton-20
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -40,6 +44,7 @@ Window {
                     }
                 }
                 LToolButton { source: "qrc:/images/message.png"; width: parent.width; height: UI.fHToolButton
+                    text: qsTr("会话")
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -51,6 +56,7 @@ Window {
                     }
                 }
                 LToolButton { source: "qrc:/images/friend.png"; width: parent.width; height: UI.fHToolButton
+                    text: qsTr("好友")
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -62,6 +68,7 @@ Window {
                     }
                 }
                 LToolButton { source: "qrc:/images/group.png"; width: parent.width; height: UI.fHToolButton
+                    text: qsTr("群组")
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -73,6 +80,7 @@ Window {
                     }
                 }
                 LToolButton { source: "qrc:/images/cloud.png"; width: parent.width; height: UI.fHToolButton
+                    text: qsTr("云库")
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -80,6 +88,23 @@ Window {
                             friend.visible= false
                             group.visible = false
                             cloud.visible = true
+                        }
+                    }
+                }
+            }
+
+            Rectangle{
+                id: exit
+                width: UI.fWMainL
+                height: height
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                LToolButton { source: "qrc:/images/cloud.png"; width: parent.width; height: UI.fHToolButton
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            main.hide();
+                            login.show();
                         }
                     }
                 }

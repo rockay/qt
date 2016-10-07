@@ -36,21 +36,37 @@ Item {
             svgsrc: "qrc:/images/find.png"
             svgcsrc: "qrc:/images/close.png"
             onValueChanged: {
-                Friend.search(search.value)
+                Friend.search(category.currentIndex,search.value)
             }
         }
-
-        TabBar {
-            id: category
+        Rectangle{
+            id: line
             width: parent.width
-//            height: UI.fHsearch*2
+            height: 1
+            color: UI.cTBBorder
+            anchors.left: parent.left
             anchors.top: search.bottom
             anchors.topMargin: UI.fMLsearch
+        }
+
+        LTabBar {
+            id: category
+            width: parent.width
+            anchors.top: line.bottom
+            anchors.left: parent.left
             LTabButton {
                 text: qsTr("通讯录")
+                onClicked:{
+                    search.defaultValue = ""
+                    Friend.search(category.currentIndex,search.value)
+                }
             }
             LTabButton {
                 text: qsTr("企业")
+                onClicked:{
+                    search.defaultValue = ""
+                    Friend.search(category.currentIndex,search.value)
+                }
             }
           }
         StackLayout {

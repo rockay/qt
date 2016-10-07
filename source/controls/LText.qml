@@ -19,5 +19,6 @@ Text {
     font.pointSize: txt.pointSize
     color: txt.fcolor
     verticalAlignment: Text.AlignVCenter
+//    horizontalAlignment: Text.AlignHCenter
 
 }

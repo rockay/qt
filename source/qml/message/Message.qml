@@ -123,7 +123,7 @@ Item {
             ListElement {
                 name: qsTr("李四")
                 src: "qrc:/images/photo.png"
-                msg: "再见理想 "
+                msg: qsTr("再见理想 ")
             }
             ListElement {
                 name: "张三丰"
@@ -290,7 +290,6 @@ Item {
                     source: "qrc:/images/cloud.png"
                 }
             }
-
             Flickable {
                 id: flickable
                 width: rightbar.width
@@ -298,10 +297,11 @@ Item {
                 anchors.left: parent.left
                 anchors.top: toolBar.bottom
 
-                TextArea.flickable: TextArea {
+                TextArea.flickable: LTextArea {
                     id: sendText
                     text: ""
                     wrapMode: TextArea.Wrap
+                    textFormat: TextEdit.RichText
                 }
 
                 ScrollBar.vertical: ScrollBar { }
@@ -319,6 +319,7 @@ Item {
 //                height: rightBottom.height - toolBar.height - sendBtn.height
 //                anchors.left: parent.left
 //                anchors.top: toolBar.bottom
+//                selectByMouse: true
 //            }
 
             LButton{
@@ -330,6 +331,9 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 5
                 text: qsTr("发送(S)")
+                onClicked: {
+                    console.log(sendText.PlainText.toString());
+                }
             }
         }
     }

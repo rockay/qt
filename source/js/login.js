@@ -11,7 +11,7 @@ function sndVCode(){
     var obj = "user_mobile="+phone;
     var verb = "POST";
 //    API.httpRequest(verb, url, obj, sndVCodeCB);
-    main.visible = true;
+    main.show();
     login.hide();
 }
 
@@ -43,7 +43,7 @@ function loginfuc(phone,code){
 function loginCB(data){
     console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
-        main.visible = true;
+        main.show();
         login.hide();
         console.log("登录成功");
         settings.token = data.token;

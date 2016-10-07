@@ -67,8 +67,8 @@ Item {
             color: UI.cTransparent
             Image {
                 id:image
-                width: parent.width/3
-                height: parent.height/3
+                width: parent.width/2
+                height: parent.height/2
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
                 source: svgsrc

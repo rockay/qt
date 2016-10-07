@@ -36,6 +36,7 @@ Item {
             svgsrc: "qrc:/images/find.png"
             svgcsrc: "qrc:/images/close.png"
             onValueChanged: {
+                Group.search(search.value);
             }
         }
 

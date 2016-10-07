@@ -40,5 +40,7 @@
         <file>images/otherfile.png</file>
         <file>images/picfile.png</file>
         <file>images/allfile.png</file>
+        <file>controls/LTabBar.qml</file>
+        <file>images/left.png</file>
     </qresource>
 </RCC>
