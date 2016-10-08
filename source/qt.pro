@@ -1,9 +1,11 @@
 TEMPLATE = app
 
 QT += qml quick quickcontrols2
+!no_desktop: QT += widgets
 CONFIG += c++11
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    documenthandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -15,5 +17,7 @@ RC_FILE = icon.rc
 # Default rules for deployment.
 include(deployment.pri)
 
-HEADERS +=
+HEADERS += \
+    documenthandler.h \
+    qtquickcontrolsapplication.h
 

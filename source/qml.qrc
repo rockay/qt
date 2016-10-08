@@ -42,5 +42,6 @@
         <file>images/allfile.png</file>
         <file>controls/LTabBar.qml</file>
         <file>images/left.png</file>
+        <file>qml/textarea.html</file>
     </qresource>
 </RCC>

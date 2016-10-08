@@ -5,6 +5,7 @@ import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 import QtQuick.Controls 2.0
 import QtQuick.Dialogs 1.2
+import org.lt.controls 1.0
 
 Item {
     FileDialog {
@@ -249,7 +250,7 @@ Item {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:{
-
+                            document.insertText();
                         }
                     }
                 }
@@ -290,22 +291,21 @@ Item {
                     source: "qrc:/images/cloud.png"
                 }
             }
-            Flickable {
-                id: flickable
-                width: rightbar.width
-                height: rightBottom.height - toolBar.height - sendBtn.height
-                anchors.left: parent.left
-                anchors.top: toolBar.bottom
+//            Flickable {
+//                id: flickable
+//                width: rightbar.width
+//                height: rightBottom.height - toolBar.height - sendBtn.height
+//                anchors.left: parent.left
+//                anchors.top: toolBar.bottom
 
-                TextArea.flickable: LTextArea {
-                    id: sendText
-                    text: ""
-                    wrapMode: TextArea.Wrap
-                    textFormat: TextEdit.RichText
-                }
+//                TextArea.flickable: LTextArea {
+//                    id: sendText
+//                    text: ""
+//                    wrapMode: TextArea.Wrap
+//                }
 
-                ScrollBar.vertical: ScrollBar { }
-            }
+//                ScrollBar.vertical: ScrollBar { }
+//            }
 //            TextEdit{
 //                width: rightbar.width
 //                height: rightBottom.height - toolBar.height - sendBtn.height
@@ -313,14 +313,50 @@ Item {
 //                anchors.top: toolBar.bottom
 //            }
 
-//            LTextArea{
-//                id: sendText
-//                width: rightbar.width
-//                height: rightBottom.height - toolBar.height - sendBtn.height
-//                anchors.left: parent.left
-//                anchors.top: toolBar.bottom
-//                selectByMouse: true
-//            }
+            LTextArea{
+                id: sendText
+                width: rightbar.width
+                height: rightBottom.height - toolBar.height - sendBtn.height
+                anchors.left: parent.left
+                anchors.top: toolBar.bottom
+                selectByMouse: true
+                Accessible.name: "document"
+                baseUrl: "qrc:/"
+                text: document.text
+                textFormat: Qt.RichText
+                Component.onCompleted: forceActiveFocus()
+            }
+            DocumentHandler {
+                id: document
+                target: sendText
+                cursorPosition: sendText.cursorPosition
+                selectionStart: sendText.selectionStart
+                selectionEnd: sendText.selectionEnd
+//                textColor: colorDialog.color
+                Component.onCompleted: {
+                    document.fileUrl = "qrc:/qml/textarea.html"
+                    console.log("+++++++++++++++++"+document.text);
+                }
+//                onFontSizeChanged: {
+//                    fontSizeSpinBox.valueGuard = false
+//                    fontSizeSpinBox.value = document.fontSize
+//                    fontSizeSpinBox.valueGuard = true
+//                }
+//                onFontFamilyChanged: {
+//                    var index = Qt.fontFamilies().indexOf(document.fontFamily)
+//                    if (index == -1) {
+//                        fontFamilyComboBox.currentIndex = 0
+//                        fontFamilyComboBox.special = true
+//                    } else {
+//                        fontFamilyComboBox.currentIndex = index
+//                        fontFamilyComboBox.special = false
+//                    }
+//                }
+                onError: {
+                    errorDialog.text = message
+                    errorDialog.visible = true
+                }
+            }
 
             LButton{
                 id: sendBtn
@@ -332,7 +368,7 @@ Item {
                 anchors.bottomMargin: 5
                 text: qsTr("发送(S)")
                 onClicked: {
-                    console.log(sendText.PlainText.toString());
+                    console.log(document.transferText);
                 }
             }
         }
