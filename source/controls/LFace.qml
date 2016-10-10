@@ -1,48 +1,117 @@
-import QtQuick 2.6
-import QtQuick.Controls 2.0
+import QtQuick 2.0
+import org.lt.controls 1.0
 
-import "qrc:/js/UI.js" as UI
-
-Pane {
-    id: pane
-
-    SwipeView {
-        id: view
-        currentIndex: 1
-        anchors.fill: parent
-
-        Repeater {
-            model: 3
-
-            Pane {
-                width: view.width
-                height: view.height
-
-                Column {
-                    spacing: 40
-                    width: parent.width
-
-                    Label {
-                        width: parent.width
-                        wrapMode: Label.Wrap
-                        horizontalAlignment: Qt.AlignHCenter
-                        text: "SwipeView provides a navigation model that simplifies horizontal paged scrolling. "
-                        + "The page indicator on the bottom shows which is the presently active page."
-                    }
-
-                    Image {
-                        source: "qrc:/images/arrows.png"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
+Rectangle {
+    id:mainPage
+    width: isDetailsUI?348:406; height: isDetailsUI?198:211
+    property bool isDetailsUI: true
+    signal signalClickCurrentImg(string imgName,string strPath);
+    property DocumentHandler document: document
+    opacity: 0.8
+    Component{
+        id:imgc
+        Rectangle {
+            id:item
+            width: grid.cellWidth; height: grid.cellHeight
+            border.width: 1
+            border.color: "#EAEAEA"
+            radius: 5
+            smooth: true
+            color: "#FFFFFF"
+            AnimatedImage { source: path; anchors.centerIn: parent;smooth: true }
+            MouseArea{
+                id:ma
+                anchors.fill: parent
+                hoverEnabled: true
+                onExited: {
+                    item.opacity = 1.0;
+                    item.color = "#FFFFFF"
+                    mainHideCallBoard();
                 }
+                onEntered: {
+                    item.opacity = 0.5;
+                    item.color = "#EAEAEA"
+                    var obj = mapToItem(null,x,y);
+                    var posx = obj.x ;
+                    var posy = obj.y ;
+                    mainShowCallBoard(title,posx,posy);
+                }
+                onClicked: {
+//                    console.log(path+"\n"+title);
+                    signalClickCurrentImg(title,path);
+                    mainPage.visible = false;
+                    document.insertFace(title,path);
+                }
+            }
+
+
+            Component.onCompleted: {
+                document.initFace(title,path);
             }
         }
     }
+    GridView {
+        id:grid
+        width: 30*12; height: 30*6
+        cellWidth:30; cellHeight:30
+//        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.leftMargin: isDetailsUI?5:20
+        anchors.right: parent.right
+        anchors.rightMargin: isDetailsUI?5:10
+        anchors.top: parent.top
+        anchors.topMargin: isDetailsUI?5:20
+        model: FaceModel {}
+        delegate: imgc
+        focus: true
+        boundsBehavior:Flickable.StopAtBounds
+    }
+    ChatTipsImage{
+        id:imgBoard
+        visible: false
+        z:20
+    }
+    function mainShowCallBoard(number,posx,posy)
+    {
+        //console.log(number+"\n"+posx+"\n"+posy)
+         var objxy = mapFromItem(null,posx,posy);
+        var nx = objxy.x;
+        var ny = objxy.y;
+        if(nx<0)
+        {
+            nx = 0;
+        }
+        if(nx + imgBoard.width> mainPage.width)
+        {
+            nx = mainPage.width - imgBoard.width;
+        }
+        imgBoard.x = nx+6;
+        imgBoard.y = ny+30;
+        imgBoard.setCurrentTxt(number);
+        imgBoard.visible = true;
+    }
+    function mainHideCallBoard()
+    {
+        imgBoard.visible = false;
+    }
+    Component.onCompleted: {
+        //console.log("af;a;onCompletedonCompletedonCompletedonCompleted")
+    }
 
-    PageIndicator {
-        count: view.count
-        currentIndex: view.currentIndex
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
+    DocumentHandler {
+        id: document
+        target: sendText
+        cursorPosition: sendText.cursorPosition
+        selectionStart: sendText.selectionStart
+        selectionEnd: sendText.selectionEnd
+        Component.onCompleted: {
+            document.fileUrl = "qrc:/qml/textarea.html"
+            console.log("+++++++++++++++++"+document.text);
+        }
+        onError: {
+            errorDialog.text = message
+            errorDialog.visible = true
+        }
     }
 }
+

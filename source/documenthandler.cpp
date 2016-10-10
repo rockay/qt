@@ -55,6 +55,7 @@
 #include <QtGui/QFontDatabase>
 #include <QtCore/QFileInfo>
 #include <QTextBlock>
+#include <QTextDocumentFragment>
 #include <QDebug>
 
 DocumentHandler::DocumentHandler()
@@ -123,10 +124,27 @@ void DocumentHandler::setDocumentTitle(QString arg)
     }
 }
 
-void DocumentHandler::insertText()
+void DocumentHandler::insertText(const QString& text)
 {
     QTextCursor helper = textCursor();
-    helper.insertText("123444");
+    helper.insertText(text);
+}
+
+void DocumentHandler::insertFace(const QString &name, const QString &path)
+{
+    QTextCursor helper = textCursor();
+    QTextDocumentFragment fragment;
+    fragment = QTextDocumentFragment::fromHtml("<img src='"+path+"'/>");
+    helper.insertFragment(fragment);
+    if(!m_facemap.contains(path))
+            m_facemap.insert(path,name);
+
+}
+
+void DocumentHandler::initFace(const QString &name, const QString &path)
+{
+    if(!m_facemap.contains(path))
+            m_facemap.insert(path,name);
 }
 
 void DocumentHandler::setText(const QString &arg)
@@ -175,6 +193,7 @@ QString DocumentHandler::text() const
 
 QString DocumentHandler::transferText() const
 {
+    QString content = m_doc->toHtml();
     QTextBlock currentBlock = m_doc->begin();
     while (currentBlock.isValid()) {
         QTextBlock::iterator it;
@@ -183,20 +202,14 @@ QString DocumentHandler::transferText() const
             if (currentFragment.isValid()){
                 QTextImageFormat newImageFormat = currentFragment.charFormat().toImageFormat();
                 if (newImageFormat.isValid()) {
-                    qDebug()<< "image format";
-                    newImageFormat.setName("qrc:/qml/images/zoomin.png");
-                    QTextCursor helper = textCursor();
-                    helper.setPosition(currentFragment.position());
-                    helper.setPosition(currentFragment.position() + currentFragment.length(), QTextCursor::KeepAnchor);
-                    QTextCharFormat char1;
-                    helper.setCharFormat(char1);
-                    helper.insertText("[:smile]");
+                    content = content.replace("<img src=\""+newImageFormat.name()+"\" />",m_facemap.value(newImageFormat.name()));
                 }
             }
         }
         currentBlock = currentBlock.next();
     }
-    return m_doc->toPlainText();
+    m_doc->setHtml(content);
+    return  m_doc->toPlainText();
 }
 
 void DocumentHandler::setCursorPosition(int position)

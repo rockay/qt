@@ -5,9 +5,37 @@ import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 import QtQuick.Controls 2.0
 import QtQuick.Dialogs 1.2
-import org.lt.controls 1.0
+import QtQuick.XmlListModel 2.0
 
 Item {
+
+    property XmlListModel tmpModel;
+    property string atContents: "@zhuditingyu"
+    XmlListModel {
+        id: xmlModel
+        source:"qrc:/ybemxml_new.xml"
+        query: "/ybdb/img/item"
+        XmlRole { name: "title"; query: "title/string()" }
+        XmlRole { name: "path"; query: "path/string()" }
+        XmlRole { name: "title2"; query: "title2/string()" }
+        Component.onCompleted: {
+            tmpModel = xmlModel;
+        }
+    }
+
+    SequentialAnimation {
+        id:animation2
+        NumberAnimation { target: biaoq; property: "opacity"; to: 0.8; duration: 500 }
+        PauseAnimation { duration: 2000 }
+        //NumberAnimation { target: atSomeBody; property: "opacity"; to: 0; duration: 500 }
+    }
+    SequentialAnimation {
+        id:animation3
+        NumberAnimation { target: biaoq; property: "opacity"; to: 0.0; duration: 500 }
+        PauseAnimation { duration: 2000 }
+//        NumberAnimation { target: biaoq; property: "visible"; to: f; duration: 500 }
+    }
+
     FileDialog {
         id: fileDialog
         title: qsTr("打开")
@@ -225,6 +253,19 @@ Item {
             border.color: UI.cTBBorder
 
         }
+
+        LFace{
+            id:biaoq
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.bottom: rightBottom.top
+            anchors.bottomMargin: 10
+            opacity: 0
+            visible: false
+            onSignalClickCurrentImg: {
+                console.log(imgName+" "+strPath);
+            }
+        }
         Rectangle{
             id: rightBottom
             width: parent.width
@@ -250,7 +291,10 @@ Item {
                     MouseArea{
                         anchors.fill: parent
                         onClicked:{
-                            document.insertText();
+//                            document.insertText();
+                            biaoq.visible = true;
+                            animation2.stop();
+                            animation2.start();
                         }
                     }
                 }
@@ -321,41 +365,10 @@ Item {
                 anchors.top: toolBar.bottom
                 selectByMouse: true
                 Accessible.name: "document"
-                baseUrl: "qrc:/"
-                text: document.text
+                baseUrl: "qrc:/images/yibanface"
+                text: biaoq.document.text
                 textFormat: Qt.RichText
                 Component.onCompleted: forceActiveFocus()
-            }
-            DocumentHandler {
-                id: document
-                target: sendText
-                cursorPosition: sendText.cursorPosition
-                selectionStart: sendText.selectionStart
-                selectionEnd: sendText.selectionEnd
-//                textColor: colorDialog.color
-                Component.onCompleted: {
-                    document.fileUrl = "qrc:/qml/textarea.html"
-                    console.log("+++++++++++++++++"+document.text);
-                }
-//                onFontSizeChanged: {
-//                    fontSizeSpinBox.valueGuard = false
-//                    fontSizeSpinBox.value = document.fontSize
-//                    fontSizeSpinBox.valueGuard = true
-//                }
-//                onFontFamilyChanged: {
-//                    var index = Qt.fontFamilies().indexOf(document.fontFamily)
-//                    if (index == -1) {
-//                        fontFamilyComboBox.currentIndex = 0
-//                        fontFamilyComboBox.special = true
-//                    } else {
-//                        fontFamilyComboBox.currentIndex = index
-//                        fontFamilyComboBox.special = false
-//                    }
-//                }
-                onError: {
-                    errorDialog.text = message
-                    errorDialog.visible = true
-                }
             }
 
             LButton{
@@ -368,7 +381,7 @@ Item {
                 anchors.bottomMargin: 5
                 text: qsTr("发送(S)")
                 onClicked: {
-                    console.log(document.transferText);
+                    console.log(biaoq.document.transferText);
                 }
             }
         }

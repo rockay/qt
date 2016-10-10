@@ -138,7 +138,9 @@ public Q_SLOTS:
     void saveAs(const QUrl &arg, const QString &fileType);
 
     void setDocumentTitle(QString arg);
-    void insertText();
+    void insertText(const QString &text);
+    void insertFace(const QString &name, const QString &path);
+    void initFace(const QString &name, const QString &path);
 
 Q_SIGNALS:
     void targetChanged();
@@ -182,6 +184,12 @@ private:
     QString m_text;
     QString m_transferText;
     QString m_documentTitle;
+    QMap<QString, QString> m_facemap;
+
+    void parseUserInformation();
+    QString getValue(const QString &name);
+    QString getAttribute(const QString &name);
+
 };
 
 #endif
