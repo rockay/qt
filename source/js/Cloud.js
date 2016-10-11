@@ -16,7 +16,7 @@ function getClouds(){
 
 // 获取云库文件回调
 function getCloudsCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取云库文件成功");
         allFiles = data.cloud_list;

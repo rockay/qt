@@ -12,7 +12,7 @@ function getContacts(){
 
 // 获取通讯录回调
 function getContactsCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取通讯录好友成功");
         allContacts = data.friend;
@@ -33,7 +33,7 @@ function getCompany(){
 
 // 获取企业好友回调
 function getCompanyCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取企业好友成功");
         allCompany = data.friend;

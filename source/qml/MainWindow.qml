@@ -35,7 +35,7 @@ Window {
                 anchors.top: parent.top
 
                 columns: 1
-                LToolButton { source: "qrc:/images/photo.png"; //API.user_photo ;
+                LToolButton { source: "qrc:/images/icon/photo.png"; //API.user_photo ;
                     width: parent.width; height: UI.fHToolButton-20
                     MouseArea{
                         anchors.fill: parent
@@ -43,7 +43,7 @@ Window {
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/message.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/icon/message.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("会话")
                     MouseArea{
                         anchors.fill: parent
@@ -55,7 +55,7 @@ Window {
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/friend.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/icon/friend.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("好友")
                     MouseArea{
                         anchors.fill: parent
@@ -67,7 +67,7 @@ Window {
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/group.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/icon/group.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("群组")
                     MouseArea{
                         anchors.fill: parent
@@ -79,7 +79,7 @@ Window {
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/cloud.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/icon/cloud.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("云库")
                     MouseArea{
                         anchors.fill: parent
@@ -99,7 +99,7 @@ Window {
                 height: height
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                LToolButton { source: "qrc:/images/cloud.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/icon/cloud.png"; width: parent.width; height: UI.fHToolButton
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -150,7 +150,7 @@ Window {
             Grid {
                 columns: 3
                 spacing: 0
-                LOperButton { source: "qrc:/images/min.png"; width: operWinArea.width*3/10; height: operWinArea.height
+                LOperButton { source: "qrc:/images/icon/min.png"; width: operWinArea.width*3/10; height: operWinArea.height
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -158,22 +158,22 @@ Window {
                         }
                     }
                 }
-                LOperButton { source: "qrc:/images/max.png"; width: operWinArea.width*3/10; height: operWinArea.height
+                LOperButton { source: "qrc:/images/icon/max.png"; width: operWinArea.width*3/10; height: operWinArea.height
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
                             if (mainform.visibility === Window.FullScreen){
-                                parent.source = "qrc:/images/max.png";
+                                parent.source = "qrc:/images/icon/max.png";
                                 mainform.visibility = Window.AutomaticVisibility
                             }
                             else{
                                 mainform.visibility = Window.FullScreen
-                                parent.source = "qrc:/images/min.png";
+                                parent.source = "qrc:/images/icon/min.png";
                             }
                         }
                     }
                 }
-                LOperButton { source: "qrc:/images/close.png"; width: operWinArea.width*4/10; height: operWinArea.height
+                LOperButton { source: "qrc:/images/icon/close.png"; width: operWinArea.width*4/10; height: operWinArea.height
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {

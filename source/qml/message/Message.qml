@@ -4,7 +4,6 @@ import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
 import QtQuick.XmlListModel 2.0
 
 Item {
@@ -23,31 +22,10 @@ Item {
         }
     }
 
-    SequentialAnimation {
-        id:animation2
-        NumberAnimation { target: biaoq; property: "opacity"; to: 0.8; duration: 500 }
-        PauseAnimation { duration: 2000 }
-        //NumberAnimation { target: atSomeBody; property: "opacity"; to: 0; duration: 500 }
-    }
-    SequentialAnimation {
-        id:animation3
-        NumberAnimation { target: biaoq; property: "opacity"; to: 0.0; duration: 500 }
-        PauseAnimation { duration: 2000 }
-//        NumberAnimation { target: biaoq; property: "visible"; to: f; duration: 500 }
-    }
-
-    FileDialog {
-        id: fileDialog
-        title: qsTr("打开")
-        folder: shortcuts.pictures
-        nameFilters: [ "图片文件 (*.jpg *.png)", "All files (*)" ]
-        onAccepted: {
-            console.log("You chose: " + fileUrls)
-            for (var i = 0; i < fileUrls.length; i++)
-                sendText.text += fileUrls[i].toString();
-        }
-        onRejected: {
-            console.log("Canceled")
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {
+            chattool.face.visible = false;
         }
     }
 
@@ -69,8 +47,8 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: UI.fMLsearch+5
             dispTxt: qsTr("搜索")
-            svgsrc: "qrc:/images/find.png"
-            svgcsrc: "qrc:/images/close.png"
+            svgsrc: "qrc:/images/icon/find.png"
+            svgcsrc: "qrc:/images/icon/close.png"
         }
 
         // 接受互动列表
@@ -146,57 +124,57 @@ Item {
             id: messagemodel
             ListElement {
                 name: "张三"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "你好久过来"
             }
             ListElement {
                 name: qsTr("李四")
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: qsTr("再见理想 ")
             }
             ListElement {
                 name: "张三丰"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "圈图群组"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "字有点大多不好显示怎么办呢ABCDEFGHIJKLMNOPQRST"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
             ListElement {
                 name: "Banana"
-                src: "qrc:/images/photo.png"
+                src: "qrc:/images/icon/photo.png"
                 msg: "泡泡网吧"
             }
         }
@@ -207,12 +185,13 @@ Item {
         height: parent.height
         anchors.left: leftarea.right
         anchors.top: parent.top
-        color: UI.cTransparent
+        color: UI.cMainBg
         Rectangle{
             id:rightTop
             width: parent.width
             height: UI.fHRithTop
-            color: UI.cTransparent
+            color: UI.cMainBg
+            z: rightCenter.z+1
             LText{
                 id: topTitle
                 text:qsTr("消息")
@@ -251,20 +230,12 @@ Item {
             color:UI.cWhite
             border.width: 1
             border.color: UI.cTBBorder
+            z: rightbar.z+1
 
-        }
-
-        LFace{
-            id:biaoq
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.bottom: rightBottom.top
-            anchors.bottomMargin: 10
-            opacity: 0
-            visible: false
-            onSignalClickCurrentImg: {
-                console.log(imgName+" "+strPath);
+            ChatShow{
+                anchors.fill: parent
             }
+
         }
         Rectangle{
             id: rightBottom
@@ -274,65 +245,18 @@ Item {
             anchors.left: parent.left
             border.width: 1
             border.color: UI.cTBBorder
+            z: rightCenter.z+1
             Rectangle{
                 id: toolBar
                 width: parent.width
                 height: UI.fHSendTool
                 color: UI.cMainCBg
-                Image{
-                    id: face
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.leftMargin: UI.fMLsearch
-                    anchors.topMargin: parent.height/4
-                    height: parent.height/2
-                    width: height
-                    source: "qrc:/images/face.png"
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked:{
-//                            document.insertText();
-                            biaoq.visible = true;
-                            animation2.stop();
-                            animation2.start();
-                        }
+                ChatToolBar{
+                    id: chattool
+                    anchors.fill: parent
+                    onSignalClick:{
+                        console.log(type+"|"+imgName+"|"+strPath);
                     }
-                }
-                Image{
-                    id: img
-                    anchors.left: face.right
-                    anchors.top: parent.top
-                    anchors.leftMargin: UI.fMLsearch
-                    anchors.topMargin: parent.height/4
-                    height: parent.height/2
-                    width: height
-                    source: "qrc:/images/image.png"
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked:{
-                            fileDialog.open();
-                        }
-                    }
-                }
-                Image{
-                    id: folder
-                    anchors.left: img.right
-                    anchors.top: parent.top
-                    anchors.leftMargin: UI.fMLsearch
-                    anchors.topMargin: parent.height/4
-                    height: parent.height/2
-                    width: height
-                    source: "qrc:/images/folder.png"
-                }
-                Image{
-                    id: cloud
-                    anchors.left: folder.right
-                    anchors.top: parent.top
-                    anchors.leftMargin: UI.fMLsearch
-                    anchors.topMargin: parent.height/4
-                    height: parent.height/2
-                    width: height
-                    source: "qrc:/images/cloud.png"
                 }
             }
 //            Flickable {
@@ -365,8 +289,8 @@ Item {
                 anchors.top: toolBar.bottom
                 selectByMouse: true
                 Accessible.name: "document"
-                baseUrl: "qrc:/images/yibanface"
-                text: biaoq.document.text
+                //baseUrl: "qrc:/images/yibanface"
+                text: chattool.document.text
                 textFormat: Qt.RichText
                 Component.onCompleted: forceActiveFocus()
             }
@@ -381,7 +305,7 @@ Item {
                 anchors.bottomMargin: 5
                 text: qsTr("发送(S)")
                 onClicked: {
-                    console.log(biaoq.document.transferText);
+                    console.log(chattool.document.transferText);
                 }
             }
         }

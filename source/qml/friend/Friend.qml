@@ -33,8 +33,8 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: UI.fMLsearch+5
             dispTxt: qsTr("好友名称")
-            svgsrc: "qrc:/images/find.png"
-            svgcsrc: "qrc:/images/close.png"
+            svgsrc: "qrc:/images/icon/find.png"
+            svgcsrc: "qrc:/images/icon/close.png"
             onValueChanged: {
                 Friend.search(category.currentIndex,search.value)
             }
@@ -250,7 +250,7 @@ Item {
                 }
                 Image{
                     id: contacts
-                    source: "qrc:/images/contacts.png"
+                    source: "qrc:/images/icon/contacts.png"
                     anchors.left: photoc.right
                     anchors.leftMargin: UI.fMLsearch
                     anchors.top: namec.bottom

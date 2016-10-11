@@ -106,7 +106,6 @@ Rectangle {
         selectionEnd: sendText.selectionEnd
         Component.onCompleted: {
             document.fileUrl = "qrc:/qml/textarea.html"
-            console.log("+++++++++++++++++"+document.text);
         }
         onError: {
             errorDialog.text = message

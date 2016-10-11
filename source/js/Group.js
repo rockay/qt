@@ -11,7 +11,7 @@ function getGroups(){
 
 // 获取群组回调
 function getGroupsCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取群组成功");
         allGroups = data.group_list;

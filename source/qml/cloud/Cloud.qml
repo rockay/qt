@@ -33,8 +33,8 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: UI.fMLsearch+5
             dispTxt: qsTr("文件名称")
-            svgsrc: "qrc:/images/find.png"
-            svgcsrc: "qrc:/images/close.png"
+            svgsrc: "qrc:/images/icon/find.png"
+            svgcsrc: "qrc:/images/icon/close.png"
             onValueChanged: {
                 Cloud.filter(categoryView.currentIndex,search.value);
             }
@@ -105,19 +105,19 @@ Item {
             id: filetype
             ListElement{
                 name:qsTr("全部文档")
-                cover:"qrc:/images/allfile.png"
+                cover:"qrc:/images/icon/allfile.png"
             }
             ListElement{
                 name:qsTr("图片文档")
-                cover:"qrc:/images/picfile.png"
+                cover:"qrc:/images/icon/picfile.png"
             }
             ListElement{
                 name:qsTr("Office文档")
-                cover:"qrc:/images/officefile.png"
+                cover:"qrc:/images/icon/officefile.png"
             }
             ListElement{
                 name:qsTr("其他文档")
-                cover:"qrc:/images/otherfile.png"
+                cover:"qrc:/images/icon/otherfile.png"
             }
         }
 

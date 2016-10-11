@@ -62,7 +62,7 @@ Window {
         width: UI.fWCloseButton
         anchors.right: parent.right
         anchors.top: parent.top
-        source: "qrc:/images/close.png";
+        source: "qrc:/images/icon/close.png";
         MouseArea{
             anchors.fill: parent
             onClicked: {
@@ -81,7 +81,7 @@ Window {
         Image{
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
-            source: "qrc:/images/left.png"
+            source: "qrc:/images/icon/left.png"
         }
 
 //        LinearGradient {
@@ -130,7 +130,7 @@ Window {
         Image {
             id: photop
             anchors.fill: parent
-            source: "qrc:/images/photo.png" //API.user_photo
+            source: "qrc:/images/icon/photo.png" //API.user_photo
         }
     }
 

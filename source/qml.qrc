@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/close.png</file>
         <file>controls/LText.qml</file>
         <file>js/UI.js</file>
         <file>js/login.js</file>
@@ -8,40 +7,22 @@
         <file>qml/MainWindow.qml</file>
         <file>qml/Main.qml</file>
         <file>qml/login/Login.qml</file>
-        <file>images/max.png</file>
-        <file>images/close_login.png</file>
-        <file>images/min.png</file>
         <file>controls/LOperButton.qml</file>
         <file>controls/LToolButton.qml</file>
-        <file>images/photo.png</file>
-        <file>images/cloud.png</file>
-        <file>images/friend.png</file>
-        <file>images/group.png</file>
-        <file>images/message.png</file>
         <file>qml/message/Message.qml</file>
         <file>qml/friend/Friend.qml</file>
         <file>controls/LTextField.qml</file>
         <file>qml/cloud/Cloud.qml</file>
         <file>qml/group/Group.qml</file>
         <file>controls/LIconTextField.qml</file>
-        <file>images/find.png</file>
-        <file>images/face.png</file>
-        <file>images/folder.png</file>
-        <file>images/image.png</file>
         <file>controls/LButton.qml</file>
         <file>controls/LTextArea.qml</file>
         <file>controls/LFace.qml</file>
-        <file>images/contacts.png</file>
         <file>controls/LTabButton.qml</file>
         <file>js/Friend.js</file>
         <file>js/Group.js</file>
         <file>js/Cloud.js</file>
-        <file>images/officefile.png</file>
-        <file>images/otherfile.png</file>
-        <file>images/picfile.png</file>
-        <file>images/allfile.png</file>
         <file>controls/LTabBar.qml</file>
-        <file>images/left.png</file>
         <file>qml/textarea.html</file>
         <file>images/face/0.gif</file>
         <file>images/face/1.gif</file>
@@ -165,5 +146,28 @@
         <file>images/yibanface/74xiandanchaoren.gif</file>
         <file>images/ybemxml_new.xml</file>
         <file>controls/ChatTipsImage.qml</file>
+        <file>qml/message/ChatToolBar.qml</file>
+        <file>images/icon/allfile.png</file>
+        <file>images/icon/close.png</file>
+        <file>images/icon/close_login.png</file>
+        <file>images/icon/cloud.png</file>
+        <file>images/icon/contacts.png</file>
+        <file>images/icon/downarraw.png</file>
+        <file>images/icon/face.png</file>
+        <file>images/icon/find.png</file>
+        <file>images/icon/folder.png</file>
+        <file>images/icon/friend.png</file>
+        <file>images/icon/group.png</file>
+        <file>images/icon/image.png</file>
+        <file>images/icon/left.png</file>
+        <file>images/icon/max.png</file>
+        <file>images/icon/message.png</file>
+        <file>images/icon/min.png</file>
+        <file>images/icon/officefile.png</file>
+        <file>images/icon/otherfile.png</file>
+        <file>images/icon/photo.png</file>
+        <file>images/icon/picfile.png</file>
+        <file>images/icon/screenshot.png</file>
+        <file>qml/message/ChatShow.qml</file>
     </qresource>
 </RCC>

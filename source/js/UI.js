@@ -69,3 +69,11 @@ var fHCloudItem = 200   // 云文件项高
 var fWCloudItem = 180   // 云文件项宽
 var fWFile = 150        // 文件图片宽
 
+// 聊天相关
+var fChatMargin = 10            // 消息显示框的左右边距
+var fChatImgH = 35              // 消息显示的头像高
+var cLeftBorder = "#F8F8F8"     // 消息显示左边的边框颜色
+var cRightBg = "#84A5CD"        // 消息显示右边的背景色
+var cTime = "#B9ADC5"           // 消息显示时间颜色
+var cChatFont = "#000"          // 消息显示字体色
+
