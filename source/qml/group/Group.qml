@@ -16,6 +16,11 @@ import "qrc:/js/API.js" as API
 import "qrc:/js/Group.js" as Group
 
 Item {
+    property bool isLoad: false // 默认不加载
+    onIsLoadChanged: {
+        if(isLoad)
+            Group.getGroups();
+    }
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -242,7 +247,7 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        Group.getGroups();
-    }
+//    Component.onCompleted: {
+//        Group.getGroups();
+//    }
 }

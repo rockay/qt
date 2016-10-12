@@ -3,7 +3,7 @@
 var api_root = "http://www.2045kpt.com/";
 
 // token 测试用
-var token = "6EBB10896EBB6EBB1A1C6EBB4F881A1C6EBB6EBB";
+var token = "6EBB10896EBB5C1F4D754D755C1F3F4E4D756EBB";
 var rong_token = "wF95F73D6ZTsWt1SYAMwQhjUT4yuNhCsE8yk4WJbGM26BuVaS2WNvdRI933kuN3GF3scOwpS24L1CoOfm/CrNlL53KtrtPF2"
 var weix_token = ""
 var user_id = "1012332"

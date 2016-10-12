@@ -6,7 +6,7 @@ import "qrc:/js/UI.js" as UI
 TextArea{
     font.family: UI.defaultFontFamily
     font.pointSize: UI.LittleFontPointSize
-    wrapMode: TextArea.Wrap
+    wrapMode: TextEdit.Wrap
 //    property int maxLength: 200//最大输入长度
 //    onLengthChanged:
 //    {

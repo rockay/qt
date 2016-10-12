@@ -12,7 +12,7 @@ Rectangle{
         ListElement{
             recipient: "Me"
             author:"photo"
-            message:"你好啊你好啊你好啊你好啊你好啊你好啊你你好啊"
+            message:"你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊<img src='qrc:/images/face/0.gif' />你<img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/1.gif' />好啊<img src='qrc:/images/face/0.gif' />"
             timestamp: "11 10 10:10"
             ctype: 1
         }
@@ -81,8 +81,8 @@ Rectangle{
                     }
 
                     Rectangle {
-                        width: Math.min(ctype == 1 ? (messageText.implicitWidth) : ctype == 2 ? (messageImg.width + 24) : (messageFile.width + 24)
-                                        , listView.width - 2*UI.fChatImgH - messageRow.spacing)
+                        width: Math.min(ctype == 1 ? (messageText.implicitWidth+ 24 ) : ctype == 2 ? (messageImg.width + 24) : (messageFile.width + 24)
+                                        , listView.width - 2*UI.fChatImgH - messageRow.spacing-24)
                         height: ctype == 1 ? messageText.implicitHeight + 24 : ctype == 2 ? (messageImg.height + 24) : (messageFile.height + 24)
                         color: sentByMe ? UI.cRightBg : UI.cWhite
                         border.color: UI.cLeftBorder
@@ -90,7 +90,7 @@ Rectangle{
                         anchors.leftMargin:  sentByMe ? UI.fChatImgH : 0
                         anchors.rightMargin: !sentByMe ?UI.fChatImgH : 0
 
-                        Text {
+                        Label {
                             id: messageText
                             text: message
                             color: sentByMe ? UI.cChatFont : UI.cChatFont

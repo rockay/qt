@@ -56,6 +56,8 @@ Window {
                             frdbtn.source = "qrc:/images/icon/friend.png"
                             grpbtn.source = "qrc:/images/icon/group.png"
                             cldbtn.source = "qrc:/images/icon/cloud.png"
+                            if(!message.isLoad)
+                                message.isLoad = true
                         }
                     }
                 }
@@ -72,6 +74,8 @@ Window {
                             frdbtn.source = "qrc:/images/icon/friendp.png"
                             grpbtn.source = "qrc:/images/icon/group.png"
                             cldbtn.source = "qrc:/images/icon/cloud.png"
+                            if(!friend.isLoad)
+                                friend.isLoad = true
                         }
                     }
                 }
@@ -88,6 +92,8 @@ Window {
                             frdbtn.source = "qrc:/images/icon/friend.png"
                             grpbtn.source = "qrc:/images/icon/groupp.png"
                             cldbtn.source = "qrc:/images/icon/cloud.png"
+                            if(!group.isLoad)
+                                group.isLoad = true
                         }
                     }
                 }
@@ -104,6 +110,8 @@ Window {
                             frdbtn.source = "qrc:/images/icon/friend.png"
                             grpbtn.source = "qrc:/images/icon/group.png"
                             cldbtn.source = "qrc:/images/icon/cloudp.png"
+                            if(!cloud.isLoad)
+                                cloud.isLoad = true
                         }
                     }
                 }
@@ -115,12 +123,20 @@ Window {
                 height: height
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                LToolButton { source: "qrc:/images/icon/exit.png"; width: parent.width; height: UI.fHToolButton
+                anchors.bottomMargin: 10
+                LToolButton {id:exitbtn; source: "qrc:/images/icon/exit.png"; width: parent.width; height: UI.fHToolButton
                     MouseArea{
                         anchors.fill: parent
+                        hoverEnabled: true
                         onClicked: {
                             main.hide();
                             login.show();
+                        }
+                        onEntered: {
+                            exitbtn.source ="qrc:/images/icon/exitp.png"
+                        }
+                        onExited: {
+                            exitbtn.source ="qrc:/images/icon/exit.png"
                         }
                     }
                 }

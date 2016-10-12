@@ -16,6 +16,11 @@ import "qrc:/js/API.js" as API
 import "qrc:/js/Cloud.js" as Cloud
 
 Item {
+    property bool isLoad: false // 默认不加载
+    onIsLoadChanged: {
+        if(isLoad)
+            Cloud.getClouds();
+    }
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -148,6 +153,27 @@ Item {
             width: parent.width
             height: UI.fHRithTop
             color: UI.cTransparent
+            Image{
+                id: addBtn
+                height: parent.height/2
+                width: height
+                source: "qrc:/images/icon/add.png"
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.topMargin: (parent.height-height)/2
+                anchors.leftMargin: (parent.height-height)/2
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        addBtn.source ="qrc:/images/icon/addp.png"
+                    }
+                    onExited: {
+                        addBtn.source ="qrc:/images/icon/add.png"
+                    }
+                }
+            }
+
             LText{
                 id: topTitle
                 text:qsTr("")
@@ -254,8 +280,8 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        Cloud.getClouds();
-    }
+//    Component.onCompleted: {
+//        Cloud.getClouds();
+//    }
 }
 

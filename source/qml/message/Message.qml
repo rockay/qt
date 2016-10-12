@@ -10,6 +10,12 @@ Item {
 
     property XmlListModel tmpModel;
     property string atContents: "@zhuditingyu"
+
+    property bool isLoad: false // 默认不加载
+    onIsLoadChanged: {
+//        if(isLoad)
+//            Cloud.getClouds();
+    }
     XmlListModel {
         id: xmlModel
         source:"qrc:/ybemxml_new.xml"

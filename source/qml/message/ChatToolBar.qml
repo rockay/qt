@@ -60,11 +60,18 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/face.png"
         MouseArea{
+            hoverEnabled: true
             anchors.fill: parent
             onClicked:{
                 biaoq.visible = !biaoq.visible;
                 animation2.stop();
                 animation2.start();
+            }
+            onEntered: {
+                face.source = "qrc:/images/icon/facep.png"
+            }
+            onExited: {
+                face.source = "qrc:/images/icon/face.png"
             }
         }
     }
@@ -79,11 +86,18 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/image.png"
         MouseArea{
+            hoverEnabled: true
             anchors.fill: parent
             onClicked:{
                 fileDialog.folder = fileDialog.shortcuts.pictures
                 fileDialog.nameFilters = [ "图片文件 (*.jpg *.png)", "All files (*)" ]
                 fileDialog.open();
+            }
+            onEntered: {
+                img.source = "qrc:/images/icon/imagep.png"
+            }
+            onExited: {
+                img.source = "qrc:/images/icon/image.png"
             }
         }
     }
@@ -98,11 +112,18 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/folder.png"
         MouseArea{
+            hoverEnabled: true
             anchors.fill: parent
             onClicked:{
                 fileDialog.folder = fileDialog.shortcuts.documents
                 fileDialog.nameFilters = [ "PDF文件 (*.pdf)", "All files (*)" ]
                 fileDialog.open();
+            }
+            onEntered: {
+                folder.source = "qrc:/images/icon/folderp.png"
+            }
+            onExited: {
+                folder.source = "qrc:/images/icon/folder.png"
             }
         }
     }
@@ -116,6 +137,16 @@ Rectangle {
         anchors.topMargin: (parent.height-UI.fChatToolH)/2
         fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/cloudt.png"
+        MouseArea{
+            hoverEnabled: true
+            anchors.fill: parent
+            onEntered: {
+                cloud.source = "qrc:/images/icon/cloudtp.png"
+            }
+            onExited: {
+                cloud.source = "qrc:/images/icon/cloudt.png"
+            }
+        }
     }
     Image{
         id: screenshot
@@ -127,5 +158,15 @@ Rectangle {
         anchors.topMargin: (parent.height-UI.fChatToolH)/2
         fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/screenshot.png"
+        MouseArea{
+            hoverEnabled: true
+            anchors.fill: parent
+            onEntered: {
+                screenshot.source = "qrc:/images/icon/screenshotp.png"
+            }
+            onExited: {
+                screenshot.source = "qrc:/images/icon/screenshot.png"
+            }
+        }
     }
 }

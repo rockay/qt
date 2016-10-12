@@ -103,6 +103,7 @@ Window {
         }
         MouseArea{
             anchors.fill: parent
+            hoverEnabled: true
             onClicked:
             {
                 Qt.quit()
@@ -114,54 +115,6 @@ Window {
                 close.source = "qrc:/images/icon/close_login.png"
             }
         }
-    }
-
-    Rectangle{
-        anchors.left: parent.left
-        anchors.top: parent.top
-        width: UI.fHLoginM
-        height: UI.fHLoginM
-        radius: 4
-        color: UI.cTransparent
-//        Image{
-//            anchors.fill: parent
-//            fillMode: Image.PreserveAspectFit
-//            source: "qrc:/images/icon/left.png"
-//        }
-
-//        LinearGradient {
-//            anchors.fill: parent
-//            start: Qt.point(4, 4)
-//            end: Qt.point(100, 100)
-//            gradient: Gradient {
-//                GradientStop { position: 0.0; color: UI.cLoginLBg }
-//                GradientStop { position: 1.0; color: UI.cLoginLBD }
-//            }
-//        }
-//        LText{
-//            anchors.left: parent.left
-//            anchors.top: parent.top
-//            text: qsTr("圈")
-//            font.pointSize: UI.LargeFontPointSize
-//            color: UI.cWhite
-//        }
-
-//        Canvas{
-//            anchors.fill: parent
-//            contextType: "2d";
-//            onPaint: {
-//                context.lineWidth = 2;
-//                context.strokeStyle = UI.cLoginLBD;
-//                context.fillStyle = UI.cLoginLBg;
-//                context.beginPath();
-//                context.moveTo(0 ,0);
-//                context.lineTo(0 , UI.fHLoginM);
-//                context.lineTo(UI.fHLoginM ,0);
-//                context.closePath();
-//                context.stroke();
-
-//            }
-//        }
     }
 
     Rectangle{
@@ -212,8 +165,15 @@ Window {
         }
         MouseArea{
             anchors.fill: parent
+            hoverEnabled: true
             onClicked: {
                 LoginJS.sndVCode();
+            }
+            onEntered: {
+                btnlogin.color = UI.cLoginQP
+            }
+            onExited: {
+                btnlogin.color = UI.cLoginBtnBg
             }
         }
     }

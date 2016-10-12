@@ -22,6 +22,7 @@ Rectangle{
         source: parent.source
     }
     LText{
+        id: txt
         text: root.text
         width: parent.width
         anchors.left: parent.left
@@ -36,9 +37,11 @@ Rectangle{
         hoverEnabled: true
         onEntered: {
 //            root.color = UI.cOperActBg
+            txt.font.bold = true
         }
         onExited: {
-            root.color = UI.cMainLBg
+//            root.color = UI.cMainLBg
+            txt.font.bold = false
         }
     }
 }

@@ -16,6 +16,13 @@ import "qrc:/js/API.js" as API
 import "qrc:/js/Friend.js" as Friend
 
 Item {
+    property bool isLoad: false // 默认不加载
+    onIsLoadChanged: {
+        if(isLoad){
+            Friend.getContacts();
+            Friend.getCompany();
+        }
+    }
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -295,8 +302,8 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        Friend.getContacts();
-        Friend.getCompany();
-    }
+//    Component.onCompleted: {
+//        Friend.getContacts();
+//        Friend.getCompany();
+//    }
 }
