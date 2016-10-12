@@ -70,7 +70,7 @@ Item {
                 width:  categoryView.width
                 height: UI.fHFItem
                 color: categoryView.currentIndex==index? UI.cItemSelected:UI.cItem
-                Image{
+                Rectangle{
                     id: photo
                     anchors.left: parent.left
                     anchors.top: parent.top
@@ -78,7 +78,13 @@ Item {
                     anchors.topMargin: parent.height/5
                     height: parent.height*3/5
                     width: height
-                    source: cover
+                    color: bcolor
+                    Image{
+                        width: parent.width*2/3
+                        height: width
+                        anchors.centerIn: parent
+                        source: cover
+                    }
                 }
                 LText{
                     id: msgTitle
@@ -106,18 +112,22 @@ Item {
             ListElement{
                 name:qsTr("全部文档")
                 cover:"qrc:/images/icon/allfile.png"
+                bcolor:"#F6C8AB"
             }
             ListElement{
                 name:qsTr("图片文档")
                 cover:"qrc:/images/icon/picfile.png"
+                bcolor:"#EAF0A3"
             }
             ListElement{
                 name:qsTr("Office文档")
                 cover:"qrc:/images/icon/officefile.png"
+                bcolor:"#B3DEEA"
             }
             ListElement{
                 name:qsTr("其他文档")
                 cover:"qrc:/images/icon/otherfile.png"
+                bcolor:"#C8E2D0"
             }
         }
 

@@ -3,14 +3,14 @@
 var api_root = "http://www.2045kpt.com/";
 
 // token 测试用
-var token = "6EBB10896EBB5C1F4D754D755C1F26CC5C1F6EBB";
+var token = "6EBB10896EBB6EBB1A1C6EBB4F881A1C6EBB6EBB";
 var rong_token = "wF95F73D6ZTsWt1SYAMwQhjUT4yuNhCsE8yk4WJbGM26BuVaS2WNvdRI933kuN3GF3scOwpS24L1CoOfm/CrNlL53KtrtPF2"
 var weix_token = ""
 var user_id = "1012332"
 var user_mobile = "13550324665"
 var user_name = "刘涛"
 var user_wx_name = "刘裕"
-var user_photo = "http://wx.qlogo.cn/mmopen/q3auhgzwzm7lgvbfzdocibjyoxnwcqiccz7kxx7fxpxyzseun5avysevy2yml7lcag5vx8ibbxlhjfxgqqdfatkbg/0"
+var user_photo = "http://qf.2045kpt.com/Files/common/User_Head/E43B16646AB1D1352F2F654E64434BAE.png"
 var is_vip_user = "0"
 var is_company_user = "0"
 

@@ -52,21 +52,66 @@ Window {
     Rectangle{
         anchors.fill: parent;
         radius: 4;
-        color: UI.cLoginBg
+        color: UI.cTransparent
+        Image{
+            anchors.fill: parent
+            source: "qrc:/images/icon/login_bg.png"
+        }
+
+        LText{
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: 10
+            anchors.topMargin: 10
+            text: qsTr("圈")
+            font.pointSize: UI.LargeFontPointSize
+            color: UI.cLoginQ
+        }
     }
 
     //要置于MouseArea之后，否则无法响应鼠标点击
-    LOperButton {
+//    LOperButton {
+//        id:closeBtn
+//        height: UI.fWCloseButton+5
+//        width: UI.fWCloseButton
+//        anchors.right: parent.right
+//        anchors.top: parent.top
+//        source: "qrc:/images/icon/close.png";
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                Qt.quit()
+//            }
+//        }
+//    }
+    Rectangle{
         id:closeBtn
-        height: UI.fWCloseButton+5
-        width: UI.fWCloseButton
+        height: UI.fHLoginClose
+        width: height
         anchors.right: parent.right
         anchors.top: parent.top
-        source: "qrc:/images/icon/close.png";
+        anchors.rightMargin: 10
+        anchors.topMargin: 10
+        color: UI.cTransparent
+        Image {
+            id: close
+            anchors.centerIn: parent
+            width: 20
+            height: width
+            fillMode: Image.PreserveAspectFit
+            source: "qrc:/images/icon/close_login.png"
+        }
         MouseArea{
             anchors.fill: parent
-            onClicked: {
+            onClicked:
+            {
                 Qt.quit()
+            }
+            onEntered: {
+                close.source = "qrc:/images/icon/close_loginp.png"
+            }
+            onExited: {
+                close.source = "qrc:/images/icon/close_login.png"
             }
         }
     }
@@ -78,11 +123,11 @@ Window {
         height: UI.fHLoginM
         radius: 4
         color: UI.cTransparent
-        Image{
-            anchors.fill: parent
-            fillMode: Image.PreserveAspectFit
-            source: "qrc:/images/icon/left.png"
-        }
+//        Image{
+//            anchors.fill: parent
+//            fillMode: Image.PreserveAspectFit
+//            source: "qrc:/images/icon/left.png"
+//        }
 
 //        LinearGradient {
 //            anchors.fill: parent
@@ -130,7 +175,7 @@ Window {
         Image {
             id: photop
             anchors.fill: parent
-            source: "qrc:/images/icon/photo.png" //API.user_photo
+            source: API.user_photo
         }
     }
 

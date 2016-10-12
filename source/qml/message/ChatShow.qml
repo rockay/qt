@@ -12,7 +12,7 @@ Rectangle{
         ListElement{
             recipient: "Me"
             author:"photo"
-            message:"你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊"
+            message:"你好啊你好啊你好啊你好啊你好啊你好啊你你好啊"
             timestamp: "11 10 10:10"
             ctype: 1
         }
@@ -81,7 +81,7 @@ Rectangle{
                     }
 
                     Rectangle {
-                        width: Math.min(ctype == 1 ? (messageText.implicitWidth + 24) : ctype == 2 ? (messageImg.width + 24) : (messageFile.width + 24)
+                        width: Math.min(ctype == 1 ? (messageText.implicitWidth) : ctype == 2 ? (messageImg.width + 24) : (messageFile.width + 24)
                                         , listView.width - 2*UI.fChatImgH - messageRow.spacing)
                         height: ctype == 1 ? messageText.implicitHeight + 24 : ctype == 2 ? (messageImg.height + 24) : (messageFile.height + 24)
                         color: sentByMe ? UI.cRightBg : UI.cWhite

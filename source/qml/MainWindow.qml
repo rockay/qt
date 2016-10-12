@@ -35,7 +35,7 @@ Window {
                 anchors.top: parent.top
 
                 columns: 1
-                LToolButton { source: "qrc:/images/icon/photo.png"; //API.user_photo ;
+                LToolButton { source: API.user_photo ;
                     width: parent.width; height: UI.fHToolButton-20
                     MouseArea{
                         anchors.fill: parent
@@ -43,7 +43,7 @@ Window {
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/icon/message.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { id:msgbtn; source: "qrc:/images/icon/message.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("会话")
                     MouseArea{
                         anchors.fill: parent
@@ -52,10 +52,14 @@ Window {
                             friend.visible= false
                             group.visible = false
                             cloud.visible = false
+                            msgbtn.source = "qrc:/images/icon/messagep.png"
+                            frdbtn.source = "qrc:/images/icon/friend.png"
+                            grpbtn.source = "qrc:/images/icon/group.png"
+                            cldbtn.source = "qrc:/images/icon/cloud.png"
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/icon/friend.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton {id:frdbtn; source: "qrc:/images/icon/friend.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("好友")
                     MouseArea{
                         anchors.fill: parent
@@ -64,10 +68,14 @@ Window {
                             friend.visible= true
                             group.visible = false
                             cloud.visible = false
+                            msgbtn.source = "qrc:/images/icon/message.png"
+                            frdbtn.source = "qrc:/images/icon/friendp.png"
+                            grpbtn.source = "qrc:/images/icon/group.png"
+                            cldbtn.source = "qrc:/images/icon/cloud.png"
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/icon/group.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton {id:grpbtn; source: "qrc:/images/icon/group.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("群组")
                     MouseArea{
                         anchors.fill: parent
@@ -76,10 +84,14 @@ Window {
                             friend.visible= false
                             group.visible = true
                             cloud.visible = false
+                            msgbtn.source = "qrc:/images/icon/message.png"
+                            frdbtn.source = "qrc:/images/icon/friend.png"
+                            grpbtn.source = "qrc:/images/icon/groupp.png"
+                            cldbtn.source = "qrc:/images/icon/cloud.png"
                         }
                     }
                 }
-                LToolButton { source: "qrc:/images/icon/cloud.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton {id:cldbtn; source: "qrc:/images/icon/cloud.png"; width: parent.width; height: UI.fHToolButton
                     text: qsTr("云库")
                     MouseArea{
                         anchors.fill: parent
@@ -88,6 +100,10 @@ Window {
                             friend.visible= false
                             group.visible = false
                             cloud.visible = true
+                            msgbtn.source = "qrc:/images/icon/message.png"
+                            frdbtn.source = "qrc:/images/icon/friend.png"
+                            grpbtn.source = "qrc:/images/icon/group.png"
+                            cldbtn.source = "qrc:/images/icon/cloudp.png"
                         }
                     }
                 }
@@ -99,7 +115,7 @@ Window {
                 height: height
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                LToolButton { source: "qrc:/images/icon/cloud.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton { source: "qrc:/images/icon/exit.png"; width: parent.width; height: UI.fHToolButton
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
@@ -168,7 +184,7 @@ Window {
                             }
                             else{
                                 mainform.visibility = Window.FullScreen
-                                parent.source = "qrc:/images/icon/min.png";
+                                parent.source = "qrc:/images/icon/max.png";
                             }
                         }
                     }

@@ -51,12 +51,13 @@ Rectangle {
 
     Image{
         id: face
-        height: parent.height/2
+        height: UI.fChatToolH
         width: height
         anchors.left: parent.left
         anchors.top: parent.top
-//        anchors.leftMargin: height
-        anchors.topMargin: parent.height/4
+        anchors.leftMargin: height
+        anchors.topMargin: (parent.height-UI.fChatToolH)/2
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/face.png"
         MouseArea{
             anchors.fill: parent
@@ -69,12 +70,13 @@ Rectangle {
     }
     Image{
         id: img
-        height: parent.height/2
+        height: UI.fChatToolH
         width: height
         anchors.left: face.right
         anchors.top: parent.top
         anchors.leftMargin: height
-        anchors.topMargin: parent.height/4
+        anchors.topMargin: (parent.height-UI.fChatToolH)/2
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/image.png"
         MouseArea{
             anchors.fill: parent
@@ -87,12 +89,13 @@ Rectangle {
     }
     Image{
         id: folder
-        height: parent.height/2
+        height: UI.fChatToolH
         width: height
         anchors.left: img.right
         anchors.top: parent.top
         anchors.leftMargin: height
-        anchors.topMargin: parent.height/4
+        anchors.topMargin: (parent.height-UI.fChatToolH)/2
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/folder.png"
         MouseArea{
             anchors.fill: parent
@@ -105,22 +108,24 @@ Rectangle {
     }
     Image{
         id: cloud
-        height: parent.height/2
+        height: UI.fChatToolH
         width: height
         anchors.left: folder.right
         anchors.top: parent.top
         anchors.leftMargin: height
-        anchors.topMargin: parent.height/4
-        source: "qrc:/images/icon/cloud.png"
+        anchors.topMargin: (parent.height-UI.fChatToolH)/2
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/images/icon/cloudt.png"
     }
     Image{
         id: screenshot
-        height: parent.height/2
+        height: UI.fChatToolH
         width: height
         anchors.left: cloud.right
         anchors.top: parent.top
         anchors.leftMargin: height
-        anchors.topMargin: parent.height/4
+        anchors.topMargin: (parent.height-UI.fChatToolH)/2
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/images/icon/screenshot.png"
     }
 }

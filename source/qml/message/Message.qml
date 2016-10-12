@@ -132,51 +132,6 @@ Item {
                 src: "qrc:/images/icon/photo.png"
                 msg: qsTr("再见理想 ")
             }
-            ListElement {
-                name: "张三丰"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "圈图群组"
-                src: "qrc:/images/icon/photo.png"
-                msg: "字有点大多不好显示怎么办呢ABCDEFGHIJKLMNOPQRST"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
-            ListElement {
-                name: "Banana"
-                src: "qrc:/images/icon/photo.png"
-                msg: "泡泡网吧"
-            }
         }
     }
     Rectangle{

@@ -169,5 +169,24 @@
         <file>images/icon/picfile.png</file>
         <file>images/icon/screenshot.png</file>
         <file>qml/message/ChatShow.qml</file>
+        <file>images/icon/close_loginp.png</file>
+        <file>images/icon/login_bg.png</file>
+        <file>images/icon/maxp.png</file>
+        <file>images/icon/minp.png</file>
+        <file>images/icon/closep.png</file>
+        <file>images/icon/friendp.png</file>
+        <file>images/icon/folderp.png</file>
+        <file>images/icon/screenshotp.png</file>
+        <file>images/icon/imagep.png</file>
+        <file>images/icon/facep.png</file>
+        <file>images/icon/cloudp.png</file>
+        <file>images/icon/cloudtp.png</file>
+        <file>images/icon/groupp.png</file>
+        <file>images/icon/messagep.png</file>
+        <file>images/icon/exitp.png</file>
+        <file>images/icon/cloudt.png</file>
+        <file>images/icon/exit.png</file>
+        <file>images/icon/addp.png</file>
+        <file>images/icon/add.png</file>
     </qresource>
 </RCC>

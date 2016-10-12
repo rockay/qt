@@ -22,12 +22,13 @@ var cBlack = "#000"
 var cWhite = "#fff"
 var cLightBlue = "lightblue"
 var cLoginBg = "#FFF"        // 登录背景颜色
+var cLoginQ = "#9FB7D0"         // 登录窗体圈的颜色
 var cLoginBtnBg = "#315C91"     // 登录按钮背景颜色
 var cLoginLBD = "#3B577B"       // 登录窗左上角的结束
 var cLoginLBg = "#4B75AD"       // 登录窗左上角的起始
 var cExchange="#335E93"         // 切换账号字体颜色
 var cMainBg = "#F5F5F5"         // 工作面板背景颜色
-var cMainLBg = "#4F77AA"        // 主窗体左侧工具条背景色
+var cMainLBg = "#4F77A8"        // 主窗体左侧工具条背景色
 var cMainCBg = "#EAEAEA"        // 主窗体中间背景色
 var cOperActBg = "#EEEEEE"      // 右上角最大，最小关闭鼠标放上背景色
 var cTBBorder = "#DDDDDD"       // 文本输入框边框
@@ -42,6 +43,7 @@ var cTabUncheckedB = "#666666"  // Tab控件未选中项的下边框色
 var cTabBg = "#8F8F8F"          // Tab控件背景色
 
 // 窗体定义
+var fHLoginClose = 27   // 登陆窗体关闭按钮高
 var fHLoginM = 80      // 登录窗体左上角高
 var fHLoginBtn = 35     // 登录窗体按钮高
 var fWMain = 850        // 主窗体宽
@@ -72,6 +74,7 @@ var fWFile = 150        // 文件图片宽
 // 聊天相关
 var fChatMargin = 10            // 消息显示框的左右边距
 var fChatImgH = 35              // 消息显示的头像高
+var fChatToolH = 20             // 聊天工具栏图标高
 var cLeftBorder = "#F8F8F8"     // 消息显示左边的边框颜色
 var cRightBg = "#84A5CD"        // 消息显示右边的背景色
 var cTime = "#B9ADC5"           // 消息显示时间颜色
