@@ -2,6 +2,21 @@
 
 var api_root = "http://www.2045kpt.com/";
 
+//{
+//    "token": "6EBB10896EBB6EBB1A1C6EBB4F885C1F0A9D6EBB",
+//    "rong_token": "68S/N6pLvPu4n2GzNkvNBRjUT4yuNhCsE8yk4WJbGM2+Ok6dNPjwaV1FCieObWa9gbUzA9+lyid6SdGFwvgjd1L53KtrtPF2",
+//    "weix_token": "",
+//    "user_info": {
+//        "user_id": 1011815,
+//        "user_mobile": "13987871719",
+//        "user_name": "测试账号1",
+//        "user_wx_name": "",
+//        "user_photo": "http://qf.2045kpt.com/Files/common/User_Head/E43B16646AB1D1352F2F654E64434BAE.png",
+//        "is_vip_user": 0,
+//        "is_company_user": 0
+//    },
+//    "errorcode": -1
+//}
 // token 测试用
 var token = "6EBB10896EBB5C1F4D754D755C1F3F4E4D756EBB";
 var rong_token = "wF95F73D6ZTsWt1SYAMwQhjUT4yuNhCsE8yk4WJbGM26BuVaS2WNvdRI933kuN3GF3scOwpS24L1CoOfm/CrNlL53KtrtPF2"
