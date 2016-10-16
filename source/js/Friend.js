@@ -12,11 +12,16 @@ function getContacts(){
 
 // 获取通讯录回调
 function getContactsCB(data){
-//    console.log("data:"+JSON.stringify(data));
+    console.log("data:"+JSON.stringify(data));
     if(data.errorcode =="-1"){
         console.log("获取通讯录好友成功");
         allContacts = data.friend;
         allmodel.append(data.friend);
+        // 将头像放到头像列表
+        for(var i=0; i< data.friend.length;i++){
+            var id = data.friend[i].friend_id;
+            API.photoObjMap[id] = data.friend[i].friend_photo;
+        }
     }else{
         console.log("获取通讯录好友失败");
     }

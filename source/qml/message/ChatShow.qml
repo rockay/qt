@@ -4,32 +4,14 @@ import QtQuick.Controls 2.0
 import QtQml.Models 2.2
 
 import "qrc:/js/UI.js" as UI
+import "qrc:/js/API.js" as API
 
 Rectangle{
     color: UI.cTransparent
+    property ListModel chatLists: chatList
+
     ListModel{
         id: chatList
-        ListElement{
-            recipient: "Me"
-            author:"photo"
-            message:"你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊<img src='qrc:/images/face/0.gif' />你<img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/0.gif' /><img src='qrc:/images/face/1.gif' />好啊<img src='qrc:/images/face/0.gif' />"
-            timestamp: "11 10 10:10"
-            ctype: 1
-        }
-        ListElement{
-            recipient: "Torres"
-            author:"photo"
-            message:"qrc:/images/icon/photo.png"
-            timestamp: "11 10 10:11"
-            ctype: 2
-        }
-        ListElement{
-            recipient: "Me"
-            author:"photo"
-            message:"qrc:/images/icon/photo.png"
-            timestamp: "11 10 10:11"
-            ctype: 3
-        }
     }
     SequentialAnimation {
         id:animation2
@@ -66,7 +48,7 @@ Rectangle{
                 anchors.right: sentByMe ? parent.right : undefined
                 spacing: 6
 
-                readonly property bool sentByMe: recipient !== "Me"
+                readonly property bool sentByMe: recipient == "Me"
 
                 Row {
                     id: messageRow
@@ -77,7 +59,7 @@ Rectangle{
                         id: you
                         height: UI.fChatImgH
                         width: height
-                        source: !sentByMe ? "qrc:/images/icon/" + author + ".png" : ""
+                        source: !sentByMe ? API.photoObjMap[author] : ""
                     }
 
                     Rectangle {
@@ -141,7 +123,7 @@ Rectangle{
                             id: me
                             width: parent.height
                             height: parent.height
-                            source: sentByMe ? "qrc:/images/icon/" + author + ".png" : ""
+                            source: sentByMe ? API.user_photo : ""
                         }
                     }
                 }
@@ -149,7 +131,7 @@ Rectangle{
                 Label {
                     id: timestampText
 //                    text: Qt.formatDateTime(timestamp, "d MMM hh:mm")
-                    text:"11 10 22:03"
+                    text: timestamp
                     color: UI.cTime
                     horizontalAlignment: Text.Center
                     width: listView.width

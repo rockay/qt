@@ -3,7 +3,8 @@ import org.lt.controls 1.0
 
 Rectangle {
     id:mainPage
-    width: isDetailsUI?348:406; height: isDetailsUI?198:211
+//    width: isDetailsUI?348:406; height: isDetailsUI?198:211
+    width: isDetailsUI?552:406; height: isDetailsUI?297:211
     property bool isDetailsUI: true
     signal signalClickCurrentImg(string imgName,string strPath);
     property DocumentHandler document: document
@@ -18,7 +19,8 @@ Rectangle {
             radius: 5
             smooth: true
             color: "#FFFFFF"
-            AnimatedImage { source: path; anchors.centerIn: parent;smooth: true }
+            AnimatedImage { source: path;width: parent.width;
+                height: parent.height; fillMode: Image.PreserveAspectFit; anchors.centerIn: parent;smooth: true }
             MouseArea{
                 id:ma
                 anchors.fill: parent
@@ -34,7 +36,7 @@ Rectangle {
                     var obj = mapToItem(null,x,y);
                     var posx = obj.x ;
                     var posy = obj.y ;
-                    mainShowCallBoard(title,posx,posy);
+//                    mainShowCallBoard(title,posx,posy);
                 }
                 onClicked: {
 //                    console.log(path+"\n"+title);
@@ -54,7 +56,6 @@ Rectangle {
         id:grid
         width: 30*12; height: 30*6
         cellWidth:30; cellHeight:30
-//        anchors.centerIn: parent
         anchors.left: parent.left
         anchors.leftMargin: isDetailsUI?5:20
         anchors.right: parent.right

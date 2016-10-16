@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.4
 
 import "qrc:/js/UI.js" as UI
 TextArea{
+    id:txtControl
     font.family: UI.defaultFontFamily
     font.pointSize: UI.LittleFontPointSize
     wrapMode: TextEdit.Wrap
@@ -17,4 +18,9 @@ TextArea{
 //            cursorPosition = Math.min(prePosition, maxLength);
 //        }
 //    }
+    background: Rectangle {
+        anchors.centerIn: parent
+        color: txtControl.enabled ? "transparent" : "#353637"
+        border.color: txtControl.enabled ?  UI.cTBBorder : "transparent"
+    }
 }

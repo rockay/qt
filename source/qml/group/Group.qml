@@ -17,6 +17,7 @@ import "qrc:/js/Group.js" as Group
 
 Item {
     property bool isLoad: false // 默认不加载
+    signal sendGroupMsgClick(string userid, string namec, string photoc,string msgc);
     onIsLoadChanged: {
         if(isLoad)
             Group.getGroups();
@@ -104,6 +105,7 @@ Item {
                         namec.text = group_name;
                         phonec.text = "共"+group_number+"人";
                         typec.text = "个人用户"//type;
+                        targetid.text = group_id;
                     }
                 }
             }
@@ -221,6 +223,11 @@ Item {
                     height: contacts.height
                     verticalAlignment:  Text.AlignVCenter
                 }
+                LText{
+                    id: targetid
+                    visible: false
+                }
+
 
                 Rectangle{
                     border.width: 1
@@ -242,6 +249,9 @@ Item {
                     color: UI.cWhite
                     radius: 4
                     fontSize: UI.StandardFontPointSize
+                    onClicked: {
+                        sendGroupMsgClick(targetid.text,namec.text,photoc.source,"");
+                    }
                 }
             }
         }

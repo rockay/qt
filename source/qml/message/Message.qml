@@ -1,10 +1,11 @@
 import QtQuick 2.0
+import QtQuick.Controls 2.0
+import QtQuick.XmlListModel 2.0
 
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
-import QtQuick.Controls 2.0
-import QtQuick.XmlListModel 2.0
+import "qrc:/js/Message.js" as MessageJS
 
 Item {
 
@@ -12,9 +13,14 @@ Item {
     property string atContents: "@zhuditingyu"
 
     property bool isLoad: false // 默认不加载
+    property ListModel chatList: chatPersionmodel
+    property ListView chatView: msgView
+
     onIsLoadChanged: {
 //        if(isLoad)
 //            Cloud.getClouds();
+        // 获取会话列表
+        ryControl.GetChatList();
     }
     XmlListModel {
         id: xmlModel
@@ -57,7 +63,7 @@ Item {
             svgcsrc: "qrc:/images/icon/close.png"
         }
 
-        // 接受互动列表
+        // 左侧会话人员列表
         ListView {
             id: msgView
             property bool deleted: false
@@ -68,7 +74,7 @@ Item {
             width: parent.width
             height: parent.height-search.height-2*UI.fMLsearch-10
 
-            model: messagemodel
+            model: chatPersionmodel
             clip: true
             maximumFlickVelocity: 5000
             orientation: ListView.Vertical
@@ -94,7 +100,7 @@ Item {
                     anchors.topMargin: parent.height/5
                     height: parent.height*3/5
                     width: height
-                    source: src
+                    source: photosrc
                 }
                 LText{
                     id: msgTitle
@@ -122,22 +128,20 @@ Item {
                     onClicked: {
                         msgView.currentIndex = index;
                         topTitle.text = name;
+
+                        // 切换聊天对象的记录
+                        chatview.chatLists.clear();  // 清除
+                        tempdata = MessageJS.allMessage.filter(function(item){
+                            return (item.author == targetid || item.targetid == targetid)
+                        });
+//                        chatview.append(tempdata);
+                        chatview.chatLists = tempdata;
                     }
                 }
             }
         }
         ListModel{
-            id: messagemodel
-            ListElement {
-                name: "张三"
-                src: "qrc:/images/icon/photo.png"
-                msg: "你好久过来"
-            }
-            ListElement {
-                name: qsTr("李四")
-                src: "qrc:/images/icon/photo.png"
-                msg: qsTr("再见理想 ")
-            }
+            id: chatPersionmodel
         }
     }
     Rectangle{
@@ -194,6 +198,7 @@ Item {
             z: rightbar.z+1
 
             ChatShow{
+                id: chatview
                 anchors.fill: parent
             }
 
@@ -207,6 +212,7 @@ Item {
             border.width: 1
             border.color: UI.cTBBorder
             z: rightCenter.z+1
+            enabled: msgView.currentIndex >=0?true:false
             Rectangle{
                 id: toolBar
                 width: parent.width
@@ -220,27 +226,6 @@ Item {
                     }
                 }
             }
-//            Flickable {
-//                id: flickable
-//                width: rightbar.width
-//                height: rightBottom.height - toolBar.height - sendBtn.height
-//                anchors.left: parent.left
-//                anchors.top: toolBar.bottom
-
-//                TextArea.flickable: LTextArea {
-//                    id: sendText
-//                    text: ""
-//                    wrapMode: TextArea.Wrap
-//                }
-
-//                ScrollBar.vertical: ScrollBar { }
-//            }
-//            TextEdit{
-//                width: rightbar.width
-//                height: rightBottom.height - toolBar.height - sendBtn.height
-//                anchors.left: parent.left
-//                anchors.top: toolBar.bottom
-//            }
 
             LTextArea{
                 id: sendText
@@ -253,7 +238,18 @@ Item {
                 //baseUrl: "qrc:/images/yibanface"
                 text: chattool.document.text
                 textFormat: Qt.RichText
+                enabled: msgView.currentIndex >=0?true:false
                 Component.onCompleted: forceActiveFocus()
+            }
+
+            LText{
+                id: tips
+                width: parent.width-sendBtn.width
+                height: UI.fHNormalBtn
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 5
             }
 
             LButton{
@@ -266,9 +262,65 @@ Item {
                 anchors.bottomMargin: 5
                 text: qsTr("发送(S)")
                 onClicked: {
-                    console.log(chattool.document.transferText);
+                    var sendtxt = chattool.document.transferText;
+
+                    // 获取发送的客户信息
+                    var idx = msgView.currentIndex;
+                    var curitem = chatPersionmodel.get(idx);
+                    var msgid = ryControl.sendMsg(curitem.targetid,curitem.categoryId,sendtxt);
+
+                    var item={
+                        "messageid": msgid,
+                        "recipient": "Me",
+                        "author": API.user_id,
+                        "message": sendtxt,
+                        "targetid": curitem.targetid,
+                        "timestamp": MessageJS.currentDateTime(),
+                        "ctype": 1
+                    }
+                    chatview.chatLists.insert(0,item);
+                    // 添加到所有的聊天记录
+//                    MessageJS.allMessage.push(0,item);
+
+
+                    chattool.document.setText("");
+                    sendText.clear();
+
                 }
             }
+
+            Connections {
+                  target: ryControl
+                  onReceivedMsg: {
+                      switch(type){
+                      case 0: // 其他
+                          tips.text = ""
+                      case 2: // 输入
+                      case 3: // 最后发送时间
+                          tips.text = msg
+                          break;
+                      case 1: // 消息
+                          // 根据ID获取头像
+                          var item={
+                              "messageid": messageid,
+                              "recipient": senderid,
+                              "author": senderid,
+                              "message": msg,
+                              "targetid": API.user_id,
+                              "timestamp": sendtime,
+                              "ctype": 1
+                          }
+                          chatview.chatLists.insert(0,item);
+                          // 添加到所有的聊天记录
+//                          MessageJS.allMessage.push(0,item);
+                          tips.text = "";
+                          break;
+                      }
+                  }
+                  onReceivedException:{
+                      tips.text = "通讯异常："+data;
+                  }
+              }
         }
     }
 }

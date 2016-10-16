@@ -18,14 +18,14 @@ var api_root = "http://www.2045kpt.com/";
 //    "errorcode": -1
 //}
 // token 测试用
-var token = "6EBB10896EBB5C1F4D754D755C1F3F4E4D756EBB";
-var rong_token = "wF95F73D6ZTsWt1SYAMwQhjUT4yuNhCsE8yk4WJbGM26BuVaS2WNvdRI933kuN3GF3scOwpS24L1CoOfm/CrNlL53KtrtPF2"
+var token = "6EBB10896EBB5C1F4D754D755C1F4D7526CC6EBB";
+var rong_token = "BFJgjNcFWmdVMB0W0q9jmz6LgOT5GtjMBORyJ/SMMB/Ai4SgesOUyx7VFQEDhV3ISmHPNBHothR7uHSWxYPLGf6/sJrJ7b4J"
 var weix_token = ""
 var user_id = "1012332"
 var user_mobile = "13550324665"
 var user_name = "刘涛"
 var user_wx_name = "刘裕"
-var user_photo = "http://qf.2045kpt.com/Files/common/User_Head/E43B16646AB1D1352F2F654E64434BAE.png"
+var user_photo = "http://wx.qlogo.cn/mmopen/Q3auHgzwzM7LGvbFZdOCibjYOXnwcQiccZ7KXX7fxPXYZsEUN5AVYsEvY2yMl7LcaG5Vx8ibBXLHjfxGqQdFATkBg/0"
 var is_vip_user = "0"
 var is_company_user = "0"
 
@@ -79,3 +79,6 @@ function httpRequest(verb, url, obj, cb) {
 //    var data = obj?JSON.stringify(obj):''
     xhr.send(obj);
 }
+
+
+var photoObjMap={};

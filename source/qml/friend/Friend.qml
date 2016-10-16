@@ -17,6 +17,7 @@ import "qrc:/js/Friend.js" as Friend
 
 Item {
     property bool isLoad: false // 默认不加载
+    signal sendMsgClick(string userid,string namec, string photoc,string msgc);
     onIsLoadChanged: {
         if(isLoad){
             Friend.getContacts();
@@ -156,6 +157,7 @@ Item {
                         namec.text = friend_name;
                         phonec.text = friend_mobile;
                         typec.text = "个人用户"//type;
+                        targetid.text = friend_id;
                     }
                 }
             }
@@ -276,6 +278,10 @@ Item {
                     height: contacts.height
                     verticalAlignment:  Text.AlignVCenter
                 }
+                LText{
+                    id: targetid
+                    visible: false
+                }
 
                 Rectangle{
                     border.width: 1
@@ -297,6 +303,9 @@ Item {
                     color: UI.cWhite
                     radius: 4
                     fontSize: UI.StandardFontPointSize
+                    onClicked: {
+                        sendMsgClick(targetid.text,namec.text,photoc.source,"");
+                    }
                 }
             }
         }

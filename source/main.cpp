@@ -19,6 +19,8 @@
 
 #include "qtquickcontrolsapplication.h"
 #include "documenthandler.h"
+#include "ryimpl.h"
+
 int main(int argc,char* argv[])
 {
     QGuiApplication::setApplicationName("Gallery");
@@ -37,6 +39,10 @@ int main(int argc,char* argv[])
 //        QQuickStyle::setStyle(settings.value("style").toString());
 
     QQmlApplicationEngine engine;
+
+    RYImpl::getInstance()->initLib();
+    engine.rootContext()->setContextProperty("ryControl", RYImpl::getInstance());
+
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
 
     if (engine.rootObjects().isEmpty())

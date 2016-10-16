@@ -5,7 +5,8 @@ QT += qml quick quickcontrols2
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    documenthandler.cpp
+    documenthandler.cpp \
+    ryimpl.cpp
 
 RESOURCES += qml.qrc
 
@@ -19,5 +20,7 @@ include(deployment.pri)
 
 HEADERS += \
     documenthandler.h \
-    qtquickcontrolsapplication.h
+    qtquickcontrolsapplication.h \
+    rcsdk.h \
+    ryimpl.h
 

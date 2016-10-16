@@ -158,11 +158,59 @@ Window {
                 id: friend
                 anchors.fill: parent
                 visible: false
+                onSendMsgClick:{
+                    console.log("photoc:"+photoc)
+                    var obj = {
+                        name: namec,
+                        photosrc: photoc,
+                        msg: msgc,
+                        categoryId: 1,   // 1 - PRIVATE 单人
+                        targetid: userid
+                    }
+                    // 判断是否已经存在
+                    var isExist = -1;
+                    for(var i=0; i<message.chatList.count; i++){
+                        if(message.chatList.get(i).targetid == userid){
+                            isExist = i;
+                            break;
+                        }
+                    }
+                    if(isExist != -1){
+                        // 存在移动到第一个
+                        message.chatList.move(isExist,0,1);
+                    }else{
+                        //添加
+                        message.chatList.insert(0,obj);
+                    }
+
+                    message.chatView.currentIndex = 0;
+                    message.visible = true;
+                    friend.visible = false;
+                    msgbtn.source = "qrc:/images/icon/messagep.png"
+                    frdbtn.source = "qrc:/images/icon/friend.png"
+                }
             }
             Group{
                 id:group
                 anchors.fill: parent
                 visible: false
+
+                onSendGroupMsgClick:{
+                    console.log("photoc:"+photoc)
+                    var obj = {
+                        name: namec,
+                        photosrc: photoc,
+                        msg: msgc,
+                        categoryId: 3,   // 3 - GROUP 群组
+                        targetid: userid
+                    }
+                    message.chatList.insert(0,obj);
+                    message.chatView.currentIndex = 0;
+                    message.visible = true;
+                    group.visible = false;
+                    msgbtn.source = "qrc:/images/icon/messagep.png"
+                    grpbtn.source = "qrc:/images/icon/group.png"
+                }
             }
             Cloud{
                 id:cloud
