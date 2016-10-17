@@ -28,6 +28,7 @@ var user_wx_name = "刘裕"
 var user_photo = "http://wx.qlogo.cn/mmopen/Q3auHgzwzM7LGvbFZdOCibjYOXnwcQiccZ7KXX7fxPXYZsEUN5AVYsEvY2yMl7LcaG5Vx8ibBXLHjfxGqQdFATkBg/0"
 var is_vip_user = "0"
 var is_company_user = "0"
+var api_upload_img = "http://f2.2045kpt.com/upload/upload_file.html"    //"http://f2.2045kpt.com/upload/upload_img"  // 文件上传路径
 
 // 登录相关
 var api_sndVcode = "api_v2/account/rndcode_send";       // 获取验证码

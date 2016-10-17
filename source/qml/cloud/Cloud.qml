@@ -21,6 +21,29 @@ Item {
         if(isLoad)
             Cloud.getClouds();
     }
+
+    FileDialog {
+        id: fileDialog
+        title: qsTr("打开")
+        onAccepted: {
+            console.log("You chose: " + fileUrls)
+            for (var i = 0; i < fileUrls.length; i++){
+                var strPath = fileUrls[i].toString();
+                utilityControl.uploadMaterial(API.api_upload_img,strPath,"mImage")
+            }
+        }
+        onRejected: {
+            console.log("Canceled")
+        }
+    }
+
+    Connections{
+        target: utilityControl
+        onUploadMaterialRet:{
+            console.log(retCode,type,retMsg);
+        }
+    }
+
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -153,26 +176,6 @@ Item {
             width: parent.width
             height: UI.fHRithTop
             color: UI.cTransparent
-            Image{
-                id: addBtn
-                height: parent.height/2
-                width: height
-                source: "qrc:/images/icon/add.png"
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.topMargin: (parent.height-height)/2
-                anchors.leftMargin: (parent.height-height)/2
-                MouseArea{
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        addBtn.source ="qrc:/images/icon/addp.png"
-                    }
-                    onExited: {
-                        addBtn.source ="qrc:/images/icon/add.png"
-                    }
-                }
-            }
 
             LText{
                 id: topTitle
@@ -199,6 +202,32 @@ Item {
                     //如果mainwindow继承自QWidget,用setPos
                     mainform.x = mainform.x+delta.x
                     mainform.y = mainform.y+delta.y
+                }
+            }
+
+            Image{
+                id: addBtn
+                height: parent.height/2
+                width: height
+                source: "qrc:/images/icon/add.png"
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.topMargin: (parent.height-height)/2
+                anchors.leftMargin: (parent.height-height)/2
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        fileDialog.folder = fileDialog.shortcuts.pictures
+                        fileDialog.nameFilters = [ "图片文件 (*.jpg *.png)", "All files (*)" ]
+                        fileDialog.open();
+                    }
+                    onEntered: {
+                        addBtn.source ="qrc:/images/icon/addp.png"
+                    }
+                    onExited: {
+                        addBtn.source ="qrc:/images/icon/add.png"
+                    }
                 }
             }
         }

@@ -6,7 +6,8 @@ CONFIG += c++11
 
 SOURCES += main.cpp \
     documenthandler.cpp \
-    ryimpl.cpp
+    ryimpl.cpp \
+    Utility.cpp
 
 RESOURCES += qml.qrc
 
@@ -22,5 +23,6 @@ HEADERS += \
     documenthandler.h \
     qtquickcontrolsapplication.h \
     rcsdk.h \
-    ryimpl.h
+    ryimpl.h \
+    Utility.h
 

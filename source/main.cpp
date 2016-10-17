@@ -20,13 +20,13 @@
 #include "qtquickcontrolsapplication.h"
 #include "documenthandler.h"
 #include "ryimpl.h"
+#include "Utility.h"
 
 int main(int argc,char* argv[])
 {
     QGuiApplication::setApplicationName("Gallery");
     QGuiApplication::setOrganizationName("QtProject");
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-//    QGuiApplication app(argc,argv);
     QtQuickControlsApplication app(argc, argv);
     app.setWindowIcon(QIcon("logo.ico"));
 
@@ -42,6 +42,10 @@ int main(int argc,char* argv[])
 
     RYImpl::getInstance()->initLib();
     engine.rootContext()->setContextProperty("ryControl", RYImpl::getInstance());
+
+
+    Utility utilityControl;
+    engine.rootContext()->setContextProperty("utilityControl", &utilityControl);
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
 

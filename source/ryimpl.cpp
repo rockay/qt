@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QByteArray>
 
 RYImpl* RYImpl::m_instance = NULL;
 
@@ -230,14 +231,17 @@ void RYImpl::initLib()
 int RYImpl::sendMsg(const QString &targetId,int categoryId, const QString &msg)
 {
     int messageId = 0;
+//    for(int i=0;i<msg.count();i+){
+//         QString str = QString::fromUtf8(msg.at(i));
+//        qDebug()<<str.size();
+//    }
     qDebug()<<tr("targetid:%1 \t categoryid:%2 \t").arg(targetId,QString(categoryId));
-//    QByteArray text = ui->textEdit->document()->toPlainText().toUtf8();
     QString fmsg= tr("{\"content\":\"%1\",\"extra\":\"helloExtra\"}").arg(msg.toUtf8().data());
     const wchar_t * msgw = reinterpret_cast<const wchar_t *>(fmsg.utf16());
     if (SaveMessage != NULL)
         messageId = SaveMessage(targetId.toUtf8().data(), categoryId, "RC:TxtMsg", "1012332", msgw, "", "");
     QString u16 = QString::fromUtf16((const ushort*)msgw);
-    qDebug()<<"msgw src:"<<u16.toUtf8();
+    qDebug()<<"msgw src:"<<u16.toUtf8()<<endl;
     auto sendMessageCallback = [](const wchar_t* json_str)
     {
         QString str1= QString::fromWCharArray(json_str);
