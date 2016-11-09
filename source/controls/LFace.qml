@@ -1,14 +1,15 @@
 import QtQuick 2.0
 import org.lt.controls 1.0
+import "qrc:/js/UI.js" as UI
+import "qrc:/js/convertuni.js" as ConvertJS
 
 Rectangle {
     id:mainPage
-//    width: isDetailsUI?348:406; height: isDetailsUI?198:211
-    width: isDetailsUI?552:406; height: isDetailsUI?297:211
-    property bool isDetailsUI: true
-    signal signalClickCurrentImg(string imgName,string strPath);
-    property DocumentHandler document: document
-    opacity: 0.8
+    width: grid.width;
+    height: grid.height
+    signal sigFaceClicked(string text);
+    opacity: 1.0
+
     Component{
         id:imgc
         Rectangle {
@@ -16,11 +17,20 @@ Rectangle {
             width: grid.cellWidth; height: grid.cellHeight
             border.width: 1
             border.color: "#EAEAEA"
-            radius: 5
+            radius: 2
             smooth: true
             color: "#FFFFFF"
-            AnimatedImage { source: path;width: parent.width;
-                height: parent.height; fillMode: Image.PreserveAspectFit; anchors.centerIn: parent;smooth: true }
+//            AnimatedImage { source: path;width: parent.width;
+//                height: parent.height; fillMode: Image.PreserveAspectFit; anchors.centerIn: parent;smooth: true }
+            LText{
+                id: emotiontxt
+                font.family: UI.emojiFont
+                pointSize: UI.BigFontPointSize
+                anchors.centerIn: parent
+                verticalAlignment: Text.AlignVCenter
+                text: utilityControl.getEmoji(ConvertJS.convertHexNCR2CP(emojicode.replace("0x","&#x")+";"));
+            }
+
             MouseArea{
                 id:ma
                 anchors.fill: parent
@@ -39,29 +49,19 @@ Rectangle {
 //                    mainShowCallBoard(title,posx,posy);
                 }
                 onClicked: {
-//                    console.log(path+"\n"+title);
-                    signalClickCurrentImg(title,path);
-                    mainPage.visible = false;
-                    document.insertFace(title,path);
+                    sigFaceClicked(emotiontxt.text)
+                    ppFace.hide()
                 }
             }
 
-
-            Component.onCompleted: {
-                document.initFace(title,path);
-            }
         }
     }
     GridView {
         id:grid
-        width: 30*12; height: 30*6
-        cellWidth:30; cellHeight:30
-        anchors.left: parent.left
-        anchors.leftMargin: isDetailsUI?5:20
-        anchors.right: parent.right
-        anchors.rightMargin: isDetailsUI?5:10
-        anchors.top: parent.top
-        anchors.topMargin: isDetailsUI?5:20
+        width: 35*13+5;
+        height: 35*10
+        cellWidth:35; cellHeight:35
+        anchors.fill: parent
         model: FaceModel {}
         delegate: imgc
         focus: true
@@ -94,24 +94,6 @@ Rectangle {
     function mainHideCallBoard()
     {
         imgBoard.visible = false;
-    }
-    Component.onCompleted: {
-        //console.log("af;a;onCompletedonCompletedonCompletedonCompleted")
-    }
-
-    DocumentHandler {
-        id: document
-        target: sendText
-        cursorPosition: sendText.cursorPosition
-        selectionStart: sendText.selectionStart
-        selectionEnd: sendText.selectionEnd
-        Component.onCompleted: {
-            document.fileUrl = "qrc:/qml/textarea.html"
-        }
-        onError: {
-            errorDialog.text = message
-            errorDialog.visible = true
-        }
     }
 }
 

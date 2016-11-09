@@ -17,7 +17,7 @@ import "qrc:/js/Group.js" as Group
 
 Item {
     property bool isLoad: false // 默认不加载
-    signal sendGroupMsgClick(string userid, string namec, string photoc,string msgc);
+    signal sendGroupMsgClick(string userid, string namec, string photoc,string msgc, int conversationType);
     onIsLoadChanged: {
         if(isLoad)
             Group.getGroups();
@@ -67,6 +67,19 @@ Item {
             spacing: 1
             delegate: msgDelegate
             ScrollIndicator.vertical: ScrollIndicator { }
+
+            onDragEnded: {
+                if (header.refresh) {
+                    console.log("need refresh....")
+                    Group.getGroups();
+                }
+            }
+
+            ListHeader {
+                id: header
+                mainListView: parent
+                y: -parent.contentY - height
+            }
         }
 
         Component{
@@ -100,12 +113,15 @@ Item {
                     anchors.fill: parent
                     onClicked: {
                         card.visible = true
-                        groupView.currentIndex = index;
+                        groupView.currentIndex = index
                         photoc.source = group_cover
-                        namec.text = group_name;
-                        phonec.text = "共"+group_number+"人";
-                        typec.text = "个人用户"//type;
-                        targetid.text = group_id;
+                        namec.text = group_name
+                        phonec.text = "共"+group_number+"人"
+                        typec.text = "个人用户" //type
+                        targetid.text = group_id
+                    }
+                    onDoubleClicked: {
+                        sendGroupMsgClick(targetid.text,namec.text,photoc.source,"",3);
                     }
                 }
             }
@@ -250,7 +266,7 @@ Item {
                     radius: 4
                     fontSize: UI.StandardFontPointSize
                     onClicked: {
-                        sendGroupMsgClick(targetid.text,namec.text,photoc.source,"");
+                        sendGroupMsgClick(targetid.text,namec.text,photoc.source,"",3);
                     }
                 }
             }

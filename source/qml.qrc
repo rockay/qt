@@ -264,5 +264,33 @@
         <file>images/emoji/drawable-xhdpi/u2615.png</file>
         <file>images/emoji/drawable-xhdpi/u2744.png</file>
         <file>js/Message.js</file>
+        <file>controls/LTextInput.qml</file>
+        <file>qml/Splash.qml</file>
+        <file>images/qt-logo.png</file>
+        <file>images/icon/person.png</file>
+        <file>qml/message/ImageShow.qml</file>
+        <file>qml/cloud/UploadFile.qml</file>
+        <file>qml/cloud/ChooseFile.qml</file>
+        <file>controls/ListHeader.qml</file>
+        <file>images/icon/refresh.png</file>
+        <file>controls/GridHeader.qml</file>
+        <file>js/convertuni.js</file>
+        <file>images/icon/next.png</file>
+        <file>images/icon/pre.png</file>
+        <file>images/icon/fullscreen.png</file>
+        <file>images/icon/share.png</file>
+        <file>images/icon/zoomin.png</file>
+        <file>images/icon/zoomout.png</file>
+        <file>images/icon/voice.png</file>
+        <file>images/beep.wav</file>
+        <file>images/icon/small.png</file>
+        <file>images/icon/save.png</file>
+        <file>qml/message/ImageEdit.qml</file>
+        <file>controls/LMenu.qml</file>
+        <file>controls/LMenuItem.qml</file>
+        <file>images/icon/listrefresh.png</file>
+        <file>images/icon/default.png</file>
+        <file>controls/LMessageDialog.qml</file>
+        <file>images/message.wav</file>
     </qresource>
 </RCC>

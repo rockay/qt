@@ -7,7 +7,7 @@
  ****************************************************/
 
 import QtQuick 2.0
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.4
 import "qrc:/js/UI.js" as UI
 
 Text {

@@ -34,8 +34,8 @@ jobj
 "userId":"4378"					//描述信息 成功，返回用户id，失败，返回错误描述
 }
 */
-typedef void(__stdcall *ConnectAckListenerCallback)(const wchar_t* json_str);
-ConnectAckListenerCallback connect_ack_callback;
+//typedef void(__stdcall *ConnectAckListenerCallback)(const wchar_t* json_str);
+//ConnectAckListenerCallback connect_ack_callback;
 
 /*
 jobj

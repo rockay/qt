@@ -11,7 +11,11 @@ import "qrc:/js/UI.js" as UI
 Rectangle{
     id:root
     property string source:""
-    color: UI.cMainBg
+    property string bgcolor: UI.cMainBg
+    property string bdcolor: UI.cMainBg
+    color: bgcolor
+    border.width: 1
+    border.color: bdcolor
     Image {
         width: 9
         height: 10
@@ -26,7 +30,7 @@ Rectangle{
             root.color = UI.cOperActBg
         }
         onExited: {
-            root.color = UI.cMainBg
+            root.color = bgcolor
         }
     }
 }

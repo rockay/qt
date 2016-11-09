@@ -141,6 +141,9 @@ public Q_SLOTS:
     void insertText(const QString &text);
     void insertFace(const QString &name, const QString &path);
     void initFace(const QString &name, const QString &path);
+    void copy();
+//    void past();
+//    void cut();
 
 Q_SIGNALS:
     void targetChanged();

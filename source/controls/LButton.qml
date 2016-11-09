@@ -5,10 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import "qrc:/js/UI.js" as UI
 Button{
     id: btn
-//    font.family: UI.defaultFontFamily
-//    font.pointSize: UI.LittleFontPointSize
-
-    property int radius: 2//最大输入长度
+    property int radius: 5
     property string bdcolor: UI.cTBBorder
     property string bgcolor: UI.cMainBg
     property string color: UI.cBlack
@@ -20,7 +17,7 @@ Button{
             border.width: control.activeFocus ? 2 : 1
             border.color: btn.bdcolor
             radius: btn.radius
-            color: btn.bgcolor
+            color:  control.pressed ? btn.bdcolor : btn.bgcolor
         }
         label: LText{
             text: btn.text

@@ -57,6 +57,8 @@
 #include <QTextBlock>
 #include <QTextDocumentFragment>
 #include <QDebug>
+#include <QApplication>
+#include <QClipboard>
 
 DocumentHandler::DocumentHandler()
     : m_target(0)
@@ -144,7 +146,13 @@ void DocumentHandler::insertFace(const QString &name, const QString &path)
 void DocumentHandler::initFace(const QString &name, const QString &path)
 {
     if(!m_facemap.contains(path))
-            m_facemap.insert(path,name);
+        m_facemap.insert(path,name);
+}
+
+void DocumentHandler::copy()
+{
+    QClipboard *board = QApplication::clipboard();
+    board->setText("233333");
 }
 
 void DocumentHandler::setText(const QString &arg)
@@ -193,22 +201,22 @@ QString DocumentHandler::text() const
 
 QString DocumentHandler::transferText() const
 {
-    QString content = m_doc->toHtml();
-    QTextBlock currentBlock = m_doc->begin();
-    while (currentBlock.isValid()) {
-        QTextBlock::iterator it;
-        for (it = currentBlock.begin(); !(it.atEnd()); ++it) {
-            QTextFragment currentFragment = it.fragment();
-            if (currentFragment.isValid()){
-                QTextImageFormat newImageFormat = currentFragment.charFormat().toImageFormat();
-                if (newImageFormat.isValid()) {
-                    content = content.replace("<img src=\""+newImageFormat.name()+"\" />",m_facemap.value(newImageFormat.name()));
-                }
-            }
-        }
-        currentBlock = currentBlock.next();
-    }
-    m_doc->setHtml(content);
+//    QString content = m_doc->toHtml();
+//    QTextBlock currentBlock = m_doc->begin();
+//    while (currentBlock.isValid()) {
+//        QTextBlock::iterator it;
+//        for (it = currentBlock.begin(); !(it.atEnd()); ++it) {
+//            QTextFragment currentFragment = it.fragment();
+//            if (currentFragment.isValid()){
+//                QTextImageFormat newImageFormat = currentFragment.charFormat().toImageFormat();
+//                if (newImageFormat.isValid()) {
+//                    content = content.replace("<img src=\""+newImageFormat.name()+"\" />",m_facemap.value(newImageFormat.name()));
+//                }
+//            }
+//        }
+//        currentBlock = currentBlock.next();
+//    }
+//    m_doc->setHtml(content);
     return  m_doc->toPlainText();
 }
 

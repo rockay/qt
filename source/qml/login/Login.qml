@@ -2,11 +2,15 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 import Qt.labs.settings 1.0
 import QtGraphicalEffects 1.0
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.2
 
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 import "qrc:/js/login.js" as LoginJS
+import "qrc:/js/Cloud.js" as CloudJS
 
 Window {
     id:login
@@ -17,21 +21,33 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.WindowSystemMenuHint
            | Qt.WindowMinimizeButtonHint| Qt.Window;
     color: UI.cTransparent
+    property bool isCodeLogin: false    // 是否验证码登录
+    property bool isLogin: false
 
-
-    Settings {
-        id: settings
-        property string token: ""
-        property string rong_token: ""
-        property string weix_token: ""
-        property string user_id: ""
-        property string user_mobile: ""
-        property string user_name: ""
-        property string user_wx_name: ""
-        property string user_photo: ""
-        property string is_vip_user: ""
-        property string is_company_user: ""
+    Component.onCompleted: {
+        LoginJS.getConfig();
+        if(settings.token==""){
+            isCodeLogin = true;
+        }
     }
+
+    onClosing:{
+        ryControl.disconnect();
+    }
+
+    LMessageDialog{
+        id: smsTipDialog
+        visible: false
+        msg: qsTr("收到验证码了吗？")
+        flag: 3
+        okTitle: "是"
+        cancelTitle: "否"
+        onCancelClicked:{
+            // 则调用发送语音验证码接口并提示“将通过语音电话为你播报验证码，请注意“010”等区号开头的来电号码”，如果点击收到了则恢复正常状态。
+            LoginJS.sndVoiceCode();
+        }
+    }
+
     MouseArea {
         id: dragRegion
         anchors.fill: parent
@@ -64,26 +80,11 @@ Window {
             anchors.leftMargin: 10
             anchors.topMargin: 10
             text: qsTr("圈")
-            font.pointSize: UI.LargeFontPointSize
+            font.pointSize: UI.HugeFontPointSize
             color: UI.cLoginQ
         }
     }
 
-    //要置于MouseArea之后，否则无法响应鼠标点击
-//    LOperButton {
-//        id:closeBtn
-//        height: UI.fWCloseButton+5
-//        width: UI.fWCloseButton
-//        anchors.right: parent.right
-//        anchors.top: parent.top
-//        source: "qrc:/images/icon/close.png";
-//        MouseArea{
-//            anchors.fill: parent
-//            onClicked: {
-//                Qt.quit()
-//            }
-//        }
-//    }
     Rectangle{
         id:closeBtn
         height: UI.fHLoginClose
@@ -106,7 +107,8 @@ Window {
             hoverEnabled: true
             onClicked:
             {
-                Qt.quit()
+//                utilityControl.quit()
+                Qt.quit();
             }
             onEntered: {
                 close.source = "qrc:/images/icon/close_loginp.png"
@@ -128,7 +130,7 @@ Window {
         Image {
             id: photop
             anchors.fill: parent
-            source: API.user_photo
+            source: settings.user_photo == "" ? "qrc:/images/qt-logo.png" : settings.user_photo
         }
     }
 
@@ -137,13 +139,14 @@ Window {
         width:photo.width
         height:txtName.contentHeight
         anchors.top: photo.bottom
-        anchors.topMargin: 20
+        anchors.topMargin: 40
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
         color: UI.cTransparent
+        visible:  !isCodeLogin
         LText{
             id:txtName
-            text: API.user_name//qsTr("郭思佳")
+            text: settings.user_name //qsTr("刘其超")
             anchors.centerIn: parent
         }
     }
@@ -157,6 +160,9 @@ Window {
         anchors.topMargin: 20
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
+        radius: 5
+        visible: !isCodeLogin
+        enabled: settings.token == "" ? false : true
         LText{
             id:txtLogin
             text:qsTr("登录")
@@ -167,7 +173,7 @@ Window {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                LoginJS.sndVCode();
+                LoginJS.loginLocal();
             }
             onEntered: {
                 btnlogin.color = UI.cLoginQP
@@ -183,15 +189,181 @@ Window {
         width:photo.width
         height:title.contentHeight
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 40
+        anchors.bottomMargin: 30
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
         color: UI.cTransparent
         LText{
             id:title
-            text:qsTr("切换账号")
+            text: isCodeLogin ? qsTr("返回快捷登录") : qsTr("切换账号")
             anchors.centerIn: parent
             color: UI.cExchange
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    if(title.text=="切换账号"){
+                        isCodeLogin = true;
+                    }else{
+                        isCodeLogin = false;
+                    }
+                }
+
+                onEntered: {
+                    title.color = UI.cLightBlue
+                }
+                onExited: {
+                    title.color = UI.cExchange
+                }
+            }
         }
     }
+
+    Rectangle{
+        id: codeArea
+        color: UI.cTransparent
+        width: parent.width
+        height: parent.height/2
+        anchors.bottom: parent.bottom
+        visible: isCodeLogin
+        Item{
+            width: parent.width*5/7
+            height: UI.fHLoginBtn
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.leftMargin: (parent.width-width)/2
+            Column{
+                spacing: 5
+                Row {
+                    spacing: 2
+                    LText{
+                        id: phonel
+                        height: UI.fHLoginBtn
+                        text: qsTr("手机号")
+                    }
+                    LTextInput{
+                        id: phone
+                        width: btncodelogin.width-codebtn.width-phonel.width-2*2;
+                        height: UI.fHLoginBtn
+                        maximumLength: 11
+                        placeholderText: qsTr("请输入手机号")
+                        text: settings.user_mobile
+
+                    }
+                    LButton{
+                        id: codebtn
+                        width: 100;
+                        height: UI.fHLoginBtn
+                        text: qsTr("获取验证码");
+                        fontSize: UI.TinyFontPointSize
+                        onClicked: {
+                            LoginJS.sndVCode();
+                        }
+                    }
+                    Timer{
+                        id: counttimer;
+                        property int count: 60
+                        interval: 1000;
+                        running: false;
+                        repeat: true
+                        property bool isVoice: false
+                        onTriggered: {
+                            count--;
+                            if(count==0){
+                                count = 60;
+                                counttimer.stop();
+                                codebtn.enabled = true;
+                                codebtn.text = qsTr("获取验证码");
+                                tips.text = "";
+                                if(!isVoice) // 是否当前是语音在倒计时
+                                {
+                                    if(smsTipDialog.visible)
+                                        smsTipDialog.requestActivate();
+                                    else
+                                        smsTipDialog.show();
+                                }
+                                isVoice = false;
+
+                            }
+                            else{
+                                codebtn.text = qsTr(count+"秒后可重新获取");
+                            }
+                        }
+                    }
+                }
+                Row{
+                    Rectangle{
+                        width: btncodelogin.width;
+                        height: 1
+                        color: UI.cLightBlue
+                        border.width: 1
+                        border.color: UI.cLightBlue
+                    }
+                }
+                Row {
+                    LText{
+                        id: codel
+                        height: UI.fHLoginBtn
+                        text: qsTr("验证码")
+                    }
+                    LTextInput{
+                        id: code
+                        width: btncodelogin.width-codel.width-2;
+                        height: UI.fHLoginBtn
+                        maximumLength: 6
+                        placeholderText: qsTr("请输入验证码")
+                    }
+                }
+                Row{
+                    Rectangle{
+                        width: btncodelogin.width
+                        height: 1
+                        color: UI.cLightBlue
+                        border.width: 1
+                        border.color: UI.cLightBlue
+                    }
+                }
+                Row{
+                    LText{
+                        id: tips
+                        width: btncodelogin.width
+                        height: UI.fHLoginBtn
+                        color: UI.cRed
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id:btncodelogin
+            color: UI.cLoginBtnBg
+            width: parent.width*5/7
+            height: UI.fHLoginBtn
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 35+UI.fHLoginBtn
+            anchors.left: parent.left
+            anchors.leftMargin: (parent.width-width)/2
+            radius: 5
+            LText{
+                text:qsTr("登录")
+                anchors.centerIn: parent
+                color: UI.cWhite
+            }
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    LoginJS.loginfuc(phone.text,code.text);
+                }
+                onEntered: {
+                    btncodelogin.color = UI.cLoginQP
+                }
+                onExited: {
+                    btncodelogin.color = UI.cLoginBtnBg
+                }
+            }
+        }
+
+    }
+
 }

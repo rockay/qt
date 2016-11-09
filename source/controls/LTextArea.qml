@@ -5,8 +5,8 @@ import QtQuick.Controls.Styles 1.4
 import "qrc:/js/UI.js" as UI
 TextArea{
     id:txtControl
-    font.family: UI.defaultFontFamily
-    font.pointSize: UI.LittleFontPointSize
+    font.family: UI.emojiFont
+    font.pointSize: UI.SmallFontPointSize
     wrapMode: TextEdit.Wrap
 //    property int maxLength: 200//最大输入长度
 //    onLengthChanged:

@@ -13,15 +13,15 @@ import QtQuick.Layouts 1.3
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
-import "qrc:/js/Friend.js" as Friend
+import "qrc:/js/Friend.js" as FriendJS
 
 Item {
     property bool isLoad: false // 默认不加载
-    signal sendMsgClick(string userid,string namec, string photoc,string msgc);
+    signal sendMsgClick(string userid,string namec, string nameremark, string photoc,string msgc,int conversationType);
     onIsLoadChanged: {
         if(isLoad){
-            Friend.getContacts();
-            Friend.getCompany();
+            FriendJS.getContacts();
+            FriendJS.getCompany();
         }
     }
     Rectangle{
@@ -44,7 +44,7 @@ Item {
             svgsrc: "qrc:/images/icon/find.png"
             svgcsrc: "qrc:/images/icon/close.png"
             onValueChanged: {
-                Friend.search(category.currentIndex,search.value)
+                FriendJS.search(category.currentIndex,search.value)
             }
         }
         Rectangle{
@@ -66,14 +66,14 @@ Item {
                 text: qsTr("通讯录")
                 onClicked:{
                     search.defaultValue = ""
-                    Friend.search(category.currentIndex,search.value)
+                    FriendJS.search(category.currentIndex,search.value)
                 }
             }
             LTabButton {
                 text: qsTr("企业")
                 onClicked:{
                     search.defaultValue = ""
-                    Friend.search(category.currentIndex,search.value)
+                    FriendJS.search(category.currentIndex,search.value)
                 }
             }
           }
@@ -83,7 +83,6 @@ Item {
             currentIndex: category.currentIndex
             anchors.left: parent.left
             anchors.top: category.bottom
-//            anchors.topMargin: UI.fMLsearch+5
 
             // 通讯录列表
             ListView {
@@ -100,6 +99,18 @@ Item {
                 spacing: 1
                 delegate: msgDelegate
                 ScrollIndicator.vertical: ScrollIndicator { }
+                onDragEnded: {
+                    if (header.refresh) {
+                        console.log("need refresh....")
+                        FriendJS.getContacts();
+                    }
+                }
+
+                ListHeader {
+                    id: header
+                    mainListView: parent
+                    y: -parent.contentY - height
+                }
             }
 
             // 企业好友列表
@@ -117,8 +128,65 @@ Item {
                 spacing: 1
                 delegate: msgDelegate
                 ScrollIndicator.vertical: ScrollIndicator { }
+                onDragEnded: {
+                    if (companyheader.refresh) {
+                        console.log("need refresh....")
+                        FriendJS.getCompany();
+                    }
+                }
+
+                ListHeader {
+                    id: companyheader
+                    mainListView: parent
+                    y: -parent.contentY - height
+                }
+
+                section.delegate: sectionDelegate
+                section.property: "company_name"
+                section.criteria: ViewSection.FullString
             }
 
+        }
+        //企业组
+        Component{
+            id:sectionDelegate
+            Rectangle {
+                id:dataGroupContainer
+                width: busiView.width
+                height: UI.fHFItem/2
+                color: "#404244"
+                LText{
+                    id: sectionName
+                    width:parent.width
+                    height: parent.height
+                    font.pointSize: UI.LittleFontPointSize
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignLeft
+                    text: section
+                    color: UI.cWhite
+                    x: 10
+                }
+                LText{
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignLeft
+                    x: parent.width - width-10;
+                    font.pointSize: UI.LittleFontPointSize
+                    font.bold: true
+                    color: UI.cWhite
+                    text: qsTr(">")
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        console.log("点击分组-展开/关闭...");
+                        for(var k=0;k<busimodel.rowCount();k++){
+                            if(busimodel.get(k).company_name != sectionName.text)continue;
+                            busimodel.get(k).visibled = !busimodel.get(k).visibled;
+                        }
+                    }
+                }
+            }
         }
 
         Component{
@@ -140,7 +208,7 @@ Item {
                 }
                 LText{
                     id: msgTitle
-                    text: friend_name
+                    text: friend_remark_name =="" ? friend_name : friend_remark_name
                     width: msgItem.width-photo.width-2*UI.fMLsearch
                     anchors.left: photo.right
                     anchors.top: parent.top
@@ -156,10 +224,42 @@ Item {
                         photoc.source = friend_photo
                         namec.text = friend_name;
                         phonec.text = friend_mobile;
-                        typec.text = "个人用户"//type;
+                        nameremark.text = friend_remark_name;
+                        typec.text = category.currentIndex==0 ? "个人用户" : "企业用户" //type
                         targetid.text = friend_id;
                     }
+                    onDoubleClicked: {
+                        sendMsgClick(friend_id, friend_name, friend_remark_name, friend_photo,"",1);
+                    }
                 }
+
+
+                states: [
+                    State {
+                        name: "showItem"
+                        when: visibled
+                        PropertyChanges { target: msgItem; height: UI.fHFItem ;opacity:1}
+                    },
+                    State {
+                        name: "hideItem"
+                        when: !visibled
+                        PropertyChanges { target: msgItem; height: 0;opacity:0}
+                    }
+                ]
+                transitions: [
+                    Transition {
+                        from: "showItem"
+                        to: "hideItem"
+                        NumberAnimation { properties: "opacity"; duration: 400 }
+                        NumberAnimation { properties: "height"; duration: 400 }
+                    },
+                    Transition {
+                        from: "hideItem"
+                        to: "showItem"
+                        NumberAnimation { properties: "opacity"; duration: 400 }
+                        NumberAnimation { properties: "height"; duration: 400 }
+                    }
+                ]
             }
         }
         ListModel{
@@ -232,20 +332,33 @@ Item {
                     height: parent.height/2
                     width: height
                 }
-                LText{
-                    id: namec
+                Item{
+                    id: nameitem
                     width: (card.width-photoc.width-UI.fMLsearch)/2
+                    height: namec.contentHeight
                     anchors.left: photoc.right
                     anchors.top: parent.top
                     anchors.leftMargin: UI.fMLsearch
-                    pointSize: UI.StandardFontPointSize
                     anchors.topMargin: UI.fMLsearch
-                    font.bold: true
-                    maximumLineCount:20
+                    LText{
+                        id: namec
+                        pointSize: UI.StandardFontPointSize
+                        font.bold: true
+                        width: parent.width
+                        visible: nameremark.text == "" ? true : false;
+                    }
+                    LText{
+                        id: nameremark
+                        pointSize: UI.StandardFontPointSize
+                        font.bold: true
+                        width: parent.width
+                        visible: text == "" ? false : true;
+                    }
                 }
+
                 Rectangle{
-                    width: namec.width
-                    height: namec.height
+                    width: nameitem.width
+                    height: nameitem.height
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.topMargin: UI.fMLsearch
@@ -262,15 +375,15 @@ Item {
                     source: "qrc:/images/icon/contacts.png"
                     anchors.left: photoc.right
                     anchors.leftMargin: UI.fMLsearch
-                    anchors.top: namec.bottom
+                    anchors.top: nameitem.bottom
                     anchors.topMargin: UI.fMLsearch
-                    height: namec.height
+                    height: nameitem.height
                     width: height
                 }
                 LText{
                     id: phonec
                     anchors.right: parent.right
-                    anchors.top: namec.bottom
+                    anchors.top: nameitem.bottom
                     anchors.leftMargin: UI.fMLsearch
                     pointSize: UI.SmallFontPointSize
                     anchors.topMargin: UI.fMLsearch
@@ -304,7 +417,7 @@ Item {
                     radius: 4
                     fontSize: UI.StandardFontPointSize
                     onClicked: {
-                        sendMsgClick(targetid.text,namec.text,photoc.source,"");
+                        sendMsgClick(targetid.text,namec.text,nameremark.text,photoc.source,"",1);
                     }
                 }
             }

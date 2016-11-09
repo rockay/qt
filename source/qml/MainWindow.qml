@@ -1,5 +1,9 @@
 import QtQuick 2.7
 import QtQuick.Window 2.2
+import Qt.labs.settings 1.0
+import org.lt.db 1.0
+import QtQuick.Controls 2.0
+import QtQuick.Dialogs 1.2
 
 import "qrc:/controls/"
 import "qrc:/qml/message/"
@@ -8,18 +12,93 @@ import "qrc:/qml/group/"
 import "qrc:/qml/cloud/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
-
+import "qrc:/js/login.js" as LoginJS
 Window {
     id:mainform
     title: qsTr("圈图")
     flags: Qt.FramelessWindowHint | Qt.WindowSystemMenuHint
            | Qt.WindowMinimizeButtonHint| Qt.Window;
     color: UI.cTransparent
+    property bool reLogin: false
 
+
+    onClosing:{
+        ryControl.disconnect();
+    }
+
+    onReLoginChanged: {
+        message.visible= true
+        friend.visible= false
+        group.visible = false
+        cloud.visible = false
+
+        message.isLoad = false
+        friend.isLoad = false
+        group.isLoad = false
+        cloud.isLoad = false
+        msgbtn.source = "qrc:/images/icon/messagep.png"
+        frdbtn.source = "qrc:/images/icon/friend.png"
+        grpbtn.source = "qrc:/images/icon/group.png"
+        cldbtn.source = "qrc:/images/icon/cloud.png"
+        message.chatListView.currentIndex = -1;
+        message.isLoad = false;
+        message.isLoad = true
+    }
+
+    UploadFile{
+        id: uploadFileDialog
+        width: mainform.width-120
+        height: mainform.height-80
+        x: 60
+        y: 40
+        visible: false
+        z: operWinArea.z + 10
+        onUploadFileSuccessed:{
+            cloud.isLoad = false;
+            cloud.isLoad = true; // 重新加载
+        }
+    }
+    ChooseFile{
+        id: chooseCloudFile
+        width: mainform.width-140
+        height: mainform.height-80
+        x: 60
+        y: 40
+        visible: false
+        z: operWinArea.z + 10
+        onChooseFileClick:{
+            console.log("file_name:"+file_name);
+            console.log("message send clould file path:"+file_url)
+
+            //云库文件
+            message.chatviewp.ctype = 31;
+            var sendtxt = "[发送云库文件]"
+
+            var idx = message.chatListView.currentIndex;
+            var retStr = message.chatListView.model.updateContacts(idx,sendtxt);
+            console.log("retStr:"+retStr)
+            if(retStr !== ""){
+                var kk = retStr.split("|");
+                if(kk.length !== 3)
+                    return;
+                var targetid = kk[0];
+                var recipient = kk[1];
+                var categoryId = kk[2];
+
+                sendtxt = file_ext+"|"+file_mold+"|"+file_size+"|"+file_name+"|"+file_url
+                var messgeid = utilityControl.getMessageId();
+                message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,settings.user_id,sendtxt,targetid,0,31,"");
+                var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
+
+                chooseCloudFile.visible = false;
+            }
+        }
+    }
 
     Rectangle{
         anchors.fill: parent;
         color: UI.cMainBg
+
         // 左侧
         Rectangle{
             id:leftbar
@@ -35,7 +114,7 @@ Window {
                 anchors.top: parent.top
 
                 columns: 1
-                LToolButton { source: API.user_photo ;
+                LToolButton { source: settings.user_photo ;
                     width: parent.width; height: UI.fHToolButton-20
                     MouseArea{
                         anchors.fill: parent
@@ -124,13 +203,20 @@ Window {
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 10
-                LToolButton {id:exitbtn; source: "qrc:/images/icon/exit.png"; width: parent.width; height: UI.fHToolButton
+                LToolButton {
+                    id:exitbtn;
+                    source: "qrc:/images/icon/exit.png";
+                    width: parent.width;
+                    height: UI.fHToolButton
                     MouseArea{
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
-                            main.hide();
-                            login.show();
+//                            messageDialog.open();
+                            if(messagebox.visible)
+                                messagebox.requestActivate();
+                            else
+                                messagebox.show();
                         }
                         onEntered: {
                             exitbtn.source ="qrc:/images/icon/exitp.png"
@@ -142,6 +228,38 @@ Window {
                 }
             }
         }
+
+        LMessageDialog{
+            id: messagebox
+            visible: false
+            msg: qsTr("确定要退出当前帐号？")
+            flag: 3
+            okTitle: "确定"
+            cancelTitle: "取消"
+            onOkClicked:{
+                login.isCodeLogin = true;
+                ryControl.disconnect();
+                main.hide();
+                login.show();
+            }
+            onCancelClicked:{
+            }
+        }
+
+//        MessageDialog {
+//            id: messageDialog
+//            title: "温馨提示"
+//            text: "确定要退出当前帐号？"
+//            icon: StandardIcon.NoIcon
+//            standardButtons:StandardButton.Yes | StandardButton.No
+//            onYes: {
+//                login.isCodeLogin = true;
+//                ryControl.disconnect();
+//                main.hide();
+//                login.show();
+//            }
+//        }
+
         Rectangle{
             id:subview
             anchors.left: leftbar.right
@@ -160,30 +278,25 @@ Window {
                 visible: false
                 onSendMsgClick:{
                     console.log("photoc:"+photoc)
-                    var obj = {
-                        name: namec,
-                        photosrc: photoc,
-                        msg: msgc,
-                        categoryId: 1,   // 1 - PRIVATE 单人
-                        targetid: userid
-                    }
+
                     // 判断是否已经存在
-                    var isExist = -1;
-                    for(var i=0; i<message.chatList.count; i++){
-                        if(message.chatList.get(i).targetid == userid){
-                            isExist = i;
+                    var idx = -1;
+                    for(var i=0; i<message.chatListModel.rowCount(); i++){
+                        if(message.chatListModel.getId(i)==userid){
+                            idx = i;
                             break;
                         }
                     }
-                    if(isExist != -1){
-                        // 存在移动到第一个
-                        message.chatList.move(isExist,0,1);
+
+                    //添加或更新
+                    if(idx>-1){
+                        message.chatListView.model.updateContacts(idx,msgc)
                     }else{
-                        //添加
-                        message.chatList.insert(0,obj);
+                        message.chatListView.model.addContacts(userid,namec,nameremark,photoc,msgc,conversationType,0) // 单人
                     }
 
-                    message.chatView.currentIndex = 0;
+                    message.chatListView.currentIndex = -1;
+                    message.chatListView.currentIndex = 0;
                     message.visible = true;
                     friend.visible = false;
                     msgbtn.source = "qrc:/images/icon/messagep.png"
@@ -204,8 +317,24 @@ Window {
                         categoryId: 3,   // 3 - GROUP 群组
                         targetid: userid
                     }
-                    message.chatList.insert(0,obj);
-                    message.chatView.currentIndex = 0;
+
+                    var idx = -1;
+                    for(var i=0; i<message.chatListModel.rowCount(); i++){
+                        if(message.chatListModel.getId(i)==userid){
+                            idx = i;
+                            break;
+                        }
+                    }
+
+                    //添加或更新
+                    if(idx>-1){
+                        message.chatListView.model.updateContacts(idx,msgc)
+                    }else{
+                        message.chatListView.model.addContacts(userid,namec,"",photoc,msgc,conversationType,0) // 群组,空字符是因为群组没有备注
+                    }
+
+                    message.chatListView.currentIndex = -1; // 引起change事件
+                    message.chatListView.currentIndex = 0;
                     message.visible = true;
                     group.visible = false;
                     msgbtn.source = "qrc:/images/icon/messagep.png"
@@ -235,6 +364,7 @@ Window {
                         anchors.fill: parent
                         onClicked: {
                             mainform.visibility = Window.Minimized
+                            main.hide();
                         }
                     }
                 }
@@ -257,12 +387,13 @@ Window {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            Qt.quit()
+                            utilityControl.quit();
                         }
                     }
                 }
             }
         }
     }
+
 
 }

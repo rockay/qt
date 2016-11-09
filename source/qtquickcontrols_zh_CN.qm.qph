@@ -1,0 +1,259 @@
+<!DOCTYPE QPH>
+<QPH language="zh_CN">
+<phrase>
+    <source>OK</source>
+    <target>确定</target>
+</phrase>
+<phrase>
+    <source>Hue</source>
+    <target>Teinte</target>
+</phrase>
+<phrase>
+    <source>Alpha</source>
+    <target>Alpha</target>
+</phrase>
+<phrase>
+    <source>Luminosity</source>
+    <target>Luminosité</target>
+</phrase>
+<phrase>
+    <source>Cancel</source>
+    <target>Annuler</target>
+</phrase>
+<phrase>
+    <source>Saturation</source>
+    <target>Saturation</target>
+</phrase>
+<phrase>
+    <source>Bold</source>
+    <target>Gras</target>
+</phrase>
+<phrase>
+    <source>Font</source>
+    <target>Police</target>
+</phrase>
+<phrase>
+    <source>Size</source>
+    <target>Taille</target>
+</phrase>
+<phrase>
+    <source>Thin</source>
+    <target>Fin</target>
+</phrase>
+<phrase>
+    <source>Black</source>
+    <target>Ultra gras</target>
+</phrase>
+<phrase>
+    <source>Light</source>
+    <target>Léger</target>
+</phrase>
+<phrase>
+    <source>Style</source>
+    <target>Style</target>
+</phrase>
+<phrase>
+    <source>Font Family</source>
+    <target>Famille de Polices</target>
+</phrase>
+<phrase>
+    <source>Italic</source>
+    <target>Italique</target>
+</phrase>
+<phrase>
+    <source>Medium</source>
+    <target>Medium</target>
+</phrase>
+<phrase>
+    <source>Normal</source>
+    <target>Normal</target>
+</phrase>
+<phrase>
+    <source>Sample</source>
+    <target>Exemple</target>
+</phrase>
+<phrase>
+    <source>Weight</source>
+    <target>Poids</target>
+</phrase>
+<phrase>
+    <source>ExtraLight</source>
+    <target>Très léger</target>
+</phrase>
+<phrase>
+    <source>Strikeout</source>
+    <target>Barré</target>
+</phrase>
+<phrase>
+    <source>Underline</source>
+    <target>Souligné</target>
+</phrase>
+<phrase>
+    <source>ExtraBold</source>
+    <target>Très gras</target>
+</phrase>
+<phrase>
+    <source>DemiBold</source>
+    <target>Semi gras</target>
+</phrase>
+<phrase>
+    <source>Writing System</source>
+    <target>Système d&apos;Écriture</target>
+</phrase>
+<phrase>
+    <source>Overline</source>
+    <target>Trait suscrit</target>
+</phrase>
+<phrase>
+    <source>No</source>
+    <target>否</target>
+</phrase>
+<phrase>
+    <source>Yes</source>
+    <target>是</target>
+</phrase>
+<phrase>
+    <source>Help</source>
+    <target>Aide</target>
+</phrase>
+<phrase>
+    <source>Open</source>
+    <target>Ouvrir</target>
+</phrase>
+<phrase>
+    <source>Save</source>
+    <target>Enregistrer</target>
+</phrase>
+<phrase>
+    <source>Abort</source>
+    <target>Abandonner</target>
+</phrase>
+<phrase>
+    <source>Apply</source>
+    <target>Appliquer</target>
+</phrase>
+<phrase>
+    <source>Close</source>
+    <target>Fermer</target>
+</phrase>
+<phrase>
+    <source>Reset</source>
+    <target>Réinitialiser</target>
+</phrase>
+<phrase>
+    <source>Retry</source>
+    <target>Réessayer</target>
+</phrase>
+<phrase>
+    <source>Restore Defaults</source>
+    <target>Restaurer les valeurs par defaut</target>
+</phrase>
+<phrase>
+    <source>Show Details...</source>
+    <target>Afficher les détails...</target>
+</phrase>
+<phrase>
+    <source>Ignore</source>
+    <target>Ignorer</target>
+</phrase>
+<phrase>
+    <source>No to All</source>
+    <target>Non à Tout</target>
+</phrase>
+<phrase>
+    <source>Yes to All</source>
+    <target>Oui à Tout</target>
+</phrase>
+<phrase>
+    <source>Save All</source>
+    <target>Tout Enregistrer</target>
+</phrase>
+<phrase>
+    <source>Discard</source>
+    <target>Ne pas tenir compte</target>
+</phrase>
+<phrase>
+    <source>Hide Details</source>
+    <target>Masquer les détails</target>
+</phrase>
+<phrase>
+    <source>Cut</source>
+    <target>Couper</target>
+</phrase>
+<phrase>
+    <source>Copy</source>
+    <target>Copier</target>
+</phrase>
+<phrase>
+    <source>Paste</source>
+    <target>Coller</target>
+</phrase>
+<phrase>
+    <source>Delete</source>
+    <target>Supprimer</target>
+</phrase>
+<phrase>
+    <source>Select</source>
+    <target>Sélectionner</target>
+</phrase>
+<phrase>
+    <source>Select All</source>
+    <target>Sélectionner tout</target>
+</phrase>
+<phrase>
+    <source>Cu&amp;t</source>
+    <target>Co&amp;uper</target>
+</phrase>
+<phrase>
+    <source>&amp;Copy</source>
+    <target>&amp;Copier</target>
+</phrase>
+<phrase>
+    <source>&amp;Redo</source>
+    <target>&amp;Rejouer</target>
+</phrase>
+<phrase>
+    <source>&amp;Undo</source>
+    <target>&amp;Annuler</target>
+</phrase>
+<phrase>
+    <source>Clear</source>
+    <target>Nettoyer</target>
+</phrase>
+<phrase>
+    <source>&amp;Paste</source>
+    <target>Co&amp;ller</target>
+</phrase>
+<phrase>
+    <source>Type</source>
+    <target>Type</target>
+</phrase>
+<phrase>
+    <source>Add the current directory as a favorite</source>
+    <target>Ajouter le dossier actuel aux favoris</target>
+</phrase>
+<phrase>
+    <source>Filename</source>
+    <target>Nom du fichier</target>
+</phrase>
+<phrase>
+    <source>Choose</source>
+    <target>Choisir</target>
+</phrase>
+<phrase>
+    <source>Modified</source>
+    <target>Modifié</target>
+</phrase>
+<phrase>
+    <source>Accessed</source>
+    <target>Accédé</target>
+</phrase>
+<phrase>
+    <source>Go up to the folder containing this one</source>
+    <target>Remonter vers le dossier contenant celui-ci</target>
+</phrase>
+<phrase>
+    <source>Remove favorite</source>
+    <target>Supprimer le favori</target>
+</phrase>
+</QPH>

@@ -51,8 +51,10 @@ Item {
                 root.defaultValue = text
                if(text.length>0){
                    image.source = svgcsrc
+                   image.width = svg.width/3
                }else{
                    image.source = svgsrc
+                   image.width = svg.width/2
                }
             }
         }
@@ -68,7 +70,7 @@ Item {
             Image {
                 id:image
                 width: parent.width/2
-                height: parent.height/2
+                height: width
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
                 source: svgsrc
