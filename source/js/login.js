@@ -76,11 +76,13 @@ function sndVoiceCodeCB(data){
 // 快速登录
 function loginLocal(){
     if(settings.token!=""){
-//        if(utilityControl.checkIdIsLogin(settings.user_id)){
-//            messagebox.msg = qsTr("账户已经登录!")
-//            message.flag = 1;
-//            message.cancelTitle = qsTr("确定")
-//        }
+        if(utilityControl.checkIdIsLogin(settings.user_id)){
+            smsTipDialog.msg = qsTr("账户已经登录!")
+            smsTipDialog.flag = 1;
+            smsTipDialog.okTitle = qsTr("确定")
+            smsTipDialog.show();
+            return ;
+        }
         // 判断验证码是否过期就行了。
         getUserInfoById(settings.user_id);
     }

@@ -277,6 +277,10 @@ Window {
                                 tips.text = "";
                                 if(!isVoice) // 是否当前是语音在倒计时
                                 {
+                                    smsTipDialog.msg = qsTr("收到验证码了吗？")
+                                    smsTipDialog.flag = 3
+                                    smsTipDialog.okTitle = "是"
+                                    smsTipDialog.cancelTitle = "否"
                                     if(smsTipDialog.visible)
                                         smsTipDialog.requestActivate();
                                     else
