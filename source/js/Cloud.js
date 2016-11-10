@@ -23,7 +23,7 @@ function getCloudsCB(data){
     if(data.errorcode === -1){
         console.log("获取云库文件成功");
         allFiles = data.cloud_list;
-        allmodel.append(data.cloud_list);
+//        allmodel.append(data.cloud_list);
         searchFile(categoryView.currentIndex,search.value);
     }else{
         console.log("获取云库文件失败");
@@ -167,11 +167,20 @@ function reCalculate(){
 }
 
 // 删除云库文件
-function deleteFile(fileid){
-    console.log("remove file:"+fileid);
+function deleteFile(cloudid){
+    // 先本地删除文件
+    for(var i=0; i <allFiles.length;i++){
+        if(allFiles[i].cloud_id == cloudid)
+        {
+            allFiles.splice(i,1);
+            break;
+        }
+    }
+    allmodel.remove(filegrid.currentIndex);
+
     // 提交接口修改
     var url = API.api_root+API.api_removefile;
-    var obj = "token="+settings.token+"&cloud_id="+fileid;
+    var obj = "token="+settings.token+"&cloud_id="+cloudid;
     var verb = "POST";
     API.httpRequest(verb, url, obj, deleteFileCB);
 }
@@ -179,23 +188,15 @@ function deleteFile(fileid){
 // 删除云库文件回调
 function deleteFileCB(data){
     console.log("data:"+JSON.stringify(data));
-    if(data.errorcode === -1){
+    if(data.errorcode == -1){
         console.log("删除云库文件成功")
-        var cloudid = allmodel.get(filegrid.currentIndex).cloud_id;
-        console.log(cloudid);
-        for(var i=0; i <allFiles.length;i++){
-            if(allFiles[i].cloud_id == cloudid)
-            {
-                allFiles.splice(i,1);
-                break;
-            }
-        }
-        allmodel.remove(filegrid.currentIndex);
-        console.log("删除云库文件成功2")
-;
-    }else if(data.errorcode === -1){
+    }else if(data.errorcode == 10){
         console.log("登录失效");
+        delErrorDialog.msg = "删除云库文件失败，登录失效";
+        delErrorDialog.show();
     }else{
+        getClouds(); // 失败重新获取
         console.log("删除云库文件失败");
+        delErrorDialog.show();
     }
 }

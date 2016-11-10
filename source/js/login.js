@@ -76,20 +76,24 @@ function sndVoiceCodeCB(data){
 // 快速登录
 function loginLocal(){
     if(settings.token!=""){
+//        if(utilityControl.checkIdIsLogin(settings.user_id)){
+//            messagebox.msg = qsTr("账户已经登录!")
+//            message.flag = 1;
+//            message.cancelTitle = qsTr("确定")
+//        }
         // 判断验证码是否过期就行了。
         getUserInfoById(settings.user_id);
     }
 }
 
-function getUserInfoById(user_id)
-{
+// 根据用户ID获取基本信息
+function getUserInfoById(user_id){
     var url = API.api_root+API.api_frienddetail;
     var obj = "token="+settings.token+"&search_key="+user_id;
     var verb = "POST";
     console.log("obj:"+obj)
     API.httpRequest(verb, url, obj, getUserInfoByIdCB);
 }
-
 
 // 获取好友信息回调
 function getUserInfoByIdCB(data){
@@ -115,7 +119,6 @@ function getUserInfoByIdCB(data){
         tips.text = "登录失败，未获取到该账户信息";
     }
 }
-
 
 // 验证码登录
 function loginfuc(phone,scode){

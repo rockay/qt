@@ -18,7 +18,10 @@ Window {
     property int curIdx: -1
     color: UI.cTransparent
     onVisibleChanged: {
-
+        if(imgWindow.visibility === Window.Maximized)
+            fullScreen.source = "qrc:/images/icon/small.png"
+        else
+            fullScreen.source = "qrc:/images/icon/fullscreen.png"
     }
 
     ListModel{
@@ -127,28 +130,33 @@ Window {
                     console.log("sourceSize:"+showimage.sourceSize.width)
                 }
 
-                MouseArea{
-                    anchors.fill: parent
-                    onWheel: {
-                        console.log("onWheel:"+wheel.angleDelta.y / 120); // now it works
-                        if (wheel.modifiers & Qt.ControlModifier) {
-                            var percent = (wheel.angleDelta.y / 120)/10;
-                            showimage.width *= (1+percent);
-                            showimage.height *= (1+percent);
-                            showimage.y = Math.max((flickable.height-showimage.height)/2,0) // 防止负数
-                            showimage.x =  Math.max((flickable.width-showimage.width)/2,0)
-                        }
-                    }
-                }
             }
-        }
 
+        }
 
         LText{
             id: imgProcess
             color: UI.cWhite
             pointSize: UI.HugeFontPointSize
             anchors.centerIn: parent
+        }
+
+
+        MouseArea{
+            anchors.fill: parent
+            onWheel: {
+                console.log("onWheel:"+wheel.angleDelta.y / 120); // now it works
+                //                        if (wheel.modifiers & Qt.ControlModifier) {
+                var percent = (wheel.angleDelta.y / 120)/10;
+                showimage.width *= (1+percent);
+                showimage.height *= (1+percent);
+                showimage.y = Math.max((flickable.height-showimage.height)/2,0) // 防止负数
+                showimage.x =  Math.max((flickable.width-showimage.width)/2,0)
+                //                        }
+            }
+            propagateComposedEvents: true
+            onClicked: { mouse.accepted = false }
+            onPressed: { mouse.accepted = false }
         }
     }
 
@@ -220,15 +228,16 @@ Window {
             anchors.leftMargin: UI.fItemMargin/2
             anchors.top: parent.top
             anchors.topMargin: (parent.height-height)/2
+
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    if (imgWindow.visibility === Window.FullScreen){
+                    if (imgWindow.visibility === Window.Maximized){
                         fullScreen.source = "qrc:/images/icon/fullscreen.png"
                         imgWindow.visibility = Window.AutomaticVisibility
                     }
                     else{
-                        imgWindow.visibility = Window.FullScreen
+                        imgWindow.visibility = Window.Maximized
                         fullScreen.source = "qrc:/images/icon/small.png"
                     }
 

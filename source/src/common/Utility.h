@@ -55,6 +55,8 @@ public slots:
     void copy(const QString &text);
     void quit();
     void checkUpdate(const QString& version, const QString& downloadpath, const QString& desc);
+
+    bool checkIdIsLogin(const QString &userid); // 判断是否已经登录过
 private:
     QNetworkAccessManager networkAccessManager;
     QString crtUploadType;

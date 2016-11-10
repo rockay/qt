@@ -62,6 +62,8 @@ Rectangle {
     LMessageDialog{
         id: upFinishDialog
         visible: false
+        x: main.x + (main.width-width)/2
+        y: main.y + (main.height-height)/2
         msg: qsTr("文件上传完成")
         flag: 1
         okTitle: "确定"

@@ -296,4 +296,14 @@ void Utility::checkUpdate(const QString &version, const QString &downloadpath, c
     }
 }
 
+bool Utility::checkIdIsLogin(const QString &userid)
+{
+    QSharedMemory sharedMemory(userid);
+    if (!sharedMemory.create(512, QSharedMemory::ReadWrite))
+    {
+        return false;
+    }
+    return true;
+}
+
 

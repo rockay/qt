@@ -1,8 +1,8 @@
 TEMPLATE = app
 
-QT += qml quick quickcontrols2 network sql widgets multimedia multimediawidgets gui
+QT += qml quick quickcontrols2 network sql multimedia multimediawidgets gui
 !contains(sql-drivers, sqlite): QTPLUGIN += qsqlite
-#!no_desktop: QT += widgets
+!no_desktop: QT += widgets
 CONFIG += c++11 localize_deployment
 INCLUDEPATH += ./src ./src/sql ./src/common ./src/screenshot ./src/MyGlobalShortCut/ ./src/network ./3rd-party/update
 #QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'true\'\" #以管理员运行

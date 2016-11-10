@@ -77,8 +77,6 @@ Item {
         }
     }
 
-
-
     Connections{ // 显示
         target: utilityControl
         onSigquit: {
@@ -101,6 +99,17 @@ Item {
             // 这里还要选中聊天人
             login.hide();
         }
+    }
+
+    Connections{ // 下载文件
+        target: networkControl
+        onDownProcess:{
+            if(percent<100)
+                tips.text = "下载进度："+percent+"%";
+            else
+                tips.text = "下载完成"
+        }
+
     }
 
     onIsLoadChanged: {
@@ -522,10 +531,11 @@ Item {
                             }
                             Timer {
                                 id: keytimer
-                                interval: 3000
+                                interval: 5000
                                 repeat: false
                                 onTriggered:{
                                     tips.text = "";
+                                    stop();
                                 }
                             }
 
@@ -554,9 +564,35 @@ Item {
                                     var sendtxt = chattool.document.transferText;
                                     var lastIdx = sendtxt.lastIndexOf("@");
                                     var tiptxt = sendtxt.substring(lastIdx+1);
-                                    chattool.document.insertText(grpMemberListModelFilter.get(0).user_name.replace(tiptxt,"")+" ")
+                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
                                     sendText.focus = true;
                                     gUserView.visible = false;
+                                }else{
+                                    event.accepted = false;
+                                }
+                            }
+                            Keys.onEnterPressed: {
+                                if( gUserView.visible && grpMemberListModelFilter.count>0){
+                                    var sendtxt = chattool.document.transferText;
+                                    var lastIdx = sendtxt.lastIndexOf("@");
+                                    var tiptxt = sendtxt.substring(lastIdx+1);
+                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
+                                    sendText.focus = true;
+                                    gUserView.visible = false;
+                                }else{
+                                    event.accepted = false;
+                                }
+                            }
+                            Keys.onDownPressed: {
+                                if(gUserView.visible && subtipslistview.currentIndex < (subtipslistview.model.count-1) && (chatview.user_type+'') == "3"){
+                                    subtipslistview.currentIndex++
+                                    console.log("++")
+                                }
+                            }
+                            Keys.onUpPressed: {
+                                if(gUserView.visible && subtipslistview.currentIndex > 0 && (chatview.user_type+'') == "3"){
+                                    subtipslistview.currentIndex--
+                                    console.log("--")
                                 }
                             }
 
@@ -570,20 +606,24 @@ Item {
 //                                        console.log(lastchar)
 //                                        console.log(lastIdx)
                                         if(lastchar === "@"){
-                                            MessageJS.search()
+                                            MessageJS.search("")
                                             gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
+                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
                                             gUserView.visible = true;
                                         }
                                         else if(gUserView.visible && lastIdx >= 0){
                                             console.log(sendtxt.substring(lastIdx+1))
                                             MessageJS.search(sendtxt.substring(lastIdx+1))
                                             gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
+                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
                                             console.log(grpMemberListModelFilter.count)
                                             if(grpMemberListModelFilter.count == 0)
                                                 gUserView.visible = false;
                                         }else{
                                             gUserView.visible = false;
                                         }
+                                    }else{
+                                        gUserView.visible = false;
                                     }
 
                                 }
@@ -594,31 +634,39 @@ Item {
                                 visible: false
                                 border.width: 1
                                 border.color: UI.cMainCBg
-                                width: 100
-                                height: parent.height-10
+                                width: 180
+                                height: Math.min(grpMemberListModelFilter.count*26,150)
                                 ListView {
                                     id: subtipslistview
                                     currentIndex: -1
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 2
+                                    anchors.leftMargin: 1
                                     anchors.top: parent.top
-                                    anchors.topMargin: 2
-                                    width: parent.width-4
-                                    height: parent.height-4
+                                    anchors.topMargin: 1
+                                    width: parent.width-2
+                                    height: parent.height-2
 
                                     model: grpMemberListModelFilter
                                     clip: true
                                     maximumFlickVelocity: 5000
                                     orientation: ListView.Vertical
                                     focus: true
-                                    highlightFollowsCurrentItem: false
-                                    spacing: 1
-                                    delegate: Rectangle{
+                                    spacing: 0
+                                    delegate: popupUsrDelegate
+
+                                    ScrollIndicator.vertical: ScrollIndicator { }
+                                }
+                                Component{
+                                    id: popupUsrDelegate
+                                    Rectangle{
                                         width: gUserView.width
                                         height: 25
+                                        color: subtipslistview.currentIndex==index ? UI.cItemSelected:UI.cItem
                                         LText{
                                             anchors.fill: parent
+                                            anchors.leftMargin: 10
                                             text: user_name
+                                            color: subtipslistview.currentIndex == index ? "red" : "black"
                                         }
                                         MouseArea{
                                             anchors.fill: parent
@@ -633,8 +681,6 @@ Item {
                                             }
                                         }
                                     }
-
-                                    ScrollIndicator.vertical: ScrollIndicator { }
                                 }
                             }
 
@@ -714,6 +760,8 @@ Item {
                             target: ryControl
                             onSendImageFailed:{
                                 tips.text = "发送图片失败，请重试！"
+                                // 更新数据库为-1
+                                ryControl.updateMsgStatus(messageid,-1)
                             }
 
                             onReceivedMsg: {
@@ -722,6 +770,7 @@ Item {
                                     tips.text = ""
                                 case 2: // 输入
                                     tips.text = msg
+                                    keytimer.start();
                                     break;
                                 case 3: // 最后发送时间，已读
 //                                    tips.text = msg
@@ -891,6 +940,8 @@ Item {
                                     }
                                 }
                                 onDoubleClicked: {
+                                    if (mouse.button == Qt.RightButton) // 右键双击不算
+                                        return;
                                     // 如果是自己则不操作
                                     if(user_id == settings.user_id)
                                         return;

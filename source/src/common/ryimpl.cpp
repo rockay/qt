@@ -375,6 +375,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
     m_categoryId = categoryId;
     m_targetid = targetId;
 
+    qDebug()<<"sendMsg msg:"<<msg;
     QString fmsg= tr("{\"content\":\"%1\"}").arg(msg.toUtf8().data());
     if(categoryId == 3 && !mention.isEmpty())
         fmsg = tr("{\"content\":\"%1\",\"mentionedInfo\":{\"type\":2,\"userIdList\":%2}}").arg(msg.toUtf8().data(),mention);
@@ -397,6 +398,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
     if(type==MSGTYPE::MSG_IMG) // 只有发送图片才有上传
     {
         m_imagePath = msg;
+        m_imgmessageId = messageId;
         auto sendImageCallback = [](const wchar_t* json_str)
         {
             QString u16 = QString::fromUtf16((const ushort*)json_str);
@@ -404,7 +406,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             QString msg = u16.toUtf8();
             QJsonObject obj = getJsonObjectFromString(msg);
             QString img_id = obj.value("img_id").toString();
-             RYImpl::getInstance()->SendImage(u16,img_id.toInt());
+            RYImpl::getInstance()->SendImage(u16,img_id.toInt());
         };
         auto processImageCallback = [](const wchar_t* json_str)
         {
@@ -562,8 +564,26 @@ void RYImpl::SendImage(const QString &json, int imgid)
         // 先生成缩略图
         QString path = m_imagePath.replace("file:///","");
         qDebug() << QFile::exists(path) <<QFile::exists("file:///"+path);
-        QImage img;
-        img.load(path);
+        QString file_ext = path.right(path.length()-path.lastIndexOf(".")-1);
+        QPixmap img;
+        if(!img.load(path,file_ext.toUtf8().data())) // 一直试图片格式
+        {
+            file_ext = "JPG";
+            if(!img.load(path,"JPG")){
+                file_ext = "PNG";
+                if(!img.load(path,"PNG")){
+                    file_ext = "BMP";
+                    if(!img.load(path,"BMP")){
+                        file_ext = "GIF";
+                        if(!img.load(path,"GIF")){
+                            if(!img.load(path,"ICO")){
+                                emit RYImpl::getInstance()->sendImageFailed(m_imgmessageId,errCode);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // 等比例
         int scalew = img.width()<img.height() ? 200.00/img.height()*img.width() : 200 ;
         int scaleh = img.width()<img.height() ? 200 : (200.00/img.width()*img.height()) ;
@@ -573,9 +593,9 @@ void RYImpl::SendImage(const QString &json, int imgid)
         qDebug() << "scaleh:"<<scaleh;
 
 
-        const QString fileName = m_picPath + Utility::getInstance()->getGuid()+".jpg";
-        QImage cutImg = img.scaled(scalew, scaleh, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        cutImg.save(fileName);
+        const QString fileName = m_picPath + Utility::getInstance()->getGuid()+"."+file_ext.toLower();
+        QPixmap cutImg = img.scaled(scalew, scaleh, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        cutImg.save(fileName,file_ext.toUtf8().data());
         retStr = fileName+"|"+url+"|"+ path; // 缩略图|网上图|原图
         emit RYImpl::getInstance()->uploadFileCallback(QString::number(imgid) ,retStr);
         // 保存消息
@@ -600,6 +620,6 @@ void RYImpl::SendImage(const QString &json, int imgid)
         sendMessage(targetId.toUtf8().data(), m_categoryId, 3, "RC:ImgMsg", msgw, "", "", imgid, sendMessageCallback);
     }else{
         qDebug()<<"results!=succes:"<<result;
-        emit RYImpl::getInstance()->sendImageFailed(errCode);
+        emit RYImpl::getInstance()->sendImageFailed(m_imgmessageId,errCode);
     }
 }

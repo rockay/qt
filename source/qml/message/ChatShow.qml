@@ -65,19 +65,6 @@ Rectangle{
         }
     }
 
-//    FileDialog {
-//        id: saveImgDialog
-//        folder: shortcuts.pictures
-//        selectExisting: false
-//        property string file_ext: "jpg"
-//        property string httpurl: ""
-//        onAccepted: {
-//            var urlNoProtocol = (fileUrl+file_ext).replace('file:///', '');
-//            if(httpurl!=""){
-//                networkControl.doDownload(httpurl,urlNoProtocol);
-//            }
-//        }
-//    }
 
     FileDialog {
         id: saveFileDialog
@@ -181,7 +168,7 @@ Rectangle{
                                     signResendMsg(model.messageid, 4,model.message)
                                     break;
                                 case 5: //  图片
-                                    signResendMsg(model.messageid, 5,model.message.split('|')[2])
+                                    signResendMsg(model.messageid, 5,model.message.split('|')[0])
                                     break;
                                 case 6: //  语音
                                     break;
@@ -253,7 +240,7 @@ Rectangle{
                         id: imgOrignal
                         visible: false
                         asynchronous: true
-                        source: model.ctype === 5? "file:///"+model.message.split('|')[0] : ""
+                        source: model.ctype === 5? (model.result==-1 ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2]) : ""
                     }
 
                     Image {
@@ -300,10 +287,8 @@ Rectangle{
                                 imageshow.imgSrc = ""
                                 imageshow.imgSrc = model.message.split('|')[1];
                                 imageshow.imgshowList = imgList
-                                if(imageshow.visible)
-                                    imageshow.requestActivate();
-                                else
-                                    imageshow.show();
+                                imageshow.show();
+                                imageshow.requestActivate();
                             }
 
                         }
@@ -420,10 +405,8 @@ Rectangle{
                                     imageshow.curIdx = imgIndx;
 
                                     imageshow.imgshowList = imgList
-                                    if(imageshow.visible)
-                                        imageshow.requestActivate();
-                                    else
-                                        imageshow.show();
+                                    imageshow.show()
+                                    imageshow.requestActivate();
                                 }else if( model.message.split('|')[1].toString() === "2"){
                                     Qt.openUrlExternally( model.message.split('|')[4]);
                                 }else{

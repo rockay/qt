@@ -41,6 +41,16 @@ Item {
     }
 
 
+    LMessageDialog{
+        id: delErrorDialog
+        visible: false
+        x: main.x + (main.width-width)/2
+        y: main.y + (main.height-height)/2
+        msg: qsTr("文件删除失败")
+        flag: 1
+        okTitle: "确定"
+    }
+
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -307,10 +317,8 @@ Item {
 
                                 imageshow.curIdx = imgIndx;
                                 imageshow.imgshowList = imgList
-                                if(imageshow.visible)
-                                    imageshow.requestActivate();
-                                else
-                                    imageshow.show();
+                                imageshow.show();
+                                imageshow.requestActivate();
                             }else if( file_mold === 2){
                                 Qt.openUrlExternally(file_url);
                             }else{

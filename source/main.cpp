@@ -58,7 +58,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
             .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
 
     // 输出信息至文件中（读写、追加形式）
-    QFile file("log.txt");
+    QFile file(strDateTime.mid(0,10)+".log");
     file.open(QIODevice::ReadWrite | QIODevice::Append);
     QTextStream stream(&file);
     stream << strMessage << "\r\n";
@@ -73,20 +73,19 @@ int main(int argc,char* argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
 
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QtQuickControlsApplication app(argc, argv);
-//    QGuiApplication app(argc, argv);
-
     app.setApplicationName("quantu");
     app.setOrganizationName("yiduotech");
     app.setAttribute(Qt::AA_EnableHighDpiScaling);
     app.setApplicationVersion ("1.0.0");
     app.setWindowIcon(QIcon("logo.ico"));
+    app.setQuitOnLastWindowClosed(false);
 
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         qDebug()<<("I couldn't detect any system tray on this system.");
         return 1;
     }
-    QApplication::setQuitOnLastWindowClosed(false);
 
     QSettings settings;
     settings.setObjectName("settings");

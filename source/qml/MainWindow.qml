@@ -372,12 +372,12 @@ Window {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            if (mainform.visibility === Window.FullScreen){
+                            if (mainform.visibility === Window.Maximized){
                                 parent.source = "qrc:/images/icon/max.png";
                                 mainform.visibility = Window.AutomaticVisibility
                             }
                             else{
-                                mainform.visibility = Window.FullScreen
+                                mainform.visibility = Window.Maximized
                                 parent.source = "qrc:/images/icon/max.png";
                             }
                         }

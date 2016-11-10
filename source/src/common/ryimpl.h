@@ -57,7 +57,7 @@ signals:
     void proceeFile(const QString &img_id, int process, int targetid);
     void uploadFileCallback(const QString &msgid, const QString &content);
     void sendMsgDealCallback(int msgid, int result);
-    void sendImageFailed(int);
+    void sendImageFailed(int messageid,int errorcode);
     void recccvMsg(const QString &senderid);
 public slots:
     void initLib(const QString &token);
@@ -78,6 +78,7 @@ private:
 
     bool m_isLoaded;
     bool m_isConnected;
+    int m_imgmessageId;
 public:
     typedef int(*DLLFunDis)(int);
     DLLFunDis Disconnect;

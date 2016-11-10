@@ -55,6 +55,7 @@ function sendMsg(sendtxt,user_type,ctype){
         // 先保存数据库
         var messgeid = utilityControl.getMessageId();
         chatview.chatListModel.addMessage(utilityControl.getGuid(),messgeid,targetid,settings.user_id,sendtxt,targetid,0,ctype,""); // 空为发送时间，CPP中获取
+        console.log("send message before")
         if(mentionList.length==0 || categoryId !=3 )
             ryControl.sendMsg(messgeid, targetid,categoryId,sendtxt,ctype,"");
         else
@@ -165,13 +166,14 @@ function saveFileMsgCB(data){
 
             // 先保存数据库
             var messgeid = utilityControl.getMessageId();
-            chatview.chatListModel.addMessage(messgeid,messgeid,targetid,settings.user_id,sendtxt,targetid,0,31,""); // 空为发送时间，CPP中获取
+            chatview.chatListModel.addMessage(messgeid, messgeid, targetid, settings.user_id, sendtxt, targetid,0,31,""); // 空为发送时间，CPP中获取
             var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
 
         }
 
     }else{
 //        upfilemodel.setProperty(curIdx, "percent", -1);
+        tips.text = "发送文件失败";
         console.log("保存云库文件失败");
     }
 }
@@ -244,7 +246,7 @@ function search(name) {
     grpMemberListModelFilter.clear();
     console.log(JSON.stringify("name:"+name));
     tempdata = allGroupUser.filter(function(item){
-        return  (item.user_name.indexOf(name)>=0);
+        return  (item.user_name.indexOf(name)>=0 && item.user_id != settings.user_id);
     });
     grpMemberListModelFilter.append(tempdata);
     if(grpMemberListModelFilter.count>0)
@@ -262,8 +264,7 @@ function selectFiles(fileUrls){
                 || ext == "JPEG" || ext == "ICO" || ext == "PNG"){// 图片
             chatview.ctype = 5;
             console.log("message send image path:"+strPath)
-            MessageJS.sendMsg(strPath,chatview.user_type,chatview.ctype);
-
+            sendMsg(strPath,chatview.user_type,chatview.ctype);
         }else if(ext == "PDF"){ // 图片
             chatview.ctype = 31;
             // 1.上传文件
