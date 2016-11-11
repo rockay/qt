@@ -33,15 +33,15 @@ signals:
     void decodingFinished(bool succeeded);
     void tagFound(QString idScanned);
     void getFinished(QString path);
-    void uploadMaterialRet(int retCode, QString type, QString retMsg,int filefrom);
-    void updateProgress(int percent,int filefrom);
+    void uploadMaterialRet(int retCode, QString type, QString retMsg,int filefrom,QString messageid);
+    void updateProgress(int percent,int filefrom, QString messageid="");
     void captureSuccessed(const QString &path);
     void sigquit();
     void sigshow(bool ischange);
 
 public slots:
     QVariant getPictureBase64(QString path);
-    bool uploadMaterial(QString url, QString filePath, QString materialType, int filefrom);
+    bool uploadMaterial(QString url, QString filePath, QString materialType, int filefrom,QString messageid);
     void replyFinished(QNetworkReply *reply);
     void uploadProgress(qint64 up, qint64 toal);
     QString getGuid();
@@ -50,7 +50,9 @@ public slots:
     bool b64dataToFile(const QString &fromData, const QString &savePath, const QString &myformat="base64");
 
     void shootScreen();
-    QString getFileInfo(QString path);
+    QString getFileInfo(const QString &path);
+    QString getFileFullInfo(const QString &path);
+    QString getFileExt(const QString &path);
     QString getEmoji(const QString &code);
     void copy(const QString &text);
     void quit();
@@ -64,6 +66,7 @@ private:
 
     UpdaterHttp *updater;
     DLLFuncd screenshot;
+    QMap<QNetworkReply *,QString> currentUploads;
 
 
     static Utility* m_instance;

@@ -1,4 +1,4 @@
-import QtQuick 2.6
+import QtQuick 2.7
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.0
 import QtQml.Models 2.2
@@ -36,14 +36,14 @@ Rectangle{
         listView.model.targetid = user_id
     }
 
-    Connections{
+    Connections{ //ryControl
         target: ryControl
         onSendMsgCallback:{
             console.log("sendmsg return json:"+retJson)
         }
     }
 
-    Connections{
+    Connections{ // listView.model
         target: listView.model
         onCountChanged:{
             imgList.clear()
@@ -100,9 +100,12 @@ Rectangle{
     Component{
         id: conversationDelegate
         Column {
+            id: messagecolumn
             property bool sentByMe: (model.senderid == API.user_id) ? true : false
-            anchors.right: sentByMe ? parent.right : undefined
             spacing: 10
+            Component.onCompleted: {
+                anchors.right = sentByMe ? parent.right : undefined
+            }
 
             LText {
                 id: timestampText
@@ -124,7 +127,7 @@ Rectangle{
                     id: you
                     height: UI.fChatImgH
                     width: height
-                    source: !sentByMe ? (chatroot.user_type==1 ? chatroot.user_photo : API.photoObjMap[model.senderid]) : ""
+                    source: !sentByMe ? (chatroot.user_type==1 ? chatroot.user_photo : API.photoObjMap[model.senderid] == undefined? "":API.photoObjMap[model.senderid]) : ""
                 }
 
                 Rectangle { // textarea
@@ -234,6 +237,47 @@ Rectangle{
                                     }
                                 }
                             }
+
+
+                            Menu {
+                                id: saveMenu
+                                width: 60
+                                property int ctype : -1
+                                property string httpurl: ""
+                                background: Item{
+                                    Rectangle{
+                                        anchors.fill: parent
+                                        color: UI.cWhite
+                                        border.width: 1
+                                        border.color: UI.cMainCBg
+                                    }
+                                }
+
+                                MenuItem {
+                                    id: copyitem
+                                    text: qsTr("复制")
+                                    height: saveMenu.ctype == 4 ? 25 : 0
+                                    visible: saveMenu.ctype == 4 ? true : false
+                                    onTriggered:{
+                                        console.log("复制");
+                                        // 复制
+                                        messageText.copy();
+                                        //                                    utilityControl.copy(messageText.text);
+                                    }
+                                }
+                                MenuItem {
+                                    id: saveitem
+                                    text: "保存"
+                                    height: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? 25 : 0
+                                    visible: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? true : false
+                                    onTriggered:{
+                                        console.log("保存")
+                                        saveFileDialog.httpurl = saveMenu.httpurl
+                                        saveFileDialog.open();
+                                    }
+                                }
+                            }
+
                         }
                     }
                     Image{
@@ -267,7 +311,7 @@ Rectangle{
                                     var idx = model.message.split('|')[0].lastIndexOf(".")
                                     var localpath = model.message.split('|')[0];
                                     var file_ext = localpath.substring(idx+1);
-                                    saveFileDialog.file_ext =  file_ext
+                                    saveFileDialog.file_ext =  file_ext;
                                     saveMenu.ctype = model.ctype
                                     saveMenu.open()
                                 }
@@ -290,10 +334,7 @@ Rectangle{
                                 imageshow.show();
                                 imageshow.requestActivate();
                             }
-
                         }
-
-
                     }
                     Rectangle{
                         id: voiceRect
@@ -353,7 +394,7 @@ Rectangle{
                             anchors.leftMargin: 10
                             anchors.top: file_name.bottom
                             anchors.topMargin: 10
-                            text: model.ctype===31 ? model.message.split('|')[2]>(1024*1024) ? (model.message.split('|')[2]/1024/1024).toFixed(2)+"M" : (model.message.split('|')[2]/1024).toFixed(2) +"kb"  : ""
+                            text: model.ctype===31 ? model.message.split('|')[2]>(1024*1024) ? (model.message.split('|')[2]/1024/1024).toFixed(0)+"M" : (model.message.split('|')[2]/1024).toFixed(0) +"kb"  : ""
                             color: UI.cMainCBg
                         }
                         Rectangle{
@@ -414,46 +455,43 @@ Rectangle{
                                 }
                             }
                         }
+
                     }
 
-                    LMenu {
-                        id: saveMenu
-                        width: 60
-                        height: copyitem.height + saveitem.height + 20
-                        property int ctype : -1
-                        property string httpurl: ""
-                        //                            chatListModel.deleteMsgByID(model.messageid);  // 删除用
-                        LMenuItem {
-                            id: copyitem
-                            text: qsTr("复制")
-                            height: saveMenu.ctype == 4 ? 25 : 0
-                            visible: saveMenu.ctype == 4 ? true : false
-                            onTriggered:{
-                                console.log("复制");
-                                // 复制
-                                messageText.copy();
-                                //                                    utilityControl.copy(messageText.text);
-                            }
-                        }
-                        LMenuItem {
-                            id: saveitem
-                            text: "保存"
-                            height: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? 25 : 0
-                            visible: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? true : false
-                            onTriggered:{
-                                console.log("保存")
-//                                if(saveMenu.ctype === 5){
-//                                    saveFileDialog.httpurl = saveMenu.httpurl
-//                                    saveFileDialog.open();
-//                                }
-//                                else if(saveMenu.ctype === 31){
-                                    saveFileDialog.httpurl = saveMenu.httpurl
-                                    saveFileDialog.open();
-//                                }
+
+                    Rectangle{
+                        id: msgMask
+                        color: UI.cBlack
+                        opacity: 0.5
+                        visible: false
+                        anchors.fill: parent
+
+                        Connections{ // 上传素材返回
+                            target: utilityControl
+                            onUpdateProgress:{
+                                if(filefrom == 0){
+                                    if(messageid == model.messageid){
+                                        if(percent==100){
+                                            msgMask.visible = false;
+                                        }
+                                        else if(model.ctype===31){
+                                            msgMask.visible = true
+                                            uploadprocess.text = percent+"%";
+//                                            console.log(uploadprocess.text)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
 
+                    LText{
+                        id: uploadprocess
+                        pointSize: UI.BigFontPointSize
+                        color: UI.cWhite
+                        anchors.centerIn: parent
+                        visible: msgMask.visible
+                    }
                 }
 
                 Rectangle{
@@ -467,6 +505,7 @@ Rectangle{
                         source: sentByMe ? API.user_photo : ""
                     }
                 }
+
             }
 
         }

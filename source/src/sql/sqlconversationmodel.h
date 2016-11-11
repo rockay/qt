@@ -58,10 +58,10 @@ public:
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE void addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
+    Q_INVOKABLE bool addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
                                  ,const QString &senderid, const QString &message, const QString &targetid
                                  , int result, int ctype, const QString &sendtime);
-    Q_INVOKABLE void updateMsgStatus(const QString &msgUId, int result);
+    Q_INVOKABLE void updateMsgStatus(const QString &msgUId, int result, uint timestamp=0);
     Q_INVOKABLE void updateMsgStatusByLastTime(const QString &messageid,const QString &senderid, const QString &targetid,const QString &recvTime, int result);
     Q_INVOKABLE QVariantMap get(int row);
     Q_INVOKABLE void updateMsgContent(const QString &msgUId, const QString &content);

@@ -11,16 +11,16 @@ void DownloadManager::doDownload(const QString &url, const QString &saveFileName
     qDebug()<<"url:"<<url;
     qDebug()<<"save path:"<< saveFileName;
     QUrl urlpath = QUrl::fromEncoded(url.toUtf8());
-    QNetworkRequest request(urlpath);
-    QNetworkReply *reply = manager.get(request);
+    m_reply = manager.get(QNetworkRequest(urlpath));
     m_fileName = saveFileName;
 
-    connect(reply,&QNetworkReply::downloadProgress,this, &DownloadManager::downloadProgress);
+    connect(m_reply,&QNetworkReply::downloadProgress,this, &DownloadManager::downloadProgress);
+
 #ifndef QT_NO_SSL
-    connect(reply, SIGNAL(sslErrors(QList<QSslError>)), SLOT(sslErrors(QList<QSslError>)));
+    connect(m_reply, SIGNAL(sslErrors(QList<QSslError>)), SLOT(sslErrors(QList<QSslError>)));
 #endif
 
-    currentDownloads.append(reply);
+//    currentDownloads.append(reply);
 }
 
 void DownloadManager::downloadProgress(qint64 up, qint64 toal)
@@ -82,11 +82,19 @@ void DownloadManager::sslErrors(const QList<QSslError> &sslErrors)
 
 void DownloadManager::downloadFinished(QNetworkReply *reply)
 {
+    /* Check if we need to redirect */
+    QUrl redurl = reply->attribute (
+                   QNetworkRequest::RedirectionTargetAttribute).toUrl();
+    if (!redurl.isEmpty()) {
+        doDownload (redurl.toString(), m_fileName);
+        return;
+    }
+
     QUrl url = reply->url();
     if (reply->error()) {
-        fprintf(stderr, "Download of %s failed: %s\n",
-                url.toEncoded().constData(),
-                qPrintable(reply->errorString()));
+        qDebug()<<"Download of %s failed: %s\n"<<url.toEncoded().constData()<<qPrintable(reply->errorString());
+        emit downloadFailed();
+        return;
     } else {
         QString filename = m_fileName; //saveFileName(url);
         if (saveToDisk(filename, reply))
@@ -94,7 +102,8 @@ void DownloadManager::downloadFinished(QNetworkReply *reply)
                    url.toEncoded().constData(), qPrintable(filename));
     }
 
-    currentDownloads.removeAll(reply);
+//    currentDownloads.removeAll(reply);
+    reply->close();
     reply->deleteLater();
     qDebug()<<"下载完成";
     emit downloadSuccessed();

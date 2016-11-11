@@ -66,11 +66,14 @@ void QTDataBase::createContact()
 
 void QTDataBase::createConversations()
 {
+    QSqlQuery query;
     if (QSqlDatabase::database().tables().contains("Conversations")) {
+        // 更新一些状态为0的，改为-1发送失败
+        query.exec("UPDATE Conversations SET result=-1 WHERE result=0");
+
         // The table already exists; we don't need to do anything.
         return;
     }
-    QSqlQuery query;
     if (!query.exec(
                 "CREATE TABLE IF NOT EXISTS 'Conversations' ("
                 "'msgUId' TEXT NOT NULL,"
@@ -88,6 +91,7 @@ void QTDataBase::createConversations()
                 ")")) {
         qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
     }
+
 }
 
 

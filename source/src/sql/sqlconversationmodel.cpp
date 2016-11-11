@@ -54,7 +54,7 @@ SqlConversationModel::SqlConversationModel(QObject *parent) :
     QSqlTableModel(parent)
 {
     setTable(conversationsTableName);
-    setSort(8, Qt::AscendingOrder);
+    setSort(9, Qt::AscendingOrder);
 //    // Ensures that the model is sorted correctly after submitting a new row.
 //    setEditStrategy(QSqlTableModel::OnManualSubmit);
     emit countChanged(rowCount());
@@ -100,7 +100,7 @@ QHash<int, QByteArray> SqlConversationModel::roleNames() const
     return names;
 }
 
-void SqlConversationModel::addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
+bool SqlConversationModel::addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
                                        ,const QString &senderid, const QString &message, const QString &targetid
                                        , int result, int ctype, const QString &sendtime)
 {
@@ -122,14 +122,15 @@ void SqlConversationModel::addMessage(const QString &msgUId, const QString &mess
 //    QSqlQuery query;
 //    sql = sql.arg(msgUId).arg(messageid).arg(recipient).arg(senderid).arg(message).arg(targetid).arg(result?1:0).arg(ctype).arg(timestamp).arg(sendtime);
 //    query.prepare(sql);
-    qDebug()<<"rowcount:"<<rowCount();
+    rowCount();
     if (!insertRecord(rowCount(), newRecord)) {
         qDebug() << "Failed to send message:" << lastError().text() <<  tableName();
-        return;
+        return false;
     }
 
     submitAll();
     refresh();
+    return true;
 }
 
 QVariantMap SqlConversationModel::get(int row) {
@@ -146,8 +147,9 @@ QVariantMap SqlConversationModel::get(int row) {
     return res;
 }
 
-void SqlConversationModel::updateMsgStatus(const QString &msgUId, int result)
+void SqlConversationModel::updateMsgStatus(const QString &msgUId, int result,uint timestamp)
 {
+    qDebug()<<"updateMsgStatus sendtime:"<<timestamp;
     // 先判断是否存在数据，存在则更新
     QSqlQuery query;
     QString sql = "SELECT count(*) FROM Conversations WHERE messageid='"+msgUId+"'";
@@ -158,8 +160,15 @@ void SqlConversationModel::updateMsgStatus(const QString &msgUId, int result)
     int count = query.value(0).toInt();
     if(count>0){
         // 更新数据库
-        sql = tr("UPDATE Conversations SET result=%1 WHERE messageid='%2'")
+        if(timestamp==0)
+            sql = tr("UPDATE Conversations SET result=%1 WHERE messageid='%2'")
                 .arg(QString::number(result),msgUId);
+        else
+        {
+            QString sendtime = QDateTime::fromTime_t(QString::number(timestamp).mid(0,10).toInt()).toString("yyyy-MM-dd hh:mm:ss");
+            sql = tr("UPDATE Conversations SET result=%1,sendtime='%3' WHERE messageid='%2'")
+                .arg(QString::number(result),msgUId,sendtime);
+        }
         query.exec(sql);
     }else{
         qDebug()<<sql;
@@ -227,7 +236,7 @@ void SqlConversationModel::refresh()
     const QString filterString = QString::fromLatin1(
         " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(m_targetid, RYImpl::getInstance()->m_userid);
     setFilter(filterString);
-    setSort(8, Qt::AscendingOrder);
+    setSort(9, Qt::AscendingOrder);
     select();
     emit countChanged(rowCount());
 }

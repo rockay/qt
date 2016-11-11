@@ -60,7 +60,7 @@ function uploadFie(){
             return;
         }
         var fileType = upfilemodel.get(curIdx).file_mold === 1 ? "mImage":"mFile";
-        var ret = utilityControl.uploadMaterial(API.api_upload_file,upfilemodel.get(curIdx).file_url,fileType,1)
+        var ret = utilityControl.uploadMaterial(API.api_upload_file,upfilemodel.get(curIdx).file_url,fileType,1,"")
         if(!ret){
             console.log("upload file failed...");
             upfilemodel.setProperty(curIdx, "percent", -1);
@@ -138,16 +138,18 @@ function selectFiles(fileUrls){
         }
 
         var fileinfo = utilityControl.getFileInfo(strPath).split('|');
-        var fsize = fileinfo.length>1 ? Number(fileinfo[0]) : 0;
-        var file_nme = fileinfo.length>1 ? fileinfo[1] : "";
-        console.log(strPath);
-        upfilemodel.append({"percent": 0 , "file_url": strPath, "size": fsize, "file_ext": ext,
-                               "file_name":file_nme,
-                               "file_mold": ( ext == "JPG" || ext == "BMP" || ext == "GIF"
-                                             || ext == "JPEG" || ext == "ICO" || ext=="PNG") ? 1 : 2
-                           })
-        allSize += fsize;
-        showSize = allSize/1024 > 1024 ? (allSize/1024/1024).toFixed(2)+"M" : (allSize/1024).toFixed(2)+"k"
+        if(fileinfo.length>1){ // 2016.11.11
+            var fsize = fileinfo.length>1 ? Number(fileinfo[0]) : 0;
+            var file_nme = fileinfo.length>1 ? fileinfo[1] : "";
+            console.log(strPath);
+            upfilemodel.append({"percent": 0 , "file_url": strPath, "size": fsize, "file_ext": ext,
+                                   "file_name":file_nme,
+                                   "file_mold": ( ext == "JPG" || ext == "BMP" || ext == "GIF"
+                                                 || ext == "JPEG" || ext == "ICO" || ext=="PNG") ? 1 : 2
+                               })
+            allSize += fsize;
+            showSize = allSize/1024 > 1024 ? (allSize/1024/1024).toFixed(2)+"M" : (allSize/1024).toFixed(2)+"k"
+        }
     }
     bottomtips.text = qsTr("共"+upfilemodel.count+"个文件，"+showSize+"（上传过程中请不要删除原始文件）")
     bottomtips.visible = true;

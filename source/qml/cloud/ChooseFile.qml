@@ -126,7 +126,6 @@ Rectangle {
                         choosefilegrid.currentIndex = index;
                     }
                     onDoubleClicked: {
-                        console.log("发送云文件");
                         chooseFileClick(4, file_name, file_url, file_size, file_ext, file_mold);
                     }
                 }

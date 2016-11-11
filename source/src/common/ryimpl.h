@@ -56,7 +56,7 @@ signals:
     void receivedException(const QString &code,const QString &data);
     void proceeFile(const QString &img_id, int process, int targetid);
     void uploadFileCallback(const QString &msgid, const QString &content);
-    void sendMsgDealCallback(int msgid, int result);
+    void sendMsgDealCallback(int msgid, int result, uint timestamp);
     void sendImageFailed(int messageid,int errorcode);
     void recccvMsg(const QString &senderid);
 public slots:

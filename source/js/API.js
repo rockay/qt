@@ -98,6 +98,33 @@ function httpRequest(verb, url, obj, cb) {
     xhr.send(obj);
 }
 
+function httpRequestID(verb, url, obj, cb, id) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+            //            print('HEADERS_RECEIVED')
+        } else if(xhr.readyState === XMLHttpRequest.DONE) {
+            try{
+                var retjson = JSON.parse(xhr.responseText.toString());
+                if(cb) // 调用传进来的callback函数
+                    cb(retjson,id);
+            }
+            catch(e){
+                console.log(xhr.responseText.toString());
+                console.log("httpRequest 发生异常："+e.message);
+                if(cb) // 调用传进来的callback函数
+                    cb("",id);
+            }
+        }
+    }
+    xhr.open(verb,url);
+    //    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('Accept', 'application/json');
+    //    var data = obj?JSON.stringify(obj):''
+    xhr.send(obj);
+}
+
 // 比较日期
 function compareDate(time1,time2){
     var oldtime=Date.parse(time1);
@@ -130,6 +157,21 @@ function validateFileExtension(filePath) {
     }
 
     return valid;
+}
+
+function getFileMode(filePath){
+    var ext = filePath.split('.').pop().toUpperCase();
+    var filemode = 0;
+
+    if(ext == "JPG" || ext == "BMP" || ext == "GIF"
+            || ext == "JPEG" || ext == "ICO" || ext == "PNG") {
+        filemode = 1;
+    }else if(ext == "PDF"){
+        filemode = 2;
+
+    }
+
+    return filemode;
 }
 
 

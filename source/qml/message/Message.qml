@@ -20,65 +20,33 @@ Item {
     property ChatShow chatviewp: chatview
     property ChatToolBar chattoolp: chattool
     property LTextArea txtAreaInput: sendText
+    property string file_messageid: ""
 
-    Connections{ // 上传素材返回
+    Connections{ // utilityControl
         target: utilityControl
         onUploadMaterialRet:{
             if(filefrom == 0){
                 if(retCode == 0){
-                    MessageJS.saveFileMsg(retMsg)
-                    console.log("成功",type,retMsg);
+                    MessageJS.saveFileMsg(retMsg,messageid)
+                    console.log("成功",type,retMsg,messageid);
                 }
                 else{
-                    console.log("失败",type,retMsg);
+                    console.log("失败",type,retMsg,messageid);
+                    tips.text = "发送失败："+retMsg;
+                    // 更新状态
+                    chatview.chatListModel.updateMsgStatus(messageid,-1);
                 }
             }
         }
-        onUpdateProgress:{
-            if(filefrom == 0){
-//                upfilemodel.setProperty(curIdx, "percent", percent);
-                console.log("percent:",percent);
-            }
+
+        onCaptureSuccessed:{
+            console.log("screen shoot path:"+path);
+            //  发送本地图片
+            chatview.ctype = 5;
+            // 将图片路径转成base64发送
+            console.log("message send image path:"+path)
+            MessageJS.sendMsg(path,chatview.user_type,chatview.ctype);
         }
-    }
-    Connections{ // 重新发送
-        target: chatview
-        onSignResendMsg:{
-            chatview.ctype = type;
-            switch(type){
-            case 4: // 文字
-            case 5: // 图片
-                MessageJS.sendMsg(content, chatview.user_type,chatview.ctype)
-                break;
-            case 31: // 云
-                var sendtxt = "[发送云库文件]"
-
-                var idx = contactListView.currentIndex;
-                var retStr = contactListView.model.updateContacts(idx,sendtxt);
-                console.log("retStr:"+retStr)
-                if(retStr !== ""){
-                    var kk = retStr.split("|");
-                    if(kk.length !== 3)
-                        return;
-                    var targetid = kk[0];
-                    var recipient = kk[1];
-                    var categoryId = kk[2];
-                    var messgeid = utilityControl.getMessageId();
-                    message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,content,targetid,0,31,"");
-                    ryControl.sendCloudMsg(messgeid,targetid,categoryId,content,31);
-                }
-
-                break;
-            default:
-                return;
-            }
-            // 删除原来的记录
-            chatview.chatListModel.deleteMsgByID(msgid)
-        }
-    }
-
-    Connections{ // 显示
-        target: utilityControl
         onSigquit: {
             console.log("hide");
             main.hide();
@@ -101,15 +69,144 @@ Item {
         }
     }
 
-    Connections{ // 下载文件
+    Connections{ // 重新发送 chatview
+        target: chatview
+        onSignResendMsg:{
+            chatview.ctype = type;
+            switch(type){
+            case 4: // 文字
+            case 5: // 图片
+                MessageJS.sendMsg(content, chatview.user_type,chatview.ctype)
+                // 删除原来的记录
+                chatview.chatListModel.deleteMsgByID(msgid)
+                break;
+            case 31: // 云
+                var sendtxt = "[发送云库文件]"
+                var strList = content.split("|");
+                console.log(content);
+                console.log(strList.length);
+                if(strList.length>=5){
+                    var filePath = strList[4];
+                    // 删除原来的记录
+                    chatview.chatListModel.deleteMsgByID(msgid)
+                    MessageJS.sendCloudMsg(filePath);
+                }else{
+                    tips.text = "重新发送失败，消息格式不正确";
+                    return;
+                }
+                break;
+            default:
+                return;
+            }
+        }
+    }
+
+    Connections{ // 下载文件 networkControl
         target: networkControl
         onDownProcess:{
             if(percent<100)
                 tips.text = "下载进度："+percent+"%";
-            else
-                tips.text = "下载完成"
+        }
+        onDownloadSuccessed:{
+            keytimer.start();
+            tips.text = "下载完成"
+        }
+        onDownloadFailed:{
+            tips.text = "下载失败"
         }
 
+    }
+
+    Connections {
+        target: ryControl
+        onSendImageFailed:{
+            tips.text = "发送图片失败，请重试！"
+            // 更新数据库为-1
+            ryControl.updateMsgStatus(messageid,-1)
+        }
+
+        onReceivedMsg: {
+            switch(type){
+            case 0: // 其他
+                tips.text = ""
+            case 2: // 输入
+                tips.text = msg
+                keytimer.start();
+                break;
+            case 3: // 最后发送时间，已读
+//                                    tips.text = msg
+                var contentJson = JSON.parse(msg);
+                console.log("contentJson:"+contentJson);
+                var lasttime = contentJson.lastMessageSendTime+'';
+                console.log("lastMessageSendTime:"+lasttime);
+                messageid = lasttime.substr(0,10);
+                chatview.chatListModel.updateMsgStatusByLastTime(messageid,API.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
+                break;
+            case 4: //文字
+            case 31: //云库
+            case 5: //图片
+            case 6: // 语音
+                // 添加到所有的聊天记录
+                chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime);
+                // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
+                // 如果是图片
+                if(type==5)
+                    msg = qsTr("[图片]");
+                if(type==6)
+                    msg = qsTr("[语音]");
+                if(type==31)
+                    msg = qsTr("[云库文件]");
+
+                if(isMetionedMe){ //@我
+                    msg = "[有人@我] " + msg;
+                }
+
+                if(conversationType == 1) // 单人
+                {
+
+                    if(senderid == chatview.user_id && main.visible){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
+                        console.log("回发消息...");
+                        MessageJS.sendNtyMsg(senderid,conversationType);
+                        chatListView.model.setCount(senderid, 0);
+                    }
+                    else{ // 不在当前会话列表
+                        if(!chatListView.model.addContactById(senderid, msg,1))  // 不在会话列表根据发送者获取基本信息
+                            MessageJS.getUserInfoById(senderid, msg)
+                    }
+                }
+                else if(conversationType == 3) // 群聊
+                {
+                    if(!chatListView.model.addContactById(targetid, msg,1)) // 不在会话列表根据发送者获取基本信息
+                        MessageJS.getGroupInfoById(targetid, msg)
+
+                }
+                // 让选中的人还是被选中
+                MessageJS.setCurrentIdx();
+                tips.text = "";
+                msgSound.play();
+                break;
+            }
+        }
+        onReceivedException:{
+            console.log("exception code:"+ code)
+            if(code == "0")
+                tips.text = "通讯正常";
+            else
+                tips.text = "通讯故障"
+        }
+        onProceeFile:{
+            tips.text = "图片上传："+process+"%"
+        }
+        onUploadFileCallback:{
+            tips.text = "图片成功"
+            // 更新消息内容
+            chatview.chatListModel.updateMsgContent(msgid, content);
+        }
+        onSendMsgDealCallback:{
+            // 消息发送成功，入库
+            console.log("消息发送成功，入库")
+            chatview.chatListModel.updateMsgStatus(msgid, result,timestamp);
+        }
     }
 
     onIsLoadChanged: {
@@ -413,6 +510,7 @@ Item {
                     color: UI.cTransparent
                     height: parent.height
                     width: parent.width -grouparea.width
+                    z: rightCenter.z+1
 
                     Rectangle{
                         id: rightCenter
@@ -423,7 +521,7 @@ Item {
                         color:UI.cWhite
                         border.width: 1
                         border.color: UI.cTBBorder
-                        z: rightbar.z+1
+                        z: rightTop.z-1
 
                         ChatShow{
                             id: chatview
@@ -446,7 +544,6 @@ Item {
                         anchors.left: parent.left
                         border.width: 1
                         border.color: UI.cTBBorder
-                        z: rightCenter.z+1
                         enabled: contactListView.currentIndex >=0?true:false
                         Rectangle{
                             id: toolBar
@@ -469,13 +566,7 @@ Item {
 
                                     }
                                     else if(type ==3 ){ // 文档
-                                        // 文档先调用上传，再发送云文件
-                                        chatview.ctype = 31;
-                                        // 1.上传文件
-                                        var ret = utilityControl.uploadMaterial(API.api_upload_file,strPath,"mFile",0) // 0为会话上传，1为云上传，消息获取区分用
-                                        if(!ret){
-                                            console.log("upload file failed...");
-                                        }
+                                        MessageJS.sendCloudMsg(strPath);
 
                                     }
                                     else if(type ==4 ){ // 云
@@ -503,6 +594,7 @@ Item {
                             property point clickPos: "0,0"
                             onLinkActivated: Qt.openUrlExternally(link)
                             persistentSelection: true
+
                             Shortcut {
                                 sequence: "Ctrl+Return"
                                 onActivated:  {
@@ -756,110 +848,6 @@ Item {
                             }
                         }
 
-                        Connections {
-                            target: ryControl
-                            onSendImageFailed:{
-                                tips.text = "发送图片失败，请重试！"
-                                // 更新数据库为-1
-                                ryControl.updateMsgStatus(messageid,-1)
-                            }
-
-                            onReceivedMsg: {
-                                switch(type){
-                                case 0: // 其他
-                                    tips.text = ""
-                                case 2: // 输入
-                                    tips.text = msg
-                                    keytimer.start();
-                                    break;
-                                case 3: // 最后发送时间，已读
-//                                    tips.text = msg
-                                    var contentJson = JSON.parse(msg);
-                                    console.log("contentJson:"+contentJson);
-                                    var lasttime = contentJson.lastMessageSendTime+'';
-                                    console.log("lastMessageSendTime:"+lasttime);
-                                    messageid = lasttime.substr(0,10);
-                                    chatview.chatListModel.updateMsgStatusByLastTime(messageid,API.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
-                                    break;
-                                case 4: //文字
-                                case 31: //云库
-                                case 5: //图片
-                                case 6: // 语音
-                                    // 添加到所有的聊天记录
-                                    chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime);
-                                    // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
-                                    // 如果是图片
-                                    if(type==5)
-                                        msg = qsTr("[图片]");
-                                    if(type==6)
-                                        msg = qsTr("[语音]");
-                                    if(type==31)
-                                        msg = qsTr("[云库文件]");
-
-                                    if(isMetionedMe){ //@我
-                                        msg = "[有人@我] " + msg;
-                                    }
-
-                                    if(conversationType == 1) // 单人
-                                    {
-
-                                        if(senderid == chatview.user_id && main.active){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
-                                            MessageJS.sendNtyMsg(senderid,conversationType);
-                                            chatListView.model.setCount(senderid, 0);
-                                        }
-                                        else{ // 不在当前会话列表
-                                            if(!chatListView.model.addContactById(senderid, msg,1))  // 不在会话列表根据发送者获取基本信息
-                                                MessageJS.getUserInfoById(senderid, msg)
-                                        }
-                                    }
-                                    else if(conversationType == 3) // 群聊
-                                    {
-                                        if(!chatListView.model.addContactById(targetid, msg,1)) // 不在会话列表根据发送者获取基本信息
-                                            MessageJS.getGroupInfoById(targetid, msg)
-
-                                    }
-                                    // 让选中的人还是被选中
-                                    MessageJS.setCurrentIdx();
-                                    tips.text = "";
-                                    msgSound.play();
-                                    break;
-                                }
-                            }
-                            onReceivedException:{
-                                console.log("exception code:"+ code)
-                                if(code == "0")
-                                    tips.text = "通讯正常";
-                                else
-                                    tips.text = "通讯故障"
-                            }
-                            onProceeFile:{
-                                tips.text = "图片上传："+process+"%"
-                            }
-                            onUploadFileCallback:{
-                                tips.text = "图片成功"
-                                // 更新消息内容
-                                chatview.chatListModel.updateMsgContent(msgid, content);
-                            }
-                            onSendMsgDealCallback:{
-                                // 消息发送成功，入库
-                                console.log("消息发送成功，入库")
-                                chatview.chatListModel.updateMsgStatus(msgid, result);
-
-                            }
-                        }
-
-                        Connections{
-                            target: utilityControl
-                            onCaptureSuccessed:{
-                                console.log("screen shoot path:"+path);
-                                //  发送本地图片
-                                chatview.ctype = 5;
-                                // 将图片路径转成base64发送
-                                console.log("message send image path:"+path)
-                                MessageJS.sendMsg(path,chatview.user_type,chatview.ctype);
-                            }
-                        }
-
                     }
                 }
                 Rectangle {
@@ -1039,6 +1027,7 @@ Item {
                 return false;
             }
             tips.text = qsTr("释放鼠标发送文件");
+            keytimer.start();
         }
         onExited: {
             tips.text = qsTr("");

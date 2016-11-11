@@ -145,7 +145,7 @@ Window {
         MouseArea{
             anchors.fill: parent
             onWheel: {
-                console.log("onWheel:"+wheel.angleDelta.y / 120); // now it works
+//                console.log("onWheel:"+wheel.angleDelta.y / 120); // now it works
                 //                        if (wheel.modifiers & Qt.ControlModifier) {
                 var percent = (wheel.angleDelta.y / 120)/10;
                 showimage.width *= (1+percent);

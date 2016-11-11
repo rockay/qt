@@ -292,5 +292,6 @@
         <file>images/icon/default.png</file>
         <file>controls/LMessageDialog.qml</file>
         <file>images/message.wav</file>
+        <file>controls/ContextMenu.qml</file>
     </qresource>
 </RCC>

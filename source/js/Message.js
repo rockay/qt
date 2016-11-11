@@ -5,22 +5,15 @@ function currentDateTime(){
     return Qt.formatDateTime(new Date(), "yyyy-MM-dd hh:mm:ss.zzz ddd");
 }
 
-
 // 发送信息
 function sendMsg(sendtxt,user_type,ctype){
     tips.text = "";
     var idx = contactListView.currentIndex;
     if(idx==-1)
         return;
-    var retStr = chatListView.model.updateContacts(idx,sendtxt);
-    console.log("retStr:"+retStr)
-    if(retStr !=""){
-        var kk = retStr.split("|");
-        if(kk.length!=3)
-            return;
-        var targetid = kk[0];
-        var recipient = kk[1];
-        var categoryId = kk[2];
+        var targetid = chatview.user_id;
+        var recipient = topTitle.text;
+        var categoryId = chatview.user_type;
 
         if(ctype==5) // 图片
             sendtxt = sendtxt.replace("file:///","");
@@ -67,7 +60,7 @@ function sendMsg(sendtxt,user_type,ctype){
             sendtxt = qsTr("[图片]");
         else if(ctype==31)
             sendtxt = qsTr("[云库文件]");
-        chatListView.model.addContactById(targetid, sendtxt,0);
+        contactListView.model.addContactById(targetid, sendtxt,0);
         contactListView.currentIndex = 0;
 
 
@@ -75,7 +68,7 @@ function sendMsg(sendtxt,user_type,ctype){
         sendText.clear();
         chatview.reload = false
         chatview.reload = true
-    }
+//    }
 }
 
 function sendNtyMsg(userid,categoryid){
@@ -95,7 +88,6 @@ function sendNtyMsg(userid,categoryid){
     systrayControl.stopFlash();
 
 }
-
 
 var allGroupUser ;    // 所有群成员
 // 获取群成员
@@ -133,43 +125,24 @@ function getGroupMemberCB(data){
 }
 
 // 文件上传成功后，保存文件。
-function saveFileMsg(fileinfo){
+function saveFileMsg(fileinfo,messageid){
     var url = API.api_root + API.api_savefile;
     var obj = "token="+API.token+"&file_info="+fileinfo;
     var verb = "POST";
     console.log("post url:"+url);
     console.log("post param:"+obj);
-    API.httpRequest(verb, url, obj, saveFileMsgCB);
+    API.httpRequestID(verb, url, obj, saveFileMsgCB,messageid);
 }
 
 // 保存云库文件回调
-function saveFileMsgCB(data){
+function saveFileMsgCB(data,messageid){
     console.log("保存文件回调:"+JSON.stringify(data));
     if(data.errorcode === -1){
-        console.log("保存云库文件成功 cloud_id:"+data.cloud_info.cloud_id);
-
-        // 发送消息，未完。
-        chatviewp.ctype = 31;
-        var sendtxt = "[发送本地文件]"
-        var idx = chatListView.currentIndex;
-        var retStr = chatListView.model.updateContacts(idx,sendtxt);
-        if(retStr !== ""){
-            var kk = retStr.split("|");
-            if(kk.length !== 3)
-                return;
-            var targetid = kk[0];
-            var recipient = kk[1];
-            var categoryId = kk[2];
-
-            sendtxt = data.cloud_info.file_ext+"|"+data.cloud_info.file_mold+"|"
-                    +data.cloud_info.file_size+"|"+data.cloud_info.file_name+"|"+data.cloud_info.file_url
-
-            // 先保存数据库
-            var messgeid = utilityControl.getMessageId();
-            chatview.chatListModel.addMessage(messgeid, messgeid, targetid, API.user_id, sendtxt, targetid,0,31,""); // 空为发送时间，CPP中获取
-            var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
-
-        }
+        // 上传成功，更新数据库MSG字段，未完成。
+        var sendtxt = data.cloud_info.file_ext+"|"+data.cloud_info.file_mold+"|"
+                +data.cloud_info.file_size+"|"+data.cloud_info.file_name+"|"+data.cloud_info.file_url
+        chatview.chatListModel.updateMsgContent(messageid, sendtxt);
+        var msgid = ryControl.sendCloudMsg(messageid,chatview.user_id,chatview.user_type,sendtxt,31);
 
     }else{
 //        upfilemodel.setProperty(curIdx, "percent", -1);
@@ -187,7 +160,6 @@ function getUserInfoById(user_id, msg){
     tempfmsg = msg;
     API.httpRequest(verb, url, obj, getUserInfoByIdCB);
 }
-
 
 // 获取好友信息回调
 function getUserInfoByIdCB(data){
@@ -217,7 +189,7 @@ function getGroupInfoById(groupid, msg){
 
 // 获取群组信息回调
 function getGroupInfoByIdCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
         console.log("获取群组信息成功");
         var obj = data.group_info;
@@ -254,7 +226,6 @@ function search(name) {
     console.log(JSON.stringify(tempdata));
 }
 
-
 // 选择文件列表后的操作
 function selectFiles(fileUrls){
     for (var i = 0; i < fileUrls.length; i++){
@@ -266,12 +237,39 @@ function selectFiles(fileUrls){
             console.log("message send image path:"+strPath)
             sendMsg(strPath,chatview.user_type,chatview.ctype);
         }else if(ext == "PDF"){ // 图片
+            console.log("message send PDF path:"+strPath)
             chatview.ctype = 31;
             // 1.上传文件
-            var ret = utilityControl.uploadMaterial(API.api_upload_file,strPath,"mFile",0) // 0为会话上传，1为云上传，消息获取区分用
+            sendCloudMsg(strPath);
         }else{ // 其它
             console.log("其它文件 失败")
         }
     }
 }
 
+function sendCloudMsg(strPath){
+    // 文档先调用上传，再发送云文件
+    chatview.ctype = 31;
+    // 先把消息入库，后面发送成功再更新既可
+    if(contactListView.currentIndex==-1)
+        return;
+
+    // 先保存数据库
+    var messageid = utilityControl.getMessageId();
+    file_messageid = messageid;
+    var sendtxt = utilityControl.getFileFullInfo(strPath); // 获取组装的发送格式
+    if(!chatview.chatListModel.addMessage(messageid, messageid, chatview.user_id, API.user_id, sendtxt, chatview.user_id,0,31,"")) // 空为发送时间，CPP中获取
+        return; // 发送失败
+
+
+    sendtxt = qsTr("[云库文件]");
+    // 更新会话列表
+    contactListView.model.addContactById(chatview.user_id, sendtxt,0);
+
+
+    // 1.上传文件
+    var ret = utilityControl.uploadMaterial(API.api_upload_file,strPath,"mFile",0,messageid) // 0为会话上传，1为云上传，消息获取区分用
+    if(!ret){
+        console.log("upload file failed...");
+    }
+}

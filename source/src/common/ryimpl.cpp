@@ -390,7 +390,9 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
         QJsonObject obj = getJsonObjectFromString(retMsg);
         int msgUId = obj.value("messageId").toInt();
         int result = obj.value("result").toString() == "success" ? 1 : -1;
-        emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result);
+        QVariant time = obj.value("timestamp").toVariant();
+        int timestamp = QString::number(time.toLongLong()).left(10).toInt();
+        emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result,timestamp);
     };
     m_imagePath = "";
     if(type==MSGTYPE::MSG_IMG) // 只有发送图片才有上传
@@ -453,7 +455,6 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
 
 int RYImpl::sendCloudMsg(int messageId,const QString &targetId,int categoryId, const QString &msg, int type)
 {
-    qDebug()<<"发送云文件:"<<msg;
     m_categoryId = categoryId;
     m_targetid = targetId;
     QStringList strList = msg.split("|");
@@ -462,16 +463,19 @@ int RYImpl::sendCloudMsg(int messageId,const QString &targetId,int categoryId, c
     QString fmsg= tr("{\"file_url\":\"%1\",\"file_name\":\"%2\",\"file_ext\":\"%3\",\"file_size\":%4,\"file_mold\":%5}")
             .arg(strList.at(4), strList.at(3), strList.at(0), strList.at(2), strList.at(1));
     const wchar_t * msgw = reinterpret_cast<const wchar_t *>(fmsg.utf16());
-    qDebug()<<tr("targetid:%1 \t categoryid:%2 \t content:%3").arg(targetId,QString(categoryId),fmsg);
+//    qDebug()<<tr("targetid:%1 \t categoryid:%2 \t content:%3").arg(targetId,QString(categoryId),fmsg);
 
     auto sendMessageCallback = [](const wchar_t* json_str)
     {
         QString u16 = QString::fromUtf16((const ushort*)json_str);
         QString retMsg = u16.toUtf8();
+        qDebug()<<"send cloud messag callback:"<<retMsg;
         QJsonObject obj = getJsonObjectFromString(retMsg);
         int msgUId = obj.value("messageId").toInt();
         int result = obj.value("result").toString() == "success" ? 1 : -1;
-        emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result);
+        QVariant time = obj.value("timestamp").toVariant();
+        int timestamp = QString::number(time.toLongLong()).left(10).toInt();
+        emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result, timestamp);
     };
     if(sendMessage!=NULL){
         sendMessage(targetId.toUtf8().data(), categoryId, 3, "app:IMFileMessage", msgw, "", "", messageId, sendMessageCallback);
@@ -611,7 +615,9 @@ void RYImpl::SendImage(const QString &json, int imgid)
             QJsonObject obj = getJsonObjectFromString(retMsg);
             int msgUId = obj.value("messageId").toInt();
             int result = obj.value("result").toString() == "success" ? 1 : -1;
-            emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result);
+            QVariant time = obj.value("timestamp").toVariant();
+            int timestamp = QString::number(time.toLongLong()).left(10).toInt();
+            emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result, timestamp);
         };
 
         // 上传成功，发送消息

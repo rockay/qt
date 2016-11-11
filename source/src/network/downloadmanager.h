@@ -16,6 +16,7 @@
 
 QT_BEGIN_NAMESPACE
 class QSslError;
+class QNetworkReply;
 QT_END_NAMESPACE
 
 class DownloadManager: public QObject
@@ -36,10 +37,12 @@ public slots:
     void downloadProgress(qint64 up, qint64 toal);
 signals:
     void downloadSuccessed();
+    void downloadFailed();
     void downProcess(int percent,const QString &file_id);
 
 private:
     QString m_fileName;
+    QNetworkReply *m_reply;
 };
 
 #endif // DOWNLOADMANAGER_H

@@ -47,7 +47,8 @@ Rectangle {
         onAccepted: {
             console.log("You chose: " + fileUrls)
             for (var i = 0; i < fileUrls.length; i++){
-                signalClick(fileType,fileUrls[i].toString(),fileUrls[i].toString());
+                if(API.validateFileExtension(fileUrls[i].toString())) // 只能选择PDF和图片
+                    signalClick(fileType,fileUrls[i].toString(),fileUrls[i].toString());
             }
         }
         onRejected: {

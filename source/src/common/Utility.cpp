@@ -1,4 +1,4 @@
-#include "Utility.h"
+﻿#include "Utility.h"
 #include <QQuickItemGrabResult>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -65,27 +65,31 @@ QVariant Utility::getPictureBase64(QString path)
 }
 
 
-bool Utility::uploadMaterial(QString url, QString filePath, QString materialType, int filefrom)
+bool Utility::uploadMaterial(QString url, QString filePath, QString materialType, int filefrom,QString messageid)
 {
-    qDebug()<<"“uploadMaterial:"<<url;
     crtUploadType = materialType;
     m_filefrom = filefrom;  // 0表示来自会话 1表示来自云上传
     filePath = filePath.replace("file:///","");
     QFileInfo fileinfo(filePath);
     QString fileName = fileinfo.fileName();
-    QString ext = fileinfo.completeSuffix();
-    if(fileinfo.size() > 20 * 1024 * 1024){
-        emit uploadMaterialRet(1, crtUploadType, "文件过大", m_filefrom);
+    QString ext =  getFileExt(filePath);
+    if(fileinfo.size() > 20 * 1024 * 1024){ // 20M
+        emit uploadMaterialRet(1, crtUploadType, "文件过大", m_filefrom, messageid);
         return false;
     }
     QString cth = "";
-    if(materialType == "mImage"){
+    if(ext == "JPG" || ext == "BMP" || ext == "GIF"
+            || ext == "JPEG" || ext == "ICO" || ext == "PNG") {
         cth = "image/"+ext;
-    }else if(materialType == "mFile"){
+    }else if(ext == "PDF"){
         cth = "application/"+ext;
+    }else{
+        emit uploadMaterialRet(2, crtUploadType, tr("文件格式不支持"), m_filefrom, messageid);
+        return false;
     }
-    qDebug()<<" Utility::uploadfile path:" <<filePath<<endl;
-    qDebug()<<" Utility::uploadfile name: " <<fileName<<ext<<endl;
+
+    qDebug()<<" Utility::uploadfile path:" <<filePath;
+    qDebug()<<" Utility::uploadfile name: " <<fileName<<ext;
 
     QFile file(filePath.replace("file:///",""));
     if(!file.open(QIODevice::ReadOnly))
@@ -134,6 +138,8 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
 
     QNetworkReply *reply;
     reply = networkAccessManager.post(request,send);
+    qDebug()<<currentUploads.contains(reply);
+    currentUploads.insert(reply,messageid);
     connect(reply,&QNetworkReply::uploadProgress,this, &Utility::uploadProgress);
     return true;
 }
@@ -143,7 +149,7 @@ void Utility::replyFinished(QNetworkReply *reply)
     if(reply->error() != QNetworkReply::NoError)
     {
         qDebug()<<"http request failed."<<reply->errorString()<<endl;
-        emit uploadMaterialRet(1, crtUploadType, reply->errorString(), m_filefrom);
+        emit uploadMaterialRet(1, crtUploadType, reply->errorString(), m_filefrom, currentUploads.value(reply));
     }
     else
     {
@@ -155,24 +161,27 @@ void Utility::replyFinished(QNetworkReply *reply)
             QJsonObject obj = doc.object();
             qDebug()<<"errorcode:"<<obj.value("errorcode").toInt();
             if(obj.value("errorcode").toInt()==-1){ // 上传成功
-                emit uploadMaterialRet(0, crtUploadType,obj.value("file_info").toString(), m_filefrom);
+                emit uploadMaterialRet(0, crtUploadType,obj.value("file_info").toString(), m_filefrom, currentUploads.value(reply));
             }else{  // 错误码
                 qDebug()<<"errorcode:"<<obj.value("errorcode").toInt()<<" m_filefrom:"<<m_filefrom;
-                emit uploadMaterialRet(1, crtUploadType,tr("error code：%1").arg(obj.value("errorcode").toInt()), m_filefrom);
+                emit uploadMaterialRet(1, crtUploadType,tr("error code：%1").arg(obj.value("errorcode").toInt()), m_filefrom,  currentUploads.value(reply));
             }
         }else{
-            emit uploadMaterialRet(1, crtUploadType,"上传失败", m_filefrom);
+            emit uploadMaterialRet(1, crtUploadType,"上传失败", m_filefrom, currentUploads.value(reply));
         }
+        reply->close();
         reply->deleteLater();
+        currentUploads.remove(reply);
     }
 }
 
 void Utility::uploadProgress(qint64 up, qint64 toal)
 {
+    QNetworkReply *reply = (QNetworkReply *)sender();
     if(up == toal){
-        emit updateProgress(100, m_filefrom);
+        emit updateProgress(100, m_filefrom,currentUploads.value(reply));
     }else{
-        emit updateProgress(up*100/toal, m_filefrom);
+        emit updateProgress(up*100/toal, m_filefrom, currentUploads.value(reply));
     }
 }
 
@@ -235,12 +244,56 @@ void Utility::shootScreen()
     }
 }
 
-QString Utility::getFileInfo(QString path)
+QString Utility::getFileExt(const QString &path)
 {
-    QString filepath = path.replace("file:///","");
+    QFileInfo fileinfo(path);
+    QString supportMulti = "tar.gz|";
+    QString file_ext = fileinfo.completeSuffix().toLower();
+    if(file_ext.indexOf(".")>=0){
+        if(supportMulti.indexOf(file_ext)<0) // 不在支持带点的后缀名的列表中
+        {
+            file_ext = file_ext.right(file_ext.length()-file_ext.lastIndexOf(".")-1);
+        }
+    }
+    return file_ext.toUpper();
+}
+
+QString Utility::getFileInfo(const QString &path)
+{
+    QString temp = path;
+    QString filepath = temp.replace("file:///","");
     QFileInfo fileinfo(filepath);
     return QString::number(fileinfo.size())+"|"+fileinfo.fileName();
 }
+
+QString Utility::getFileFullInfo(const QString &path)
+{
+    // ext|mod|size|filename|fileurl file_mold：文件类型，1 表示图片类型，2 表示 PDF 类型
+    QString temp = path;
+    QString file_ext = getFileExt(temp);
+    QString filepath = temp.replace("file:///","");
+    QFileInfo fileinfo(filepath);
+    int file_mode = 0;
+    if(file_ext == "JPG" || file_ext == "BMP" || file_ext == "GIF"
+            || file_ext == "JPEG" || file_ext == "ICO" || file_ext == "PNG") {
+        file_mode = 1;
+    }else if(file_ext == "PDF"){
+        file_mode = 2;
+
+    }
+    QString retStr;
+    retStr.append(file_ext);
+    retStr.append("|");
+    retStr.append(QString::number(file_mode));
+    retStr.append("|");
+    retStr.append(QString::number(fileinfo.size()));
+    retStr.append("|");
+    retStr.append(fileinfo.fileName());
+    retStr.append("|");
+    retStr.append(path);
+    return retStr;
+}
+
 
 QString unicodeToUtf8(const QString& unicode)
 {

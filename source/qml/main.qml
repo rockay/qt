@@ -78,6 +78,7 @@ QtObject {
 
     property var splashWindow: Splash {
         onTimeout: {
+            lWindow.requestActivate();
             lWindow.visible = true
         }
     }
