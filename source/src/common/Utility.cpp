@@ -18,6 +18,7 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QVersionNumber>
+#include <windows.h>
 #include "ryimpl.h"
 #include "qtquickcontrolsapplication.h"
 
@@ -31,8 +32,8 @@ Utility::Utility(QObject *parent) : QObject()
     updater = new UpdaterHttp;
     QLibrary mylib("PrScrn.dll");
     if(mylib.load()){
-        print = (DLLFuncd)mylib.resolve("PrScrn");
-        if (print == NULL)
+        screenshot = (DLLFuncd)mylib.resolve("PrScrn");
+        if (screenshot == NULL)
             qDebug()<<"load screenshot PrScrn failed...";
     }else{
         qDebug()<<"load screenshot failed...";
@@ -218,15 +219,17 @@ void Utility::shootScreen()
 
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->clear();
-    if (print != NULL){
-        bool ret = print();
+    if (screenshot != NULL){
+        int ret = screenshot(0);
         qDebug()<<"screenshot ret:"<<ret;
-        const QMimeData *mimeData = clipboard->mimeData();
-        if (mimeData->hasImage()) {
-            QPixmap picture = qvariant_cast<QPixmap>(mimeData->imageData());
-            const QString temp = RYImpl::getInstance()->m_picPath + Utility::getInstance()->getGuid()+".jpg";
-            picture.save(temp);
-            emit Utility::getInstance()->captureSuccessed(temp);
+        if(ret==1){
+            const QMimeData *mimeData = clipboard->mimeData();
+            if (mimeData->hasImage()) {
+                QPixmap picture = qvariant_cast<QPixmap>(mimeData->imageData());
+                const QString temp = RYImpl::getInstance()->m_picPath + Utility::getInstance()->getGuid()+".jpg";
+                picture.save(temp);
+                emit Utility::getInstance()->captureSuccessed(temp);
+            }
         }
         clipboard->clear();
     }
@@ -298,12 +301,15 @@ void Utility::checkUpdate(const QString &version, const QString &downloadpath, c
 
 bool Utility::checkIdIsLogin(const QString &userid)
 {
-    QSharedMemory sharedMemory(userid);
-    if (!sharedMemory.create(512, QSharedMemory::ReadWrite))
-    {
-        return false;
+    LPCWSTR key = (const wchar_t*) userid.utf16();
+    HANDLE m_hutex  =  CreateMutex(NULL, FALSE,  key);
+    if  (GetLastError()  ==  ERROR_ALREADY_EXISTS)  {
+        CloseHandle(m_hutex);
+        m_hutex  =  NULL;
+        return  true;
     }
-    return true;
+    else
+        return false;
 }
 
 

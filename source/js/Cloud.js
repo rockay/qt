@@ -8,7 +8,7 @@ function getClouds(){
     // file_mold：文件类型，0 表示获取所有，1 表示只获取图片 get_mold：获取类型，1 表示首次获取或下拉刷新，2 表示上拉获取更多
     // last_node：获取节点，get_mold 为 1 时为 0，
     // get_mold 为 2 时为已获取到的最 后一条 cloud_id
-    var obj = "token="+settings.token+"&file_mold=0&get_mold=1&last_node=0";
+    var obj = "token="+API.token+"&file_mold=0&get_mold=1&last_node=0";
     var verb = "POST";
     console.log("clouds::::::::"+obj);
     allmodel.clear();
@@ -83,7 +83,7 @@ function uploadFie(){
 // 文件上传成功后，保存文件。
 function saveFile(fileinfo){
     var url = API.api_root + API.api_savefile;
-    var obj = "token="+settings.token+"&file_info="+fileinfo;
+    var obj = "token="+API.token+"&file_info="+fileinfo;
     var verb = "POST";
     console.log("post param:"+obj);
     API.httpRequest(verb, url, obj, saveFileCB);
@@ -107,7 +107,7 @@ function saveFileCB(data){
 // 获取云库文件(发送消息时)
 function getCloudsByMsg(){
     var url = API.api_root+API.api_getcloudfile;
-    var obj = "token="+settings.token+"&file_mold=0&get_mold=1&last_node=0";
+    var obj = "token="+API.token+"&file_mold=0&get_mold=1&last_node=0";
     var verb = "POST";
     API.httpRequest(verb, url, obj, getCloudsByMsgCB);
 
@@ -180,7 +180,7 @@ function deleteFile(cloudid){
 
     // 提交接口修改
     var url = API.api_root+API.api_removefile;
-    var obj = "token="+settings.token+"&cloud_id="+cloudid;
+    var obj = "token="+API.token+"&cloud_id="+cloudid;
     var verb = "POST";
     API.httpRequest(verb, url, obj, deleteFileCB);
 }

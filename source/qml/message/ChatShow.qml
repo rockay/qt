@@ -100,7 +100,7 @@ Rectangle{
     Component{
         id: conversationDelegate
         Column {
-            property bool sentByMe: (model.senderid == settings.user_id) ? true : false
+            property bool sentByMe: (model.senderid == API.user_id) ? true : false
             anchors.right: sentByMe ? parent.right : undefined
             spacing: 10
 
@@ -464,7 +464,7 @@ Rectangle{
                         id: me
                         width: parent.height
                         height: parent.height
-                        source: sentByMe ? settings.user_photo : ""
+                        source: sentByMe ? API.user_photo : ""
                     }
                 }
             }

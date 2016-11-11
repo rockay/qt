@@ -19,6 +19,8 @@ void QTDataBase::initDB(const QString &user_id)
         if (!database.isValid())
             qFatal("Cannot add database: %s", qPrintable(database.lastError().text()));
     }
+    if(database.isOpen())
+        database.close();
 
     QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     writeDir.setPath(writeDir.path()+"/"+user_id);

@@ -3,7 +3,7 @@ var allGroups;
 // 获取群组
 function getGroups(){
     var url = API.api_root+API.api_grouplist;
-    var obj = "token="+settings.token+"&last_node=0";
+    var obj = "token="+API.token+"&last_node=0";
     var verb = "POST";
     API.httpRequest(verb, url, obj, getGroupsCB);
 

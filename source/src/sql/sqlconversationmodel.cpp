@@ -46,6 +46,7 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 #include <QSettings>
+#include "ryimpl.h"
 
 static const char *conversationsTableName = "Conversations";
 
@@ -219,12 +220,12 @@ void SqlConversationModel::deleteMsgByID(const QString &msgUId)
 void SqlConversationModel::refresh()
 {
     setTable(conversationsTableName);
-    QSettings settings;
-    settings.setObjectName("settings");
-    QString user_id = settings.value("user_id").toString();
+//    QSettings settings;
+//    settings.setObjectName("settings");
+//    QString user_id = settings.value("user_id").toString();
 
     const QString filterString = QString::fromLatin1(
-        " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(m_targetid,user_id);
+        " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(m_targetid, RYImpl::getInstance()->m_userid);
     setFilter(filterString);
     setSort(8, Qt::AscendingOrder);
     select();

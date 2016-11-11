@@ -1,4 +1,18 @@
-﻿
+﻿// 设置登录者的基本信息
+function copySettings2API(){
+    API.token = settings.token;
+    API.rong_token = settings.rong_token;
+    API.weix_token = settings.weix_token;
+    API.user_id = settings.user_id;
+    API.user_mobile = settings.user_mobile;
+    API.user_name = settings.user_name;
+    API.user_wx_name = settings.user_wx_name;
+    API.user_photo = settings.user_photo;
+    API.is_vip_user = settings.is_vip_user;
+    API.is_company_user = settings.is_company_user;
+    main.pphoto = API.user_photo;
+}
+
 // 获取验证码
 function sndVCode(){
     if(phone.text=="" || phone.text.length!=11){
@@ -27,7 +41,7 @@ function clearCodeLogin(){
 function sndVCodeCB(data){
     console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
-        settings.code = data.rnd_code;
+//        settings.code = data.rnd_code;
         tips.text = qsTr("验证码短信已发送到手机，请注意查收");
     }else{
         clearCodeLogin();
@@ -65,7 +79,7 @@ function sndVoiceCode(){
 function sndVoiceCodeCB(data){
 //    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
-        settings.code = data.rnd_code;
+//        settings.code = data.rnd_code;
         tips.text = ("将通过语音电话为你播报验证码，请注意来电");
     }else{
         clearCodeLogin();
@@ -106,18 +120,23 @@ function getUserInfoByIdCB(data){
         login.hide();
         main.reLogin = false;
         main.reLogin = true;
-        ryControl.initLib(settings.rong_token);
+        copySettings2API();
+        ryControl.initLib(API.rong_token, API.user_id);
         ryControl.connect();
         clearCodeLogin();
         isLogin = true;
     }else if(data.errorcode === 10){
-        tips.text = "帐号在其他设备登录，请用验证码重新登录";
-        ryControl.connect();
         isCodeLogin = false;
         isCodeLogin = true;
         isLogin = false;
+        tips.text = "帐号在其他设备登录，请用验证码重新登录";
+        ryControl.connect();
     }
     else{
+        smsTipDialog.msg = qsTr("登录失败，未获取到该账户信息，请重试!")
+        smsTipDialog.flag = 1;
+        smsTipDialog.okTitle = qsTr("确定")
+        smsTipDialog.show();
         tips.text = "登录失败，未获取到该账户信息";
     }
 }
@@ -146,7 +165,6 @@ function loginCB(data){
         clearCodeLogin();
         code.text = "";
         isLogin = true;
-
         console.log("登录成功");
         settings.token = data.token;
         settings.rong_token = data.rong_token;
@@ -158,13 +176,15 @@ function loginCB(data){
         settings.user_photo = data.user_info.user_photo;
         settings.is_vip_user = data.user_info.is_vip_user;
         settings.is_company_user = data.user_info.is_company_user;
+
+        copySettings2API();
         tips.text = "";
-        dbControl.initDB(settings.user_id)
+        dbControl.initDB(API.user_id)
         main.reLogin = false;
         main.reLogin = true;
         main.show();
         login.hide();
-        ryControl.initLib(settings.rong_token);
+        ryControl.initLib(API.rong_token, API.user_id);
         ryControl.connect();
 
 
@@ -222,5 +242,11 @@ function getConfigCB(data){
 
     }else{
         console.log("获取配置信息回调成功失败");
+        smsTipDialog.msg = qsTr("获取配置信息回调成功失败!")
+        smsTipDialog.flag = 1;
+        smsTipDialog.okTitle = qsTr("确定")
+        smsTipDialog.show();
+        tips.text = qsTr("获取配置信息回调成功失败");
+        return ;
     }
 }

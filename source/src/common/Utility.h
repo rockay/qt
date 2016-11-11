@@ -10,7 +10,7 @@
 #include <QFileInfo>
 #include "Updater.h"
 
-typedef bool(*DLLFuncd)();
+typedef int(*DLLFuncd)(int);
 
 class Utility :  public QObject
 {
@@ -63,7 +63,7 @@ private:
     int m_filefrom;
 
     UpdaterHttp *updater;
-    DLLFuncd print;
+    DLLFuncd screenshot;
 
 
     static Utility* m_instance;

@@ -4,7 +4,7 @@ var allCompany ;    // 所有企业好友
 // 获取通讯录好友
 function getContacts(){
     var url = API.api_root+API.api_friendlist;
-    var obj = "token="+settings.token;
+    var obj = "token="+API.token;
     var verb = "POST";
     API.httpRequest(verb, url, obj, getContactsCB);
 
@@ -27,7 +27,7 @@ function getContactsCB(data){
 // 获取企业好友
 function getCompany(){
     var url = API.api_root+API.api_companyflist;
-    var obj = "token="+settings.token; // 企业ID先写死，可能要接口
+    var obj = "token="+API.token; // 企业ID先写死，可能要接口
     var verb = "POST";
     API.httpRequest(verb, url, obj, getCompanyCB);
 

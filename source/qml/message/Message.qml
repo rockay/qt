@@ -64,7 +64,7 @@ Item {
                     var recipient = kk[1];
                     var categoryId = kk[2];
                     var messgeid = utilityControl.getMessageId();
-                    message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,settings.user_id,content,targetid,0,31,"");
+                    message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,content,targetid,0,31,"");
                     ryControl.sendCloudMsg(messgeid,targetid,categoryId,content,31);
                 }
 
@@ -779,14 +779,14 @@ Item {
                                     var lasttime = contentJson.lastMessageSendTime+'';
                                     console.log("lastMessageSendTime:"+lasttime);
                                     messageid = lasttime.substr(0,10);
-                                    chatview.chatListModel.updateMsgStatusByLastTime(messageid,settings.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
+                                    chatview.chatListModel.updateMsgStatusByLastTime(messageid,API.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
                                     break;
                                 case 4: //文字
                                 case 31: //云库
                                 case 5: //图片
                                 case 6: // 语音
                                     // 添加到所有的聊天记录
-                                    chatview.chatListModel.addMessage(msgUid,messageid,settings.user_name,senderid,msg,targetid,1,type,sendtime);
+                                    chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime);
                                     // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
                                     // 如果是图片
                                     if(type==5)
@@ -943,7 +943,7 @@ Item {
                                     if (mouse.button == Qt.RightButton) // 右键双击不算
                                         return;
                                     // 如果是自己则不操作
-                                    if(user_id == settings.user_id)
+                                    if(user_id == API.user_id)
                                         return;
 
                                     // 判断是否已经存在

@@ -20,6 +20,7 @@ Window {
            | Qt.WindowMinimizeButtonHint| Qt.Window;
     color: UI.cTransparent
     property bool reLogin: false
+    property string pphoto: ""
 
 
     onClosing:{
@@ -87,7 +88,7 @@ Window {
 
                 sendtxt = file_ext+"|"+file_mold+"|"+file_size+"|"+file_name+"|"+file_url
                 var messgeid = utilityControl.getMessageId();
-                message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,settings.user_id,sendtxt,targetid,0,31,"");
+                message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,sendtxt,targetid,0,31,"");
                 var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
 
                 chooseCloudFile.visible = false;
@@ -114,7 +115,7 @@ Window {
                 anchors.top: parent.top
 
                 columns: 1
-                LToolButton { source: settings.user_photo ;
+                LToolButton { source: pphoto ;
                     width: parent.width; height: UI.fHToolButton-20
                     MouseArea{
                         anchors.fill: parent

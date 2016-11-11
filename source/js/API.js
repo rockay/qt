@@ -18,16 +18,16 @@ var api_root = "http://www.2045kpt.com/";
 //    "errorcode": -1
 //}
 // token 测试用
-var token = "6EBB10896EBB5C1F4D754D755C1F4D7526CC6EBB";
-var rong_token = "BFJgjNcFWmdVMB0W0q9jmz6LgOT5GtjMBORyJ/SMMB/Ai4SgesOUyx7VFQEDhV3ISmHPNBHothR7uHSWxYPLGf6/sJrJ7b4J"
+var token = "";
+var rong_token = ""
 var weix_token = ""
-var user_id = "1012332"
-var user_mobile = "13550324665"
-var user_name = "刘涛"
-var user_wx_name = "刘裕"
-var user_photo = "http://wx.qlogo.cn/mmopen/Q3auHgzwzM7LGvbFZdOCibjYOXnwcQiccZ7KXX7fxPXYZsEUN5AVYsEvY2yMl7LcaG5Vx8ibBXLHjfxGqQdFATkBg/0"
-var is_vip_user = "0"
-var is_company_user = "0"
+var user_id = ""
+var user_mobile = ""
+var user_name = ""
+var user_wx_name = ""
+var user_photo = ""
+var is_vip_user = ""
+var is_company_user = ""
 
 var windows_newversion = ""
 var windows_newdescribe = ""

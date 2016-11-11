@@ -54,7 +54,7 @@ function sendMsg(sendtxt,user_type,ctype){
 
         // 先保存数据库
         var messgeid = utilityControl.getMessageId();
-        chatview.chatListModel.addMessage(utilityControl.getGuid(),messgeid,targetid,settings.user_id,sendtxt,targetid,0,ctype,""); // 空为发送时间，CPP中获取
+        chatview.chatListModel.addMessage(utilityControl.getGuid(),messgeid,targetid, API.user_id,sendtxt,targetid,0,ctype,""); // 空为发送时间，CPP中获取
         console.log("send message before")
         if(mentionList.length==0 || categoryId !=3 )
             ryControl.sendMsg(messgeid, targetid,categoryId,sendtxt,ctype,"");
@@ -101,7 +101,7 @@ var allGroupUser ;    // 所有群成员
 // 获取群成员
 function getGroupMember(groupid){
     var url = API.api_root+API.api_groupmember;
-    var obj = "token="+settings.token+"&group_id="+groupid;
+    var obj = "token="+API.token+"&group_id="+groupid;
     var verb = "POST";
     API.httpRequest(verb, url, obj, getGroupMemberCB);
 
@@ -135,7 +135,7 @@ function getGroupMemberCB(data){
 // 文件上传成功后，保存文件。
 function saveFileMsg(fileinfo){
     var url = API.api_root + API.api_savefile;
-    var obj = "token="+settings.token+"&file_info="+fileinfo;
+    var obj = "token="+API.token+"&file_info="+fileinfo;
     var verb = "POST";
     console.log("post url:"+url);
     console.log("post param:"+obj);
@@ -166,7 +166,7 @@ function saveFileMsgCB(data){
 
             // 先保存数据库
             var messgeid = utilityControl.getMessageId();
-            chatview.chatListModel.addMessage(messgeid, messgeid, targetid, settings.user_id, sendtxt, targetid,0,31,""); // 空为发送时间，CPP中获取
+            chatview.chatListModel.addMessage(messgeid, messgeid, targetid, API.user_id, sendtxt, targetid,0,31,""); // 空为发送时间，CPP中获取
             var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
 
         }
@@ -182,7 +182,7 @@ function saveFileMsgCB(data){
 var tempfmsg = "";
 function getUserInfoById(user_id, msg){
     var url = API.api_root+API.api_frienddetail;
-    var obj = "token="+settings.token+"&search_key="+user_id;
+    var obj = "token="+API.token+"&search_key="+user_id;
     var verb = "POST";
     tempfmsg = msg;
     API.httpRequest(verb, url, obj, getUserInfoByIdCB);
@@ -208,7 +208,7 @@ var tempgmsg = "";
 // 获取群组信息
 function getGroupInfoById(groupid, msg){
     var url = API.api_root+API.api_groupmember;
-    var obj = "token="+settings.token+"&group_id="+groupid;
+    var obj = "token="+API.token+"&group_id="+groupid;
     var verb = "POST";
     grouptempid = groupid;
     tempgmsg = msg;
@@ -246,7 +246,7 @@ function search(name) {
     grpMemberListModelFilter.clear();
     console.log(JSON.stringify("name:"+name));
     tempdata = allGroupUser.filter(function(item){
-        return  (item.user_name.indexOf(name)>=0 && item.user_id != settings.user_id);
+        return  (item.user_name.indexOf(name)>=0 && item.user_id != API.user_id);
     });
     grpMemberListModelFilter.append(tempdata);
     if(grpMemberListModelFilter.count>0)

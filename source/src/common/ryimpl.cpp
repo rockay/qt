@@ -175,11 +175,9 @@ void __stdcall message_callback(const wchar_t* json_str)
     emit RYImpl::getInstance()->receivedMsg(type,sender,msgUId,QString::number(messageid),content,sendtime,conversationType,targetid, isMentionedMe);
 }
 
-void RYImpl::initLib(const QString &token)
+void RYImpl::initLib(const QString &token, const QString &user_id)
 {
     m_token = token;
-    QSettings settings;
-    QString user_id = settings.value("user_id").toString();
     m_userid = user_id;
 
     QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);

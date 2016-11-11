@@ -60,7 +60,7 @@ signals:
     void sendImageFailed(int messageid,int errorcode);
     void recccvMsg(const QString &senderid);
 public slots:
-    void initLib(const QString &token);
+    void initLib(const QString &token, const QString &user_id);
     void connect();
     void disconnect();
     int sendMsg(int msgid,const QString &targetId,int categoryId, const QString &msg, int type, const QString &mention="");     // 发送消息，返回消息ID号
