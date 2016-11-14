@@ -151,7 +151,7 @@ function selectFiles(fileUrls){
             showSize = allSize/1024 > 1024 ? (allSize/1024/1024).toFixed(2)+"M" : (allSize/1024).toFixed(2)+"k"
         }
     }
-    bottomtips.text = qsTr("共"+upfilemodel.count+"个文件，"+showSize+"（上传过程中请不要删除原始文件）")
+    bottomtips.text = qsTr("共"+upfilemodel.count+"个文件，"+showSize)
     bottomtips.visible = true;
 }
 

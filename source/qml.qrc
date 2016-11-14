@@ -293,5 +293,7 @@
         <file>controls/LMessageDialog.qml</file>
         <file>images/message.wav</file>
         <file>controls/ContextMenu.qml</file>
+        <file>images/icon/arr_right.png</file>
+        <file>images/icon/arr_down.png</file>
     </qresource>
 </RCC>

@@ -89,8 +89,8 @@ Rectangle {
         LText{
             id: uptitle
             color: UI.cUploadTitle
-            text: qsTr("上传图片-批量上传")
-            pointSize: UI.StandardFontPointSize
+            text: qsTr("上传文件")
+            pointSize: UI.LittleFontPointSize
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top
@@ -208,7 +208,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
                     horizontalAlignment: Text.AlignHCenter
-                    color: upfilegrid.currentIndex==index ? "red" : "black"
+                    color: UI.cUploadTip //upfilegrid.currentIndex==index ? "red" : UI.cUploadTip
                 }
                 MouseArea{
                     anchors.fill: parent
@@ -258,7 +258,7 @@ Rectangle {
 
             model: upfilemodel
             delegate: upfileDelegate
-            highlight: Rectangle { color: UI.cLightBlue; radius: 2 }
+//            highlight: Rectangle { color: UI.cLightBlue; radius: 2 }
             clip: true
             maximumFlickVelocity: 10000
             focus: true
@@ -271,7 +271,7 @@ Rectangle {
 
     Rectangle{
         id: bottombar
-        height: 80
+        height: 60
         width: parent.width - 4
         color: UI.cTransparent
         anchors.left: parent.left
@@ -281,11 +281,11 @@ Rectangle {
         LButton{
             id: uploadBtn
             text: qsTr("开始上传")
-            fontSize: UI.StandardFontPointSize
-            width: 150
-            height: 50
-            anchors.left: parent.left
-            anchors.leftMargin: 10
+            fontSize: UI.LittleFontPointSize
+            width: 100
+            height: 40
+            anchors.right: parent.right
+            anchors.rightMargin: 10
             anchors.top: parent.top
             color: UI.cWhite
             bgcolor: UI.cUploadBtnBG
@@ -308,11 +308,11 @@ Rectangle {
         LButton{
             id: addFileBtn
             text: qsTr("添加文件")
-            fontSize: UI.StandardFontPointSize
-            width: 150
-            height: 50
-            anchors.left: uploadBtn.right
-            anchors.leftMargin: 10
+            fontSize: UI.LittleFontPointSize
+            width: 100
+            height: 40
+            anchors.right: uploadBtn.left
+            anchors.rightMargin: 10
             anchors.top: parent.top
             color: UI.cWhite
             bgcolor: UI.cUploadBtnBG
@@ -325,13 +325,13 @@ Rectangle {
         }
         LText{
             id: bottomtips
-            text: qsTr("共2张图片，0.34M（上传过程中请不要删除原始图片）")
+            text: qsTr("选择或拖拽图片与PDF文档上传")
             pointSize: UI.LittleFontPointSize
-            anchors.left: addFileBtn.right
+            anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top
             anchors.topMargin: (parent.height - height)/2
-            visible: false
+            visible: true
             color: UI.cUploadTip
         }
     }

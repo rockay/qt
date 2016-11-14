@@ -90,13 +90,6 @@ function sndVoiceCodeCB(data){
 // 快速登录
 function loginLocal(){
     if(settings.token!=""){
-        if(utilityControl.checkIdIsLogin(settings.user_id)){
-            smsTipDialog.msg = qsTr("账户已经登录!")
-            smsTipDialog.flag = 1;
-            smsTipDialog.okTitle = qsTr("确定")
-            smsTipDialog.show();
-            return ;
-        }
         // 判断验证码是否过期就行了。
         getUserInfoById(settings.user_id);
     }
@@ -115,6 +108,13 @@ function getUserInfoById(user_id){
 function getUserInfoByIdCB(data){
 //    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
+        if(utilityControl.checkIdIsLogin(settings.user_id)){
+            smsTipDialog.msg = qsTr("账户已经登录!")
+            smsTipDialog.flag = 1;
+            smsTipDialog.okTitle = qsTr("确定")
+            smsTipDialog.show();
+            return ;
+        }
         console.log("快捷登录成功");
         main.show();
         login.hide();
@@ -130,7 +130,8 @@ function getUserInfoByIdCB(data){
         isCodeLogin = true;
         isLogin = false;
         tips.text = "帐号在其他设备登录，请用验证码重新登录";
-        ryControl.connect();
+        ryControl.disconnect();
+        utilityControl.releseAccount();
     }
     else{
         smsTipDialog.msg = qsTr("登录失败，未获取到该账户信息，请重试!")
@@ -138,6 +139,8 @@ function getUserInfoByIdCB(data){
         smsTipDialog.okTitle = qsTr("确定")
         smsTipDialog.show();
         tips.text = "登录失败，未获取到该账户信息";
+        ryControl.disconnect();
+        utilityControl.releseAccount();
     }
 }
 

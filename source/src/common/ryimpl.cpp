@@ -365,6 +365,7 @@ void RYImpl::disconnect()
     if(m_isConnected &&  Disconnect != NULL){
        qDebug()<<("disconnect");
         Disconnect(4);
+        Utility::getInstance()->releseAccount();
     }
 }
 

@@ -43,7 +43,7 @@ Rectangle {
             id: uptitle
             color: UI.cUploadTitle
             text: qsTr("云库-选择文件(双击选择发送文件)")
-            pointSize: UI.StandardFontPointSize
+            pointSize: UI.LittleFontPointSize
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top
@@ -111,7 +111,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
                     horizontalAlignment: Text.AlignHCenter
-                    color: choosefilegrid.currentIndex==index ? "red" : "black"
+                    color: UI.cUploadTip //choosefilegrid.currentIndex==index ? "red" : UI.cUploadTip
                 }
                 MouseArea{
                     anchors.fill: parent
@@ -143,7 +143,7 @@ Rectangle {
 
             model: choosefilemodel
             delegate: upfileDelegate
-            highlight: Rectangle { color: UI.cLightBlue; radius: 2 }
+//            highlight: Rectangle { color: UI.cLightBlue; radius: 2 }
             clip: true
             maximumFlickVelocity: 10000
             focus: true

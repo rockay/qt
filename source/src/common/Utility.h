@@ -8,6 +8,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QFileInfo>
+#include <windows.h>
 #include "Updater.h"
 
 typedef int(*DLLFuncd)(int);
@@ -57,6 +58,7 @@ public slots:
     void copy(const QString &text);
     void quit();
     void checkUpdate(const QString& version, const QString& downloadpath, const QString& desc);
+    void releseAccount();
 
     bool checkIdIsLogin(const QString &userid); // 判断是否已经登录过
 private:
@@ -70,6 +72,8 @@ private:
 
 
     static Utility* m_instance;
+
+    HANDLE m_hutex;
 };
 
 #endif // UTILITY_H

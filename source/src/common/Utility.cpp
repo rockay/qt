@@ -18,7 +18,6 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QVersionNumber>
-#include <windows.h>
 #include "ryimpl.h"
 #include "qtquickcontrolsapplication.h"
 
@@ -352,17 +351,28 @@ void Utility::checkUpdate(const QString &version, const QString &downloadpath, c
     }
 }
 
+void Utility::releseAccount()
+{
+    qDebug()<<"ReleaseMutex"<<m_hutex;
+    if(m_hutex != NULL){
+        CloseHandle(m_hutex);
+        m_hutex  =  NULL;
+    }
+}
+
 bool Utility::checkIdIsLogin(const QString &userid)
 {
     LPCWSTR key = (const wchar_t*) userid.utf16();
-    HANDLE m_hutex  =  CreateMutex(NULL, FALSE,  key);
+    HANDLE temp  =  CreateMutex(NULL, FALSE,  key);
     if  (GetLastError()  ==  ERROR_ALREADY_EXISTS)  {
-        CloseHandle(m_hutex);
-        m_hutex  =  NULL;
+        CloseHandle(temp);
+        temp  =  NULL;
         return  true;
     }
-    else
+    else{
+        m_hutex = temp;
         return false;
+    }
 }
 
 

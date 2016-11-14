@@ -160,11 +160,11 @@ Item {
                 cover:"qrc:/images/icon/officefile.png"
                 bcolor:"#B3DEEA"
             }
-            ListElement{
-                name:qsTr("其他文档")
-                cover:"qrc:/images/icon/otherfile.png"
-                bcolor:"#C8E2D0"
-            }
+//            ListElement{
+//                name:qsTr("其他文档")
+//                cover:"qrc:/images/icon/otherfile.png"
+//                bcolor:"#C8E2D0"
+//            }
         }
 
         ListModel{

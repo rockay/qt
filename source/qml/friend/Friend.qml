@@ -118,7 +118,6 @@ Item {
                 id: busiView
                 property bool deleted: false
                 currentIndex: -1
-
                 model: busimodel
                 clip: true
                 maximumFlickVelocity: 5000
@@ -153,33 +152,50 @@ Item {
             Rectangle {
                 id:dataGroupContainer
                 width: busiView.width
-                height: UI.fHFItem/2
-                color: "#404244"
-                LText{
-                    id: sectionName
-                    width:parent.width
-                    height: parent.height
-                    font.pointSize: UI.LittleFontPointSize
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignLeft
-                    text: section
-                    color: UI.cWhite
-                    x: 10
+                height: UI.fHFItem
+                color: UI.cTransparent
+                Image{
+                    id: lefticon
+                    source: sectionName.selected ? "qrc:/images/icon/arr_down.png" : "qrc:/images/icon/arr_right.png"
+                    width: 21
+                    height: 21
+                    fillMode: Image.PreserveAspectFit
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.top: parent.top
+                    anchors.topMargin: (parent.height-height)/2
                 }
                 LText{
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignLeft
-                    x: parent.width - width-10;
+                    id: sectionName
+                    width: parent.width
+                    height: parent.height
                     font.pointSize: UI.LittleFontPointSize
-                    font.bold: true
-                    color: UI.cWhite
-                    text: qsTr(">")
+                    text: section
+                    color: selected ? UI.cBlack : "#818181"
+                    anchors.left: lefticon.right
+                    anchors.leftMargin: 10
+                    anchors.top: parent.top
+                    anchors.topMargin: (parent.height-height)/2
+                    property bool selected: false
+                }
+
+                Rectangle{
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    height: 1
+                    border.width: 1
+                    border.color: UI.cWhite
                 }
 
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
                         console.log("点击分组-展开/关闭...");
+                        if( sectionName.selected == true)
+                            sectionName.selected = false;
+                        else
+                            sectionName.selected = true;
+
                         for(var k=0;k<busimodel.rowCount();k++){
                             if(busimodel.get(k).company_name != sectionName.text)continue;
                             busimodel.get(k).visibled = !busimodel.get(k).visibled;

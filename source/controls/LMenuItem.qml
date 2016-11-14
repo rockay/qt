@@ -7,17 +7,34 @@ MenuItem {
     id: mitemroot
     font.family: UI.defaultFontFamily
     property string bgcolor : UI.cTransparent
-    property bool trigger: false
-    background: Rectangle{
-        focus: false
-        x: 2
-        y: 2
-        width: parent.width-4
-        height: parent.height-4
-        anchors.centerIn: parent
-        color: mitemroot.down ? UI.cLightBlue : UI.cTransparent
-//        color: mitemroot.hovered ? UI.cLightBlue : UI.cTransparent
+    focus: true
+    hoverEnabled: true
+    background: Item{
+        Rectangle{
+            x: 1
+            y: 1
+            width: parent.width-2
+            height: parent.height-2
+            color: mitemroot.hovered || mitemroot.down ? UI.cLightBlue : UI.cTransparent
+        //        MouseArea{
+        //            anchors.fill: parent
+        //            hoverEnabled: true
+        //            propagateComposedEvents: true
+        //            onEntered: {
+        //                parent.color = UI.cLightBlue;
+        //            }
+        //            onExited: {
+        //                parent.color = UI.cTransparent;
+        //            }
+        //            onClicked: {
+        ////                mouse.accepted = false
+        //                mitemroot.triggered();
+        //            }
+        //        }
+        }
+
     }
     leftPadding: 10
+
 }
 
