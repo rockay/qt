@@ -42,11 +42,15 @@ QtObject {
         minimumWidth: UI.fWMain
         minimumHeight: UI.fHMain
         visible: false
-   }
+    }
     property var iWindow:ImageShow {
         id: imageshow
         visible: false
-   }
+    }
+    property var fWindow:FileWebview {
+        id: fileshow
+        visible: false
+    }
 
     property var twindow: Window{
         id: ppFace
@@ -67,6 +71,7 @@ QtObject {
             anchors.fill: parent
         }
     }
+
 
 //    property var iWindow:ImageEdit {
 //        id: imageshow

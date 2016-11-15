@@ -295,5 +295,6 @@
         <file>controls/ContextMenu.qml</file>
         <file>images/icon/arr_right.png</file>
         <file>images/icon/arr_down.png</file>
+        <file>qml/message/FileWebview.qml</file>
     </qresource>
 </RCC>

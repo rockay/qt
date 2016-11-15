@@ -11,6 +11,7 @@ import org.lt.controls 1.1
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
+import "qrc:/js/convertuni.js" as ConvertJS
 
 
 Rectangle{
@@ -131,6 +132,7 @@ Rectangle{
                 }
 
                 Rectangle { // textarea
+                    id: textarearect
                     width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 24 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : model.ctype == 31 ? 250: (messageFile.width + 24)
                                     , listView.width - 2*UI.fChatImgH - messageRow.spacing-24)
                     height:{
@@ -192,24 +194,20 @@ Rectangle{
                         LText {
                             id: hidemessageText
                             text: model.message
-                            pointSize: UI.SmallFontPointSize
-                            font.family: UI.emojiFont
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
-                            anchors.margins: 12
                             wrapMode: Label.Wrap
+                            textFormat: Text.RichText
                             visible: false
                         }
                         LTextArea {
                             id: messageText
                             text: model.message
-                            font.family: UI.emojiFont
+//                            font.family: UI.emojiFont
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
-                            //                                anchors.margins: 12
                             wrapMode: Label.Wrap
                             visible: model.ctype == 4 ? true : false
-                            font.pointSize: UI.LittleFontPointSize
                             selectByMouse: true
                             textFormat: Qt.RichText
                             onLinkActivated: Qt.openUrlExternally(link)
@@ -239,7 +237,6 @@ Rectangle{
                                     }
                                 }
                             }
-
 
                             Menu {
                                 id: saveMenu
@@ -280,6 +277,14 @@ Rectangle{
                                 }
                             }
 
+                            Component.onCompleted: {
+                                var transferText = model.message.replace(/\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]/g, function(match){
+                                    return "<img src='qrc:/images/emoji/drawable-xhdpi/u"+ConvertJS.getCPfromChar(match).toLowerCase().trim()+".png' width=25 height=25/>";
+                                 });
+                                messageText.text= transferText ;
+                                hidemessageText.text= transferText ;
+                                console.log("transferText:"+transferText)
+                            }
                         }
                     }
                     Image{
@@ -451,6 +456,10 @@ Rectangle{
                                     imageshow.show()
                                     imageshow.requestActivate();
                                 }else if( model.message.split('|')[1].toString() === "2"){
+//                                    fileshow.fileUrl = ""
+//                                    fileshow.fileUrl = model.message.split('|')[4];
+//                                    fileshow.show()
+//                                    imageshow.requestActivate();
                                     Qt.openUrlExternally( model.message.split('|')[4]);
                                 }else{
                                     console.log("==unsupport file...")

@@ -6,7 +6,7 @@ import "qrc:/js/UI.js" as UI
 TextArea{
     id:txtControl
     font.family: UI.emojiFont
-    font.pointSize: UI.SmallFontPointSize
+    font.pointSize: UI.LittleFontPointSize
     wrapMode: TextEdit.Wrap
 //    property int maxLength: 200//最大输入长度
 //    onLengthChanged:

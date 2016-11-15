@@ -136,7 +136,7 @@ void DocumentHandler::insertFace(const QString &name, const QString &path)
 {
     QTextCursor helper = textCursor();
     QTextDocumentFragment fragment;
-    fragment = QTextDocumentFragment::fromHtml("<img src='"+path+"' width=100 height=100/>");
+    fragment = QTextDocumentFragment::fromHtml(path);
     helper.insertFragment(fragment);
 
 }
@@ -181,8 +181,8 @@ void DocumentHandler::insertImage(const QString &name, const QString &picpath)
     }
 
     // 等比例
-    int scalew = img.width()<img.height() ? 60.00/img.height()*img.width() : 60 ;
-    int scaleh = img.width()<img.height() ? 60 : (60.00/img.width()*img.height()) ;
+    int scalew = img.width()<img.height() ? 80.00/img.height()*img.width() : 80 ;
+    int scaleh = img.width()<img.height() ? 80 : (80.00/img.width()*img.height()) ;
     qDebug() << "width:"<<scalew;
     qDebug() << "height:"<<scaleh;
     QString html = tr("<img src='%1?pic' width='%2' height='%3'/>").arg(picpath,QString::number(scalew),QString::number(scaleh));

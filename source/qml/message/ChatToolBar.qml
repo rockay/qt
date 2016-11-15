@@ -8,6 +8,7 @@ import QtQuick.Window 2.2
 import "qrc:/controls/"
 import "qrc:/js/API.js" as API
 import "qrc:/js/UI.js" as UI
+import "qrc:/js/convertuni.js" as ConvertJS
 
 Rectangle {
     id: chattoolroot
@@ -21,7 +22,8 @@ Rectangle {
         target: ppFace.biaoq
         onSigFaceClicked: {
             console.log("text:"+text);
-            document.insertText(text);
+//            text = "<img src='qrc:/images/emoji/drawable-xhdpi/u"+ConvertJS.getCPfromChar(text).toLowerCase().trim()+".png' width=25 height=25/>"
+            document.insertFace("emoji",text);
         }
     }
 

@@ -9,6 +9,7 @@ import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 import "qrc:/js/Message.js" as MessageJS
+import "qrc:/js/convertuni.js" as ConvertJS
 
 Item {
 
@@ -976,9 +977,9 @@ Item {
                                 anchors.leftMargin: 5
                                 anchors.top: parent.top
                                 anchors.topMargin: (parent.height-height)/2
-                                pointSize: UI.TinyFontPointSize
                                 text: user_name
                                 height: contentHeight
+                                pointSize: UI.TinyFontPointSize
                             }
 
                             MouseArea{

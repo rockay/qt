@@ -169,7 +169,6 @@ Item {
                     id: sectionName
                     width: parent.width
                     height: parent.height
-                    font.pointSize: UI.LittleFontPointSize
                     text: section
                     color: selected ? UI.cBlack : "#818181"
                     anchors.left: lefticon.right

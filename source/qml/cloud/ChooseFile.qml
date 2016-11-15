@@ -43,7 +43,6 @@ Rectangle {
             id: uptitle
             color: UI.cUploadTitle
             text: qsTr("云库-选择文件(双击选择发送文件)")
-            pointSize: UI.LittleFontPointSize
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top

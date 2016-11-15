@@ -26,6 +26,12 @@ function sendFun(){
             subTxt += txtList[i];
             console.log("subTxt:"+subTxt);
         }else if(txtList[i].indexOf(":&&:") ==0 ){// 图片或文件
+            // 判断是否表情
+            if(txtList[i].indexOf(":&&:qrc:/images/emoji/drawable-xhdpi/u") ==0){
+                subTxt += utilityControl.getEmoji(ConvertJS.convertHexNCR2CP(txtList[i].replace(":&&:qrc:/images/emoji/drawable-xhdpi/u","&#x").replace(".png","")+";"));
+                continue;
+            }
+
             // 先发文本
             if(subTxt!=""){
                 chatview.ctype = 4;

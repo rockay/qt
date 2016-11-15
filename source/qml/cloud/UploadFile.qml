@@ -90,7 +90,6 @@ Rectangle {
             id: uptitle
             color: UI.cUploadTitle
             text: qsTr("上传文件")
-            pointSize: UI.LittleFontPointSize
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top
@@ -281,7 +280,6 @@ Rectangle {
         LButton{
             id: uploadBtn
             text: qsTr("开始上传")
-            fontSize: UI.LittleFontPointSize
             width: 100
             height: 40
             anchors.right: parent.right
@@ -308,7 +306,6 @@ Rectangle {
         LButton{
             id: addFileBtn
             text: qsTr("添加文件")
-            fontSize: UI.LittleFontPointSize
             width: 100
             height: 40
             anchors.right: uploadBtn.left
@@ -326,7 +323,6 @@ Rectangle {
         LText{
             id: bottomtips
             text: qsTr("选择或拖拽图片与PDF文档上传")
-            pointSize: UI.LittleFontPointSize
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top
