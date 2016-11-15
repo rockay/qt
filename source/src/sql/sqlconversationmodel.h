@@ -62,7 +62,7 @@ public:
                                  ,const QString &senderid, const QString &message, const QString &targetid
                                  , int result, int ctype, const QString &sendtime);
     Q_INVOKABLE void updateMsgStatus(const QString &msgUId, int result, uint timestamp=0);
-    Q_INVOKABLE void updateMsgStatusByLastTime(const QString &messageid,const QString &senderid, const QString &targetid,const QString &recvTime, int result);
+    Q_INVOKABLE void updateMsgStatusByLastTime(const QString &lasttime,const QString &senderid, const QString &targetid,const QString &recvTime, int result);
     Q_INVOKABLE QVariantMap get(int row);
     Q_INVOKABLE void updateMsgContent(const QString &msgUId, const QString &content);
     Q_INVOKABLE void deleteMsgByID(const QString &msgUId);

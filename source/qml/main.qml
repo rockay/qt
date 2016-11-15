@@ -33,7 +33,7 @@ QtObject {
         id: login
         visible: false
         width: 400 //280
-        height: 520 //400
+        height: 560 //400
     }
     property var mWindow:MainWindow {
         id: main

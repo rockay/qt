@@ -61,6 +61,10 @@ TextBalloon::TextBalloon(QQuickItem *parent)
 //! [1]
 void TextBalloon::paint(QPainter *painter)
 {
+//    QPen pen;
+//    pen.setColor("#EAEAEA");
+//    pen.setWidth(1);
+//    painter->setPen(pen);
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::Antialiasing);
     if(rightAligned){

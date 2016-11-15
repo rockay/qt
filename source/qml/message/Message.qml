@@ -45,7 +45,8 @@ Item {
             chatview.ctype = 5;
             // 将图片路径转成base64发送
             console.log("message send image path:"+path)
-            MessageJS.sendMsg(path,chatview.user_type,chatview.ctype);
+            chattool.document.insertImage("strPath","file:///"+path);
+            //MessageJS.sendMsg(path,chatview.user_type,chatview.ctype);
         }
         onSigquit: {
             console.log("hide");
@@ -121,6 +122,7 @@ Item {
         target: ryControl
         onSendImageFailed:{
             tips.text = "发送图片失败，请重试！"
+
             // 更新数据库为-1
             ryControl.updateMsgStatus(messageid,-1)
         }
@@ -136,11 +138,10 @@ Item {
             case 3: // 最后发送时间，已读
 //                                    tips.text = msg
                 var contentJson = JSON.parse(msg);
-                console.log("contentJson:"+contentJson);
                 var lasttime = contentJson.lastMessageSendTime+'';
                 console.log("lastMessageSendTime:"+lasttime);
-                messageid = lasttime.substr(0,10);
-                chatview.chatListModel.updateMsgStatusByLastTime(messageid,API.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
+//                messageid = lasttime.substr(0,10);
+                chatview.chatListModel.updateMsgStatusByLastTime(lasttime,API.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
                 break;
             case 4: //文字
             case 31: //云库
@@ -185,6 +186,46 @@ Item {
                 tips.text = "";
                 msgSound.play();
                 break;
+            case 32: // 收到回执类消息
+                console.log("qml 收到回执消息:"+msg)
+                var itemList = msg.split('|');
+                if(itemList.length!=4){
+                    return;
+                }
+                var sendUserId = itemList[2] ;
+                var groupId = itemList[3];
+
+                var replyContent = "{\"sendUserName\":\""+API.user_name+"\",\"sendUserId\":\""+API.user_id+"\",\"receipSendUserId\":\""+sendUserId+"\",\"groupId\":\""+groupId+"\"}"
+                chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,itemList[0]+"<font color=\"blue\">[回执消息]</font>",targetid,1,4,sendtime); // 4先当普通消息存放
+                if(type==32)
+                    msg = qsTr("[收到回执消息]");
+                if(conversationType == 1) // 单人
+                {
+
+                    if(senderid == chatview.user_id && main.visible){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
+                        console.log("回发消息...");
+                        MessageJS.sendNtyMsg(senderid,conversationType);
+                        chatListView.model.setCount(senderid, 0);
+                    }
+                    else{ // 不在当前会话列表
+                        if(!chatListView.model.addContactById(senderid, msg,1))  // 不在会话列表根据发送者获取基本信息
+                            MessageJS.getUserInfoById(senderid, msg)
+                    }
+                }
+                else if(conversationType == 3) // 群聊
+                {
+                    if(!chatListView.model.addContactById(targetid, msg,1)) // 不在会话列表根据发送者获取基本信息
+                        MessageJS.getGroupInfoById(targetid, msg)
+
+                }
+                // 让选中的人还是被选中
+                MessageJS.setCurrentIdx();
+                tips.text = "";
+                msgSound.play();
+
+                // 回发消息
+                ryControl.sendCustMsg(0,groupId,conversationType,replyContent);
+                break;
             }
         }
         onReceivedException:{
@@ -194,20 +235,21 @@ Item {
             else
                 tips.text = "通讯故障"
         }
-        onProceeFile:{
-            tips.text = "图片上传："+process+"%"
-        }
+//        onProceeFile:{
+//            tips.text = "图片上传："+process+"%"
+//        }
         onUploadFileCallback:{
-            tips.text = "图片成功"
             // 更新消息内容
             chatview.chatListModel.updateMsgContent(msgid, content);
         }
         onSendMsgDealCallback:{
             // 消息发送成功，入库
-            console.log("消息发送成功，入库")
+            console.log("消息发送成功，入库:"+msgid)
             chatview.chatListModel.updateMsgStatus(msgid, result,timestamp);
+            MessageJS.loopSendImg();
         }
     }
+
 
     onIsLoadChanged: {
         console.log("onIsLoadChanged,need refresh....")
@@ -231,6 +273,22 @@ Item {
     SoundEffect {
         id: msgSound
         source: "qrc:/images/message.wav"
+    }
+
+    // pdf convert to png
+
+    Rectangle{
+        id: pdfpng
+        width:100
+        height:100
+        border.width: 1
+        border.color: UI.cMainCBg
+        color: UI.cWhite
+        property string txtName: ""
+        LText{
+            text: pdfpng.txtName
+            anchors.centerIn: parent
+        }
     }
 
     Rectangle{
@@ -422,7 +480,8 @@ Item {
                         if (mouse.button == Qt.RightButton) { // 右键菜单
                             var pp  = Qt.point(mouse.x,mouse.y)
                             contactMenu.x = pp.x;
-                            contactMenu.y = pp.y;
+                            contactMenu.y = contactListView.y+index*UI.fHItem + pp.y;
+                            contactMenu.curIndex = index;
                             contactMenu.open();
                             return;
                         }
@@ -432,24 +491,42 @@ Item {
                     }
                 }
 
-                LMenu {
-                    id: contactMenu
-                    width: 70
-                    LMenuItem {
-                        text: qsTr("删除")
-                        onTriggered:{
-                            console.log("删除");
-                            if(index == chatListView.currentIndex){
-                                messageRect.visible = false;
-                                topTitle.text = "";
-                                chatListView.currentIndex--;
-                            }
-                            chatListView.model.remove(index);
 
-                        }
+
+            }
+        }
+        LMenu {
+            id: contactMenu
+            width: 70
+            property int curIndex: -1
+            LMenuItem {
+                text: qsTr("删除")
+                onTriggered:{
+                    console.log("删除");
+                    chatListView.model.remove(contactMenu.curIndex);
+
+                    if(chatListView.currentIndex>0 && chatListView.currentIndex < chatListView.model.count)
+                        chatListView.currentIndex--;
+                    else if(chatListView.model.count==0){
+                        chatListView.currentIndex = -1;
+                        messageRect.visible = false;
+                        topTitle.text = "";
+                        chatview.user_id="";
+                        chatview.user_type=1;
+                    }else if(chatListView.currentIndex == 0 && chatListView.model.count>0){
+                        chatListView.currentIndex = -1;
+                        chatListView.currentIndex = 0;
                     }
-                }
 
+//                            if(index == chatListView.currentIndex){
+////                                messageRect.visible = false;
+////                                topTitle.text = "";
+//                                if(chatListView.model.count>0)
+//                                    chatListView.currentIndex--;
+//                            }
+//                            chatListView.model.remove(index);
+
+                }
             }
         }
     }
@@ -562,6 +639,9 @@ Item {
                                         chatview.ctype = 5;
                                         // 将图片路径转成base64发送
                                         console.log("message send image path:"+strPath)
+
+                                        chattool.document.insertImage("strPath",strPath);
+                                        return
                                         MessageJS.sendMsg(strPath,chatview.user_type,chatview.ctype);
 
                                     }
@@ -599,26 +679,16 @@ Item {
                                 sequence: "Ctrl+Return"
                                 onActivated:  {
                                     console.log("发送消息");
-                                    chatview.ctype = 4; // 文字和表情都是文字，图片直接发送
-                                    var sendtxt = chattool.document.transferText;
-                                    if(sendtxt.length==0){
-                                        tips.text = qsTr("请输入要发送的内容")
-                                        return
-                                    }
-                                    MessageJS.sendMsg(sendtxt,chatview.user_type,chatview.ctype); // user_type1为个人 3为群组
+
+                                    MessageJS.sendFun();
                                 }
                             }
                             Shortcut {
                                 sequence: "Ctrl+Enter"
                                 onActivated:  {
                                     console.log("发送消息");
-                                    chatview.ctype = 4; // 文字和表情都是文字，图片直接发送
-                                    var sendtxt = chattool.document.transferText;
-                                    if(sendtxt.length==0){
-                                        tips.text = qsTr("请输入要发送的内容")
-                                        return
-                                    }
-                                    MessageJS.sendMsg(sendtxt,chatview.user_type,chatview.ctype); // user_type1为个人 3为群组
+
+                                    MessageJS.sendFun();
                                 }
                             }
                             Timer {
@@ -653,7 +723,7 @@ Item {
 
                             Keys.onReturnPressed: {
                                 if( gUserView.visible && grpMemberListModelFilter.count>0){
-                                    var sendtxt = chattool.document.transferText;
+                                    var sendtxt = chattool.document.sourceText;
                                     var lastIdx = sendtxt.lastIndexOf("@");
                                     var tiptxt = sendtxt.substring(lastIdx+1);
                                     chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
@@ -665,7 +735,7 @@ Item {
                             }
                             Keys.onEnterPressed: {
                                 if( gUserView.visible && grpMemberListModelFilter.count>0){
-                                    var sendtxt = chattool.document.transferText;
+                                    var sendtxt = chattool.document.sourceText;
                                     var lastIdx = sendtxt.lastIndexOf("@");
                                     var tiptxt = sendtxt.substring(lastIdx+1);
                                     chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
@@ -690,13 +760,12 @@ Item {
 
                             onTextChanged: {
                                 if( (chatview.user_type+'') === "3"){
-                                    var sendtxt = chattool.document.transferText;
+                                    var sendtxt = chattool.document.sourceText;
+                                    console.log("onTextChanged:"+sendtxt)
                                     // 取最后一个@
                                     if(sendtxt.length>0){
                                         var lastchar = sendtxt.charAt(sendtxt.length - 1);
                                         var lastIdx = sendtxt.lastIndexOf("@");
-//                                        console.log(lastchar)
-//                                        console.log(lastIdx)
                                         if(lastchar === "@"){
                                             MessageJS.search("")
                                             gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
@@ -763,7 +832,7 @@ Item {
                                         MouseArea{
                                             anchors.fill: parent
                                             onClicked: {
-                                                var sendtxt = chattool.document.transferText;
+                                                var sendtxt = chattool.document.sourceText;
                                                 var lastIdx = sendtxt.lastIndexOf("@");
                                                 var tiptxt = sendtxt.substring(lastIdx+1);
                                                 chattool.document.insertText(grpMemberListModelFilter.get(0).user_name.replace(tiptxt,"")+" ")
@@ -838,13 +907,7 @@ Item {
                             anchors.bottomMargin: 5
                             text: qsTr("发送(S)")
                             onClicked: {
-                                chatview.ctype = 4; // 文字和表情都是文字，图片直接发送
-                                var sendtxt = chattool.document.transferText;
-                                if(sendtxt.length==0){
-                                    tips.text = qsTr("请输入要发送的内容")
-                                    return
-                                }
-                                MessageJS.sendMsg(sendtxt,chatview.user_type,chatview.ctype); // user_type1为个人 3为群组
+                                MessageJS.sendFun();
                             }
                         }
 
@@ -974,12 +1037,14 @@ Item {
                                 LMenuItem {
                                     text: "发消息"
                                     onTriggered:{
+                                        // 如果是自己则不操作
+                                        if(user_id == API.user_id)
+                                            return;
 
                                         // 判断是否已经存在
                                         var idx = -1;
                                         console.log(user_id)
                                         for(var i=0; i<chatListModel.rowCount(); i++){
-                                            console.log(chatListModel.getId(i))
                                             if(chatListModel.getId(i) === user_id){
                                                 idx = i;
                                                 break;

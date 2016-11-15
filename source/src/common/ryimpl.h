@@ -2,6 +2,7 @@
 #define RYIMPL_H
 
 #include <QObject>
+#include <QMap>
 typedef void(__stdcall *ConnectAckListenerCallback)(const wchar_t* json_str);
 
 typedef void(__stdcall *PublishAckListenerCallback)(const wchar_t* json_str);
@@ -20,7 +21,8 @@ enum MSGTYPE{
     MSG_VC=6,           // 收到语音消息
     MSG_IMGTXT=7,       // 收到图片文字消息
     MSG_LBS=8,           // 收到位置消息
-    MSG_CLOUDIMG=31           // 收到云库文件
+    MSG_CLOUDIMG=31,            // 收到云库文件
+    MSG_ReceiptMessage = 32     // 群里自定义回执消息
 };
 
 class RYImpl : public QObject
@@ -48,13 +50,15 @@ public:
     QString m_rootPath;
     QString m_voicePath;
     QString m_picPath;
+    bool m_locked;
+    bool m_txtlocked;
 
 
 signals:
     void receivedMsg(int type,const QString &senderid,const QString &msgUid, const QString &messageid, const QString &msg,const QString &sendtime,int conversationType,const QString& targetid, bool isMetionedMe);
     void sendMsgCallback(const QString &retJson);
     void receivedException(const QString &code,const QString &data);
-    void proceeFile(const QString &img_id, int process, int targetid);
+    void proceeFile(const QString &messageid, int percent, int targetid);
     void uploadFileCallback(const QString &msgid, const QString &content);
     void sendMsgDealCallback(int msgid, int result, uint timestamp);
     void sendImageFailed(int messageid,int errorcode);
@@ -65,7 +69,8 @@ public slots:
     void disconnect();
     int sendMsg(int msgid,const QString &targetId,int categoryId, const QString &msg, int type, const QString &mention="");     // 发送消息，返回消息ID号
     int sendCloudMsg(int msgid,const QString &targetId,int categoryId, const QString &msg, int type);                           // 发送云文件消息
-    void sendNtfMsg(const QString& msguid,const QString &targetId,int categoryId, const QString &msg);
+    void sendNtfMsg(const QString& msguid,const QString &targetId,int categoryId, const QString &msg);                          // 发送回执消息
+    int sendCustMsg(int msgid,const QString &targetId,int categoryId, const QString &msg);                                      // 发送自定义消息
 
     int GetChatList();
     QString saveImage(const QString & base64);
@@ -79,6 +84,8 @@ private:
     bool m_isLoaded;
     bool m_isConnected;
     int m_imgmessageId;
+    QMap<QString,QString> img_idmap;
+
 public:
     typedef int(*DLLFunDis)(int);
     DLLFunDis Disconnect;

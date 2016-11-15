@@ -178,12 +178,14 @@ void SqlConversationModel::updateMsgStatus(const QString &msgUId, int result,uin
     refresh();
 }
 
-void SqlConversationModel::updateMsgStatusByLastTime(const QString &messageid, const QString &senderid, const QString &targetid, const QString &recvTime, int result)
+void SqlConversationModel::updateMsgStatusByLastTime(const QString &lasttime, const QString &senderid, const QString &targetid, const QString &recvTime, int result)
 {
     // 先判断是否存在数据，存在则更新
+    QString sendtime = QDateTime::fromTime_t(lasttime.toLongLong()).toString("yyyy-MM-dd hh:mm:ss");
     QSqlQuery query;
-    QString  sql = tr("update conversations set result=%1,rcvTime='%2' where senderid='%3' and targetid='%4' and result=1 and messageid<='%5'")
-            .arg(QString::number(result), recvTime, senderid, targetid, messageid);
+    QString  sql = tr("update conversations set result=%1,rcvTime='%2' where senderid='%3' and targetid='%4' and result=1 and sendtime<='%5'")
+            .arg(QString::number(result), recvTime, senderid, targetid, sendtime);
+    qDebug()<<"updateMsgStatusByLastTime:"<<sql;
     if(!query.exec(sql))
         qDebug() << "Failed to send message:" << lastError().text() <<  tableName();
     submitAll();

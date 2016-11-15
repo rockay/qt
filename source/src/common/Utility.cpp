@@ -192,7 +192,7 @@ QString Utility::getGuid()
 int Utility::getMessageId()
 {
     QDateTime time = QDateTime::currentDateTime();   //获取当前时间
-    int timeT = time.toTime_t();   //将当前时间转为时间戳
+    int timeT = time.toMSecsSinceEpoch();   //将当前时间转为时间戳
     return timeT;
 }
 

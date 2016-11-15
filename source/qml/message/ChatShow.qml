@@ -6,7 +6,7 @@ import QtMultimedia 5.6
 import QtQuick.Dialogs 1.2
 
 import org.lt.db 1.0
-import org.lt.controls 1.0
+import org.lt.controls 1.1
 
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
@@ -200,7 +200,7 @@ Rectangle{
                             wrapMode: Label.Wrap
                             visible: false
                         }
-                        TextArea {
+                        LTextArea {
                             id: messageText
                             text: model.message
                             font.family: UI.emojiFont
@@ -209,8 +209,10 @@ Rectangle{
                             //                                anchors.margins: 12
                             wrapMode: Label.Wrap
                             visible: model.ctype == 4 ? true : false
-                            font.pointSize: UI.SmallFontPointSize
+                            font.pointSize: UI.LittleFontPointSize
                             selectByMouse: true
+                            textFormat: Qt.RichText
+                            onLinkActivated: Qt.openUrlExternally(link)
                             readOnly : true
                             persistentSelection: true
                             background: Rectangle {
@@ -284,7 +286,7 @@ Rectangle{
                         id: imgOrignal
                         visible: false
                         asynchronous: true
-                        source: model.ctype === 5? (model.result==-1 ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2]) : ""
+                        source: model.ctype === 5? ((model.result==-1 || model.result==0) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2]) : ""
                     }
 
                     Image {
@@ -481,6 +483,23 @@ Rectangle{
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        Connections {
+                            target: ryControl
+                            onProceeFile:{
+                                if(messageid == model.messageid){
+                                    if(percent==100){
+                                        msgMask.visible = false;
+                                    }
+                                    else if(model.ctype===5){
+                                        msgMask.visible = true
+                                        uploadprocess.text = percent+"%";
+//                                            console.log(uploadprocess.text)
+                                    }
+                                }
+//                                tips.text = "图片上传："+process+"%"
                             }
                         }
                     }

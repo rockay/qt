@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import org.lt.controls 1.0
+import org.lt.controls 1.1
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/convertuni.js" as ConvertJS
 

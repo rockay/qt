@@ -136,10 +136,8 @@ void DocumentHandler::insertFace(const QString &name, const QString &path)
 {
     QTextCursor helper = textCursor();
     QTextDocumentFragment fragment;
-    fragment = QTextDocumentFragment::fromHtml("<img src='"+path+"'/>");
+    fragment = QTextDocumentFragment::fromHtml("<img src='"+path+"' width=100 height=100/>");
     helper.insertFragment(fragment);
-    if(!m_facemap.contains(path))
-            m_facemap.insert(path,name);
 
 }
 
@@ -155,6 +153,56 @@ void DocumentHandler::copy()
     board->setText("233333");
 }
 
+void DocumentHandler::insertImage(const QString &name, const QString &picpath)
+{
+    QString tempPath = picpath;
+    QString path = tempPath.replace("file:///","");
+    qDebug() << QFile::exists(path) <<QFile::exists("file:///"+path);
+    QString file_ext = path.right(path.length()-path.lastIndexOf(".")-1);
+    QPixmap img;
+    if(!img.load(path,file_ext.toUtf8().data())) // 一直试图片格式
+    {
+        file_ext = "JPG";
+        if(!img.load(path,"JPG")){
+            file_ext = "PNG";
+            if(!img.load(path,"PNG")){
+                file_ext = "BMP";
+                if(!img.load(path,"BMP")){
+                    file_ext = "GIF";
+                    if(!img.load(path,"GIF")){
+                        file_ext = "ICO";
+                        if(!img.load(path,"ICO")){
+                            return ;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 等比例
+    int scalew = img.width()<img.height() ? 60.00/img.height()*img.width() : 60 ;
+    int scaleh = img.width()<img.height() ? 60 : (60.00/img.width()*img.height()) ;
+    qDebug() << "width:"<<scalew;
+    qDebug() << "height:"<<scaleh;
+    QString html = tr("<img src='%1?pic' width='%2' height='%3'/>").arg(picpath,QString::number(scalew),QString::number(scaleh));
+    qDebug()<<"html:"<<html;
+    QTextCursor helper = textCursor();
+    QTextDocumentFragment fragment;
+    fragment = QTextDocumentFragment::fromHtml(html);
+    helper.insertFragment(fragment);
+}
+
+void DocumentHandler::insertFile(const QString &name, const QString &path)
+{
+    // 生成缩略图
+    QTextCursor helper = textCursor();
+    QTextDocumentFragment fragment;
+    fragment = QTextDocumentFragment::fromHtml("<img src='"+path+"?pdf' width='60' height='60'/>");
+    helper.insertFragment(fragment);
+}
+
+
 void DocumentHandler::setText(const QString &arg)
 {
     if (m_text != arg) {
@@ -167,6 +215,14 @@ void DocumentHandler::setTransferText(const QString &arg)
     if (m_transferText != arg) {
         m_transferText = arg;
         emit transferTextChanged();
+    }
+}
+
+void DocumentHandler::setSourceText(const QString &arg)
+{
+    if (m_sourceText != arg) {
+        m_sourceText = arg;
+        emit sourceTextChanged();
     }
 }
 
@@ -201,22 +257,33 @@ QString DocumentHandler::text() const
 
 QString DocumentHandler::transferText() const
 {
-//    QString content = m_doc->toHtml();
-//    QTextBlock currentBlock = m_doc->begin();
-//    while (currentBlock.isValid()) {
-//        QTextBlock::iterator it;
-//        for (it = currentBlock.begin(); !(it.atEnd()); ++it) {
-//            QTextFragment currentFragment = it.fragment();
-//            if (currentFragment.isValid()){
-//                QTextImageFormat newImageFormat = currentFragment.charFormat().toImageFormat();
-//                if (newImageFormat.isValid()) {
+    QString content = m_doc->toHtml();
+    QTextBlock currentBlock = m_doc->begin();
+    while (currentBlock.isValid()) {
+        QTextBlock::iterator it;
+        for (it = currentBlock.begin(); !(it.atEnd()); ++it) {
+            QTextFragment currentFragment = it.fragment();
+            if (currentFragment.isValid()){
+                QTextImageFormat newImageFormat = currentFragment.charFormat().toImageFormat();
+                if (newImageFormat.isValid()) {
+                    // 判断是否有图片文件
 //                    content = content.replace("<img src=\""+newImageFormat.name()+"\" />",m_facemap.value(newImageFormat.name()));
-//                }
-//            }
-//        }
-//        currentBlock = currentBlock.next();
-//    }
-//    m_doc->setHtml(content);
+
+                    // <img([^<]*)/>  "<img[^<]+src=([^<]*)+[^<]/>"
+                    QString regStr = "<img[^>]+src=\"([^<]*)\"[^>]+width[^>]+/>";
+                    content = content.replace(QRegExp(regStr), "|&|:&&:\\1|&|");
+                    break;
+                }
+            }
+        }
+        currentBlock = currentBlock.next();
+    }
+    m_doc->setHtml(content);
+    return  m_doc->toPlainText();
+}
+
+QString DocumentHandler::sourceText() const
+{
     return  m_doc->toPlainText();
 }
 

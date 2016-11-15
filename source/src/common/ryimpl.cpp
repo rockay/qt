@@ -40,6 +40,8 @@ void __stdcall exception_callback(const wchar_t* json_str)
 
     emit RYImpl::getInstance()->receivedException(code, data);
 
+    RYImpl::getInstance()->m_txtlocked = false;
+    RYImpl::getInstance()->m_locked = false;
     auto connectCallback = [](const wchar_t* json_str)
     {
         QString str1= QString::fromWCharArray(json_str);
@@ -64,10 +66,17 @@ void __stdcall message_callback(const wchar_t* json_str)
     QJsonObject obj = getJsonObjectFromString(msg);
     QJsonObject objContent = getJsonObjectFromString(obj.value("m_Message").toString());
 
-    qDebug()<<"msg:"<<msg;
+//    qDebug()<<"msg:"<<msg;
     // 这里判断是对方发送消息，还是对方在输入内容。
     QString content ="";
     MSGTYPE type = MSGTYPE::OTHER;
+    QString msgUId = obj.value("m_MsgUId").toString();
+    QString sender = obj.value("m_SenderId").toString();
+    QString sendtime = obj.value("m_SendTime").toString();
+    QString targetid = obj.value("m_TargetId").toString();
+    int messageid = obj.value("m_MessageId").toInt();
+    int conversationType = obj.value("m_ConversationType").toInt();
+
     if(objContent.contains("content") || objContent.contains("file_url"))
     {
         emit RYImpl::getInstance()->recccvMsg("");
@@ -76,6 +85,7 @@ void __stdcall message_callback(const wchar_t* json_str)
         // 判断是文字还是图片，还是其它
         QString className = obj.value("m_ClazzName").toString();
         content = objContent.value("content").toString();
+        qDebug()<<"消息 className:"<<className;
         if(className.compare("RC:TxtMsg")==0) // 文字
         {
             type = MSGTYPE::MSG_TXT;
@@ -114,7 +124,6 @@ void __stdcall message_callback(const wchar_t* json_str)
         {
             type = MSGTYPE::MSG_CLOUDIMG;
             qDebug()<<"云库图片:"<<objContent;
-            qDebug()<<"file_name:"<<objContent.value("file_name").toString();
             QString file_ext = objContent.value("file_ext").toString();
             int file_mold= objContent.value("file_mold").toInt();
             int file_size = objContent.value("file_size").toInt();
@@ -122,7 +131,17 @@ void __stdcall message_callback(const wchar_t* json_str)
             QString file_url = objContent.value("file_url").toString();
             // 保存缩略图路径和远程路径
             content = QString("%1|%2|%3|%4|%5").arg(file_ext, QString::number(file_mold), QString::number(file_size), file_name, file_url);
-            qDebug()<<"云库图片:"<<content;
+        }
+        else if(className.compare("app:ReceiptMessage")==0) // 回执消息
+        {
+            type = MSGTYPE::MSG_ReceiptMessage;
+            qDebug()<<"回执消息:"<<objContent;
+            QString subcontent = objContent.value("content").toString();
+            QString sendUserName= objContent.value("sendUserName").toString();
+            QString sendUserId = objContent.value("sendUserId").toString();
+            QString groupId  = objContent.value("groupId").toString();
+            content = QString("%1|%2|%3|%4").arg(subcontent, sendUserName, sendUserId, groupId);
+            qDebug()<<"回执消息 content:"<<content;
         }
     }
     else if (objContent.contains("typingContentType")){
@@ -140,12 +159,7 @@ void __stdcall message_callback(const wchar_t* json_str)
         // 不知道的格式，直接返回
         return;
     }
-    QString msgUId = obj.value("m_MsgUId").toString();
-    QString sender = obj.value("m_SenderId").toString();
-    QString sendtime = obj.value("m_SendTime").toString();
-    QString targetid = obj.value("m_TargetId").toString();
-    int messageid = obj.value("m_MessageId").toInt();
-    int conversationType = obj.value("m_ConversationType").toInt();
+
     QString rcvTime = obj.value("m_RcvTime").toString();
     qDebug()<<"m_MessageId"<<messageid;
 
@@ -177,6 +191,8 @@ void __stdcall message_callback(const wchar_t* json_str)
 
 void RYImpl::initLib(const QString &token, const QString &user_id)
 {
+    m_locked = false;
+    m_txtlocked = false;
     m_token = token;
     m_userid = user_id;
 
@@ -384,6 +400,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
     qDebug()<<"msgw src:"<<u16.toUtf8()<<endl;
     auto sendMessageCallback = [](const wchar_t* json_str)
     {
+        RYImpl::getInstance()->m_txtlocked = false;
         QString str1= QString::fromWCharArray(json_str);
         qDebug()<< "发送回执:"+str1;
         QString u16 = QString::fromUtf16((const ushort*)json_str);
@@ -395,7 +412,6 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
         int timestamp = QString::number(time.toLongLong()).left(10).toInt();
         emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result,timestamp);
     };
-    m_imagePath = "";
     if(type==MSGTYPE::MSG_IMG) // 只有发送图片才有上传
     {
         m_imagePath = msg;
@@ -407,6 +423,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             QString msg = u16.toUtf8();
             QJsonObject obj = getJsonObjectFromString(msg);
             QString img_id = obj.value("img_id").toString();
+            RYImpl::getInstance()->m_locked = false;
             RYImpl::getInstance()->SendImage(u16,img_id.toInt());
         };
         auto processImageCallback = [](const wchar_t* json_str)
@@ -418,6 +435,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             QString img_id = obj.value("img_id").toString();
             int process = obj.value("process").toInt();
             int targetId = obj.value("targetId").toInt();
+            RYImpl::getInstance()->m_locked = false;
             emit RYImpl::getInstance()->proceeFile(img_id,process,targetId);
         };
 
@@ -431,16 +449,22 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             qDebug()<< "UpLoadFile open file path:"<<"file:///"+msg;
         }
         blob = file.readAll();
-        qDebug()<<blob.toHex();
-        qDebug()<<blob.size();
         uchar *picData = (uchar *)(blob.data());
+
+        if(!img_idmap.contains(QString::number(messageId))){
+            img_idmap.insert(QString::number(messageId),msg);
+        }
+//        while(m_locked);
+//        m_locked  = true;
         UpLoadFile(targetId.toUtf8().data(),categoryId,1,picData,blob.size(),QString::number(messageId).toUtf8().data(),sendImageCallback,processImageCallback);
-        qDebug()<<"UpLoadFile ok";
+        qDebug()<<"UpLoadFile ok:"<<messageId;
     }
-    qDebug()<<"sendMessage categoryId:"<<categoryId;
     if(sendMessage!=NULL){
         switch(type){
         case MSGTYPE::MSG_TXT:
+            qDebug()<<"sendMessage m_txtlocked:"<<m_txtlocked;
+//            while(m_txtlocked);
+//            m_txtlocked = true;
             sendMessage(targetId.toUtf8().data(), categoryId, 3, "RC:TxtMsg", msgw, "", "", messageId, sendMessageCallback);
             break;
         case MSGTYPE::MSG_VC:
@@ -483,6 +507,28 @@ int RYImpl::sendCloudMsg(int messageId,const QString &targetId,int categoryId, c
     }
     return messageId;
 }
+
+int RYImpl::sendCustMsg(int messageId,const QString &targetId,int categoryId, const QString &msg)
+{
+    m_categoryId = categoryId;
+    m_targetid = targetId;
+    qDebug()<<"发送自定义格式消息:"<<msg;
+    const wchar_t * msgw = reinterpret_cast<const wchar_t *>(msg.utf16());
+
+    auto sendMessageCallback = [](const wchar_t* json_str)
+    {
+        QString u16 = QString::fromUtf16((const ushort*)json_str);
+        QString retMsg = u16.toUtf8();
+        qDebug()<<"send cust messag callback:"<<retMsg;
+    };
+    if(sendMessage!=NULL){
+        sendMessage(targetId.toUtf8().data(), categoryId, 3, "app:ReceiptReadMessage", msgw, "", "", messageId, sendMessageCallback);
+    }
+    return messageId;
+}
+
+
+
 
 void RYImpl::sendNtfMsg(const QString& msguid, const QString &targetId, int categoryId, const QString &msg)
 {
@@ -559,13 +605,15 @@ void RYImpl::SendImage(const QString &json, int imgid)
     int errCode = obj.value("errorCode").toInt();
     QString result = obj.value("result").toString();
     QString img_id = obj.value("img_id").toString();
+    qDebug()<<"imgid:"<<imgid;
+    qDebug()<<"img_id:"<<img_id;
     QString targetId = QString(obj.value("targetId").toString());
     QString url = obj.value("url").toString();
     QString retStr = "";
     if(result.compare("success")==0){
-        qDebug()<<"errorCode==0";
         // 先生成缩略图
-        QString path = m_imagePath.replace("file:///","");
+        QString tempPath = img_idmap.value(QString::number(imgid));
+        QString path = tempPath.replace("file:///","");
         qDebug() << QFile::exists(path) <<QFile::exists("file:///"+path);
         QString file_ext = path.right(path.length()-path.lastIndexOf(".")-1);
         QPixmap img;
@@ -579,21 +627,21 @@ void RYImpl::SendImage(const QString &json, int imgid)
                     if(!img.load(path,"BMP")){
                         file_ext = "GIF";
                         if(!img.load(path,"GIF")){
+                            file_ext = "ICO";
                             if(!img.load(path,"ICO")){
                                 emit RYImpl::getInstance()->sendImageFailed(m_imgmessageId,errCode);
+                                return ;
                             }
                         }
                     }
                 }
             }
         }
+
         // 等比例
         int scalew = img.width()<img.height() ? 200.00/img.height()*img.width() : 200 ;
         int scaleh = img.width()<img.height() ? 200 : (200.00/img.width()*img.height()) ;
         qDebug() << "width:"<<img.width();
-        qDebug() << "height:"<<img.height();
-        qDebug() << "scalew:"<<scalew;
-        qDebug() << "scaleh:"<<scaleh;
 
 
         const QString fileName = m_picPath + Utility::getInstance()->getGuid()+"."+file_ext.toLower();
@@ -605,14 +653,15 @@ void RYImpl::SendImage(const QString &json, int imgid)
 
         QString base64data = Utility::getInstance()->getPictureBase64(fileName).toString();
         QString fmsg= tr("{\"content\":\"%1\",\"imageUri\":\"%2\",\"extra\":\"\"}").arg(base64data.toUtf8().data(),url);
-        qDebug() << "image content:"<<fmsg;
         const wchar_t * msgw = reinterpret_cast<const wchar_t *>(fmsg.utf16());
 //        int msgId = SaveMessage(targetId.toUtf8().data(), m_categoryId, "RC:ImgMsg", m_userid.toLatin1().data(), msgw, "", "");
 
-        auto sendMessageCallback = [](const wchar_t* json_str)
+        auto sendMessageCallback1 = [](const wchar_t* json_str)
         {
+            RYImpl::getInstance()->m_txtlocked = false;
             QString u16 = QString::fromUtf16((const ushort*)json_str);
             QString retMsg = u16.toUtf8();
+            qDebug()<<"send image callback..."<<retMsg;
             QJsonObject obj = getJsonObjectFromString(retMsg);
             int msgUId = obj.value("messageId").toInt();
             int result = obj.value("result").toString() == "success" ? 1 : -1;
@@ -620,11 +669,13 @@ void RYImpl::SendImage(const QString &json, int imgid)
             int timestamp = QString::number(time.toLongLong()).left(10).toInt();
             emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result, timestamp);
         };
-
+//        qDebug()<<"m_txtlocked:"<<m_txtlocked;
+//        while(m_txtlocked);
+//        m_txtlocked = true;
         // 上传成功，发送消息
-        sendMessage(targetId.toUtf8().data(), m_categoryId, 3, "RC:ImgMsg", msgw, "", "", imgid, sendMessageCallback);
+        sendMessage(targetId.toUtf8().data(), m_categoryId, 3, "RC:ImgMsg", msgw, "", "",imgid, sendMessageCallback1);
     }else{
         qDebug()<<"results!=succes:"<<result;
-        emit RYImpl::getInstance()->sendImageFailed(m_imgmessageId,errCode);
+        emit RYImpl::getInstance()->sendImageFailed(imgid,errCode);
     }
 }

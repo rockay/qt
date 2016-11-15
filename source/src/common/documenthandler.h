@@ -88,6 +88,7 @@ class DocumentHandler : public QObject
     Q_PROPERTY(QUrl fileUrl READ fileUrl WRITE setFileUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(QString transferText READ transferText WRITE setTransferText NOTIFY transferTextChanged)
+    Q_PROPERTY(QString sourceText READ sourceText WRITE setSourceText NOTIFY sourceTextChanged)
     Q_PROPERTY(QString documentTitle READ documentTitle WRITE setDocumentTitle NOTIFY documentTitleChanged)
 
 public:
@@ -121,6 +122,7 @@ public:
     QUrl fileUrl() const;
     QString text() const;
     QString transferText() const;
+    QString sourceText() const;
 
     QString documentTitle() const;
 
@@ -135,6 +137,7 @@ public Q_SLOTS:
     void setFileUrl(const QUrl &arg);
     void setText(const QString &arg);
     void setTransferText(const QString &arg);
+    void setSourceText(const QString &arg);
     void saveAs(const QUrl &arg, const QString &fileType);
 
     void setDocumentTitle(QString arg);
@@ -142,8 +145,9 @@ public Q_SLOTS:
     void insertFace(const QString &name, const QString &path);
     void initFace(const QString &name, const QString &path);
     void copy();
-//    void past();
-//    void cut();
+
+    void insertImage(const QString &name, const QString &path);
+    void insertFile(const QString &name, const QString &path);
 
 Q_SIGNALS:
     void targetChanged();
@@ -166,6 +170,7 @@ Q_SIGNALS:
 
     void textChanged();
     void transferTextChanged();
+    void sourceTextChanged();
     void documentTitleChanged();
     void error(QString message);
 
@@ -186,6 +191,7 @@ private:
     QUrl m_fileUrl;
     QString m_text;
     QString m_transferText;
+    QString m_sourceText;
     QString m_documentTitle;
     QMap<QString, QString> m_facemap;
 
