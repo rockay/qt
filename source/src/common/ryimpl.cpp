@@ -66,7 +66,7 @@ void __stdcall message_callback(const wchar_t* json_str)
     QJsonObject obj = getJsonObjectFromString(msg);
     QJsonObject objContent = getJsonObjectFromString(obj.value("m_Message").toString());
 
-//    qDebug()<<"msg:"<<msg;
+    qDebug()<<"message_callback:"<<msg;
     // 这里判断是对方发送消息，还是对方在输入内容。
     QString content ="";
     MSGTYPE type = MSGTYPE::OTHER;

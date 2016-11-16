@@ -148,6 +148,8 @@ Item {
             case 31: //云库
             case 5: //图片
             case 6: // 语音
+                if(conversationType==1 && senderid == API.user_id)
+                    return;
                 // 添加到所有的聊天记录
                 chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime);
                 // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
@@ -336,6 +338,7 @@ Item {
             highlightFollowsCurrentItem: false
             spacing: 1
             delegate: msgDelegate
+            property int relativeY: header.y
             ScrollIndicator.vertical: ScrollIndicator { }
             onCurrentIndexChanged: {
                 console.log("changed..."+currentIndex)
@@ -383,6 +386,35 @@ Item {
                 id: header
                 mainListView: parent
                 y: -parent.contentY - height
+            }
+            LMenu {
+                id: contactMenu
+                width: 70
+                property int curIndex: -1
+                LMenuItem {
+                    text: qsTr("删除")
+                    onTriggered:{
+                        console.log("删除");
+                        chatListView.model.remove(contactMenu.curIndex);
+                        if(chatListView.currentIndex==0)
+                            chatListView.currentIndex = -1;
+                        chatListView.currentIndex = 0;
+//                        if(chatListView.currentIndex>0 && chatListView.currentIndex < chatListView.model.count){
+//                            if(chatListView.currentIndex >= contactMenu.curIndex)
+//                                chatListView.currentIndex--;
+//                        }
+//                        else if(chatListView.model.count==0){
+//                            chatListView.currentIndex = -1;
+//                            messageRect.visible = false;
+//                            topTitle.text = "";
+//                            chatview.user_id="";
+//                            chatview.user_type=1;
+//                        }else if(chatListView.currentIndex == 0 && chatListView.model.count>0){
+//                            chatListView.currentIndex = -1;
+//                            chatListView.currentIndex = 0;
+//                        }
+                    }
+                }
             }
         }
 
@@ -481,7 +513,8 @@ Item {
                         if (mouse.button == Qt.RightButton) { // 右键菜单
                             var pp  = Qt.point(mouse.x,mouse.y)
                             contactMenu.x = pp.x;
-                            contactMenu.y = contactListView.y+index*UI.fHItem + pp.y;
+                            var relatveY = contactListView.visibleArea.yPosition * contactListView.model.count*(UI.fHItem + contactListView.spacing)
+                            contactMenu.y = msgItem.y - relatveY +pp.y ;
                             contactMenu.curIndex = index;
                             contactMenu.open();
                             return;
@@ -491,46 +524,10 @@ Item {
                         contactListView.currentIndex = index
                     }
                 }
-
-
-
-            }
-        }
-        LMenu {
-            id: contactMenu
-            width: 70
-            property int curIndex: -1
-            LMenuItem {
-                text: qsTr("删除")
-                onTriggered:{
-                    console.log("删除");
-                    chatListView.model.remove(contactMenu.curIndex);
-
-                    if(chatListView.currentIndex>0 && chatListView.currentIndex < chatListView.model.count)
-                        chatListView.currentIndex--;
-                    else if(chatListView.model.count==0){
-                        chatListView.currentIndex = -1;
-                        messageRect.visible = false;
-                        topTitle.text = "";
-                        chatview.user_id="";
-                        chatview.user_type=1;
-                    }else if(chatListView.currentIndex == 0 && chatListView.model.count>0){
-                        chatListView.currentIndex = -1;
-                        chatListView.currentIndex = 0;
-                    }
-
-//                            if(index == chatListView.currentIndex){
-////                                messageRect.visible = false;
-////                                topTitle.text = "";
-//                                if(chatListView.model.count>0)
-//                                    chatListView.currentIndex--;
-//                            }
-//                            chatListView.model.remove(index);
-
-                }
             }
         }
     }
+
     Rectangle{
         id:rightbar
         width: parent.width-leftarea.width
@@ -762,7 +759,6 @@ Item {
                             onTextChanged: {
                                 if( (chatview.user_type+'') === "3"){
                                     var sendtxt = chattool.document.sourceText;
-                                    console.log("onTextChanged:"+sendtxt)
                                     // 取最后一个@
                                     if(sendtxt.length>0){
                                         var lastchar = sendtxt.charAt(sendtxt.length - 1);

@@ -290,9 +290,9 @@ function getGroupInfoByIdCB(data){
 }
 
 function setCurrentIdx(){
-    console.log("curr_id:"+chatviewp.user_id);
+//    console.log("curr_id:"+chatviewp.user_id);
     for( var i=0; i<contactListView.model.count; i++){
-        console.log("user_id:"+contactListView.model.get(i).user_id);
+//        console.log("user_id:"+contactListView.model.get(i).user_id);
         if(contactListView.model.get(i).user_id == chatviewp.user_id){
             contactListView.currentIndex = i;
             break;
@@ -371,3 +371,4 @@ function sendCloudMsg(strPath){
         console.log("upload file failed...");
     }
 }
+

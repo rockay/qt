@@ -149,7 +149,7 @@ QVariantMap SqlConversationModel::get(int row) {
 
 void SqlConversationModel::updateMsgStatus(const QString &msgUId, int result,uint timestamp)
 {
-    qDebug()<<"updateMsgStatus sendtime:"<<timestamp;
+    qDebug()<<"updateMsgStatus:"<<msgUId<<result<<timestamp;
     // 先判断是否存在数据，存在则更新
     QSqlQuery query;
     QString sql = "SELECT count(*) FROM Conversations WHERE messageid='"+msgUId+"'";
@@ -185,9 +185,10 @@ void SqlConversationModel::updateMsgStatusByLastTime(const QString &lasttime, co
     QSqlQuery query;
     QString  sql = tr("update conversations set result=%1,rcvTime='%2' where senderid='%3' and targetid='%4' and result=1 and sendtime<='%5'")
             .arg(QString::number(result), recvTime, senderid, targetid, sendtime);
-    qDebug()<<"updateMsgStatusByLastTime:"<<sql;
     if(!query.exec(sql))
         qDebug() << "Failed to send message:" << lastError().text() <<  tableName();
+    else
+        qDebug()<<"failed... updateMsgStatusByLastTime:"<<sql;
     submitAll();
     refresh();
 }

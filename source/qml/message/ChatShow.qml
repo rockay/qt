@@ -95,6 +95,7 @@ Rectangle{
         model: SqlConversationModel{}//chatList
         delegate: conversationDelegate
         cacheBuffer: 50 * 20
+        clip: true
         ScrollBar.vertical: ScrollBar {}
     }
 
@@ -283,7 +284,6 @@ Rectangle{
                                  });
                                 messageText.text= transferText ;
                                 hidemessageText.text= transferText ;
-                                console.log("transferText:"+transferText)
                             }
                         }
                     }
