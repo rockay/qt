@@ -46,6 +46,7 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 #include <QSqlTableModel>
+#include "tthread.h"
 
 static const char *contactsTableName = "Contacts";
 
@@ -53,6 +54,12 @@ static const char *contactsTableName = "Contacts";
 SqlContactModel::SqlContactModel(QObject *parent) :
     QSqlTableModel(parent)
 {
+    connect(TThread::getInstance(),SIGNAL(updateFinished()), this,SLOT(receviedModel()));
+    watchTimer = new QTimer(this);
+    connect(watchTimer,SIGNAL(timeout()),this,SLOT(updateDBTable()));
+    watchTimer->setInterval(1000);
+
+    setEditStrategy(OnManualSubmit);
     setTable(contactsTableName);
     setSort(7, Qt::DescendingOrder);
     select();
@@ -102,7 +109,30 @@ QHash<int, QByteArray> SqlContactModel::roleNames() const
 void SqlContactModel::addContacts(const QString &user_id, const QString &user_name, const QString &user_remark,
                                   const QString &user_photo, const QString &last_msg,int categoryId,int newcount)
 {
+    watchTimer->stop();
     QDateTime timestamp = QDateTime::currentDateTime();
+    for(int i=0; i< rowCount();i++){
+        QSqlRecord curRecord = record(i);
+        if(curRecord.value("user_id") == user_id){
+            // 已经存在，只需要更新可
+            curRecord.setValue("user_name", user_name);
+            curRecord.setValue("user_remark", user_remark);
+            curRecord.setValue("user_photo", user_photo);
+            curRecord.setValue("last_msg", last_msg);
+            curRecord.setValue("categoryId", categoryId);
+            curRecord.setValue("newcount", newcount);
+            curRecord.setValue("timestamp", timestamp.toString("yyyy-MM-dd hh:mm:ss"));
+            setRecord(i,curRecord);
+            QString sql = tr(" UPDATE contacts SET user_name='%1',user_remark='%2',user_photo='%3',last_msg='%4',categoryId=%5,newcount=%6,timestamp='%7' WHERE user_id='%8'")
+                    .arg(user_name, user_remark, user_photo, last_msg, QString::number(categoryId), QString::number(newcount)
+                         , timestamp.toString("yyyy-MM-dd hh:mm:ss"), user_id);
+            TThread::getInstance()->sqlList.push_back(sql);
+            watchTimer->start();
+            return;
+        }
+    }
+
+
 
     QSqlRecord newRecord = record();
     newRecord.setValue("user_id", user_id);
@@ -113,81 +143,93 @@ void SqlContactModel::addContacts(const QString &user_id, const QString &user_na
     newRecord.setValue("categoryId", categoryId);
     newRecord.setValue("newcount", newcount);
     newRecord.setValue("timestamp", timestamp.toString("yyyy-MM-dd hh:mm:ss"));
-    if (!insertRecord(rowCount(), newRecord)) {
+    if (!insertRecord(0, newRecord)) {
         qWarning() << "Failed to addContacts:" << lastError().text();
+        watchTimer->start();
         return;
     }
+    QString sql = tr(" INSERT into contacts(user_id, user_name, user_remark, user_photo, last_msg, categoryId, newcount, timestamp) VALUES('%1','%2','%3','%4','%5',%6,%7,'%8')")
+            .arg(user_id, user_name, user_remark, user_photo, last_msg, QString::number(categoryId), QString::number(newcount)
+                 , timestamp.toString("yyyy-MM-dd hh:mm:ss"));
+    TThread::getInstance()->sqlList.push_back(sql);
+    qDebug()<<"======addContacts successed";
 
-    submitAll();
-    refresh();
-    emit countChanged(rowCount());
+    watchTimer->start();
 }
 
 QString SqlContactModel::updateContacts(int idx, const QString &last_msg)
 {
+
     QDateTime timestamp = QDateTime::currentDateTime();
     QSqlRecord curRecord = record(idx);
     if(!last_msg.isNull() && !last_msg.isEmpty())
         curRecord.setValue("last_msg", last_msg);
     curRecord.setValue("timestamp", timestamp.toString("yyyy-MM-dd hh:mm:ss"));
-
+    qDebug()<<"updateContacts() called..";
     if (!setRecord(idx,curRecord)) {
         qWarning() << "Failed to updateContacts:" << lastError().text();
         return "";
     }
+    QString sql = "";
+    if(!last_msg.isNull() && !last_msg.isEmpty()){
+        sql = tr(" UPDATE contacts SET last_msg='%1',timestamp='%2' WHERE user_id='%3' ")
+                    .arg(last_msg,timestamp.toString("yyyy-MM-dd hh:mm:ss"),curRecord.value("user_id").toString());
+    }else{
+        sql = tr(" UPDATE contacts SET timestamp='%1' WHERE user_id='%2' ")
+                    .arg(timestamp.toString("yyyy-MM-dd hh:mm:ss"),curRecord.value("user_id").toString());
+    }
+    TThread::getInstance()->sqlList.push_back(sql);
 
-    submitAll();
-    refresh();
     QString str = curRecord.value(0).toString()+"|"+curRecord.value(1).toString()+"|"+curRecord.value(5).toString();
     return str;
 }
 
 bool SqlContactModel::addContactById(const QString &user_id, const QString &last_msg, int newcount){
     bool flag = false;
-    // 先判断是否存在数据，存在则更新
-    QSqlQuery query;
-    QString sql = "SELECT count(*) FROM contacts WHERE user_id='"+user_id+"'";
-    if(!query.exec(sql)){
-        return flag;
-    }
-    query.next();
-    int count = query.value(0).toInt();
-    if(count>0){
-        // 更新数据库
-        QDateTime timestamp = QDateTime::currentDateTime();
-        sql = tr("UPDATE contacts SET last_msg='%1',timestamp='%2',newcount=%3 WHERE user_id='%4'")
-                .arg(last_msg,timestamp.toString("yyyy-MM-dd hh:mm:ss"),QString::number(newcount),user_id);
-        query.exec(sql);
-        flag = true;
-    }else{
-        qDebug()<<sql;
-    }
+    watchTimer->stop();
+    QDateTime timestamp = QDateTime::currentDateTime();
+    for(int i=0; i< rowCount();i++){
+        QSqlRecord curRecord = record(i);
+        if(curRecord.value("user_id") == user_id){
+            flag = true;
+            curRecord.setValue("last_msg",last_msg);
+            curRecord.setValue("newcount",newcount);
+            curRecord.setValue("timestamp", timestamp.toString("yyyy-MM-dd hh:mm:ss"));
 
-    submitAll();
-    refresh();
+            // 与0记录交换
+            QSqlRecord zeroRecord = record(0);
+            setRecord(0,curRecord);
+            setRecord(i,zeroRecord);
+
+
+            qDebug()<<"addContactById() called.."<< curRecord.value("timestamp")<<newcount;
+
+            QString sql = tr(" UPDATE contacts SET last_msg='%1',timestamp='%2',newcount=%3 WHERE user_id='%4' ")
+                    .arg(last_msg,timestamp.toString("yyyy-MM-dd hh:mm:ss"),QString::number(newcount),user_id);
+            TThread::getInstance()->sqlList.push_back(sql);
+            flag = true;
+            break;
+        }
+    }
+    emit countChanged(rowCount());
+    watchTimer->start();
     return flag;
 }
 
 void SqlContactModel::setCount(const QString &user_id, int newcount){
-    // 先判断是否存在数据，存在则更新
-    QSqlQuery query;
-    QString sql = "SELECT count(*) FROM contacts WHERE user_id='"+user_id+"'";
-    if(!query.exec(sql)){
-        return;
+    watchTimer->stop();
+    for(int i=0; i< rowCount();i++){
+        QSqlRecord curRecord = record(i);
+        if(curRecord.value("user_id") == user_id){
+            curRecord.setValue("newcount",newcount);
+            setRecord(i,curRecord);
+            break;
+        }
     }
-    query.next();
-    int count = query.value(0).toInt();
-    if(count>0){
-        // 更新数据库
-        sql = tr("UPDATE contacts SET newcount=%1 WHERE user_id='%2'")
-                .arg(QString::number(newcount),user_id);
-        query.exec(sql);
-    }else{
-        qDebug()<<sql;
-    }
-
-    submitAll();
-    refresh();
+    QString sql = tr(" UPDATE contacts SET newcount=%1 WHERE user_id='%2' ")
+            .arg(QString::number(newcount),user_id);
+    TThread::getInstance()->sqlList.push_back(sql);
+    watchTimer->start();
 }
 
 int SqlContactModel::getId(int idx)
@@ -212,8 +254,14 @@ QVariantMap SqlContactModel::get(int row) {
 
 void SqlContactModel::remove(int row)
 {
+    QSqlRecord curRecord = record(row);
+    QString user_id = curRecord.value("user_id").toString();
     removeRow(row);
+    QString sql = tr("DELETE FROM contacts WHERE user_id='%1' ").arg(user_id);
+    TThread::getInstance()->sqlList.push_back(sql);
+    TThread::getInstance()->start();
     refresh();
+
 }
 
 void SqlContactModel::refresh()
@@ -227,3 +275,23 @@ void SqlContactModel::refresh()
     emit countChanged(rowCount());
 }
 
+
+void SqlContactModel::updateDBTable()
+{
+//    TThread::getInstance()->setContact(this);
+    TThread::getInstance()->start();
+    watchTimer->stop();
+}
+
+void SqlContactModel::commitAll()
+{
+//    submitAll();
+//    emit needRefresh();
+}
+
+void SqlContactModel::receviedModel()
+{
+    qDebug()<<"Thread completed...............";
+//    this = model;
+//    memcpy(this,model,sizeof(SqlContactModel));
+}

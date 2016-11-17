@@ -42,6 +42,7 @@
 #define SQLCONTACTMODEL_H
 
 #include <QSqlTableModel>
+#include<QTimer>
 
 class SqlContactModel : public QSqlTableModel
 {
@@ -72,8 +73,18 @@ signals:
     void nameChanged();
     void countChanged(int c);
 
+    void needRefresh();
+
+public slots:
+    void updateDBTable();
+
+    void commitAll();
+
+    void receviedModel();
+
 private:
     QString m_name;
+    QTimer *watchTimer;
 
 };
 

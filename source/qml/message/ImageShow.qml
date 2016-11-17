@@ -118,7 +118,6 @@ Window {
                     imgProcess.visible = true;
                     if(progress == 1 || progress == 0)
                         imgProcess.visible = false;
-                    console.log("onProgressChanged:"+imgProcess.text);
                 }
 
                 onSourceSizeChanged:  {
@@ -126,8 +125,6 @@ Window {
                     showimage.height = Math.min(flickable.height,showimage.sourceSize.height)
                     showimage.y = (flickable.height-showimage.height)/2
                     showimage.x = (flickable.width-showimage.width)/2
-                    console.log("flickable:"+flickable.width)
-                    console.log("sourceSize:"+showimage.sourceSize.width)
                 }
 
             }

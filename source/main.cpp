@@ -100,9 +100,7 @@ int main(int argc,char* argv[])
     //数据库
     qmlRegisterType<SqlContactModel>("org.lt.db", 1, 0, "SqlContactModel");
     qmlRegisterType<SqlConversationModel>("org.lt.db", 1, 0, "SqlConversationModel");
-    qmlRegisterType<SqlFriendModel>("org.lt.db", 1, 0, "SqlFriendModel");
-    qmlRegisterType<SqlGroupModel>("org.lt.db", 1, 0, "SqlGroupModel");
-    qmlRegisterType<SqlGroupMemmberModel>("org.lt.db", 1, 0, "SqlGroupMemmberModel");
+
     //自定义文本框
     qmlRegisterType<DocumentHandler>("org.lt.controls", 1, 1, "DocumentHandler");
     qmlRegisterType<TextBalloon>("org.lt.controls", 1, 1, "TextBalloon");

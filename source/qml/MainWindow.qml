@@ -89,6 +89,7 @@ Window {
                 sendtxt = file_ext+"|"+file_mold+"|"+file_size+"|"+file_name+"|"+file_url
                 var messgeid = utilityControl.getMessageId();
                 message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,sendtxt,targetid,0,31,"");
+                message.chatviewp.converListView.positionViewAtEnd();
                 var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
 
                 chooseCloudFile.visible = false;

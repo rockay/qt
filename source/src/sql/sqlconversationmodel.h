@@ -42,6 +42,7 @@
 #define SQLCONVERSATIONMODEL_H
 
 #include <QSqlTableModel>
+#include<QTimer>
 
 class SqlConversationModel : public QSqlTableModel
 {
@@ -60,7 +61,7 @@ public:
 
     Q_INVOKABLE bool addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
                                  ,const QString &senderid, const QString &message, const QString &targetid
-                                 , int result, int ctype, const QString &sendtime);
+                                 , int result, int ctype, const QString &sendtime, const QString &curuser_id="");
     Q_INVOKABLE void updateMsgStatus(const QString &msgUId, int result, uint timestamp=0);
     Q_INVOKABLE void updateMsgStatusByLastTime(const QString &lasttime,const QString &senderid, const QString &targetid,const QString &recvTime, int result);
     Q_INVOKABLE QVariantMap get(int row);
@@ -72,9 +73,17 @@ public:
 signals:
     void targetidChanged();
     void countChanged(int c);
+    void needRefresh();
+
+public slots:
+    void updateDBTable();
+    void commitAll();
+    void receviedModel();
+
 
 private:
     QString m_targetid;
+    QTimer *watchTimer;
 };
 
 #endif // SQLCONVERSATIONMODEL_H

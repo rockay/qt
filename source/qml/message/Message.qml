@@ -119,7 +119,7 @@ Item {
 
     }
 
-    Connections {
+    Connections { // ryControl
         target: ryControl
         onSendImageFailed:{
             tips.text = "发送图片失败，请重试！"
@@ -129,6 +129,11 @@ Item {
         }
 
         onReceivedMsg: {
+            if(mainform.visible || mainform.active){
+                // 停止闪烁
+                systrayControl.stopFlash();
+            }
+
             switch(type){
             case 0: // 其他
                 tips.text = ""
@@ -148,10 +153,11 @@ Item {
             case 31: //云库
             case 5: //图片
             case 6: // 语音
-                if(conversationType==1 && senderid == API.user_id)
+                if(senderid == API.user_id)
                     return;
                 // 添加到所有的聊天记录
-                chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime);
+                chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime, chatview.user_id);
+                chatview.converListView.positionViewAtEnd();
                 // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
                 // 如果是图片
                 if(type==5)
@@ -171,17 +177,18 @@ Item {
                     if(senderid == chatview.user_id && main.visible){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
                         console.log("回发消息...");
                         MessageJS.sendNtyMsg(senderid,conversationType);
-                        chatListView.model.setCount(senderid, 0);
+//                        chatListView.model.setCount(senderid, 0);
+                        chatListView.model.addContactById(senderid, msg,0)
                     }
                     else{ // 不在当前会话列表
-                        if(!chatListView.model.addContactById(senderid, msg,1))  // 不在会话列表根据发送者获取基本信息
-                            MessageJS.getUserInfoById(senderid, msg)
+                        chatListView.model.addContactById(senderid, msg,1)  // 不在会话列表根据发送者获取基本信息
+                        MessageJS.getUserInfoById(senderid, msg)
                     }
                 }
                 else if(conversationType == 3) // 群聊
                 {
-                    if(!chatListView.model.addContactById(targetid, msg,1)) // 不在会话列表根据发送者获取基本信息
-                        MessageJS.getGroupInfoById(targetid, msg)
+                    chatListView.model.addContactById(targetid, msg,1) // 不在会话列表根据发送者获取基本信息
+                    MessageJS.getGroupInfoById(targetid, msg)
 
                 }
                 // 让选中的人还是被选中
@@ -211,14 +218,14 @@ Item {
                         chatListView.model.setCount(senderid, 0);
                     }
                     else{ // 不在当前会话列表
-                        if(!chatListView.model.addContactById(senderid, msg,1))  // 不在会话列表根据发送者获取基本信息
-                            MessageJS.getUserInfoById(senderid, msg)
+                        chatListView.model.addContactById(senderid, msg,1)  // 不在会话列表根据发送者获取基本信息
+                        MessageJS.getUserInfoById(senderid, msg)
                     }
                 }
                 else if(conversationType == 3) // 群聊
                 {
-                    if(!chatListView.model.addContactById(targetid, msg,1)) // 不在会话列表根据发送者获取基本信息
-                        MessageJS.getGroupInfoById(targetid, msg)
+                    chatListView.model.addContactById(targetid, msg,1) // 不在会话列表根据发送者获取基本信息
+                    MessageJS.getGroupInfoById(targetid, msg)
 
                 }
                 // 让选中的人还是被选中
@@ -253,6 +260,12 @@ Item {
         }
     }
 
+    Connections{
+        target: contactListView.model
+        onNeedRefresh:{
+            contactListView.model.refresh()
+        }
+    }
 
     onIsLoadChanged: {
         console.log("onIsLoadChanged,need refresh....")
@@ -639,8 +652,7 @@ Item {
                                         console.log("message send image path:"+strPath)
 
                                         chattool.document.insertImage("strPath",strPath);
-                                        return
-                                        MessageJS.sendMsg(strPath,chatview.user_type,chatview.ctype);
+                                        return;
 
                                     }
                                     else if(type ==3 ){ // 文档

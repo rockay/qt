@@ -75,12 +75,9 @@ var isSending = false;
 
 function loopSendImg(){
     if(imgMsgObj.length>0){
-        console.log("imgMsgObj.length>0 messageid:"+imgMsgObj[0].messageid)
-        console.log("imgMsgObj.length>0 sendtxt:"+imgMsgObj[0].sendtxt)
         ryControl.sendMsg(imgMsgObj[0].messageid, imgMsgObj[0].targetid, imgMsgObj[0].categoryId, imgMsgObj[0].sendtxt, imgMsgObj[0].ctype,"");
         imgMsgObj.shift();
     }else{
-        console.log("imgMsgObj.length==0")
         isSending = false;
     }
 }
@@ -124,6 +121,7 @@ function sendMsg(sendtxt,user_type,ctype){
         // 先保存数据库
         var messageid = utilityControl.getMessageId();
         chatview.chatListModel.addMessage(utilityControl.getGuid(),messageid,targetid, API.user_id,sendtxt,targetid,0,ctype,""); // 空为发送时间，CPP中获取
+        chatview.converListView.positionViewAtEnd();
 
         if(ctype==5){ // 图片进入消息队列
             var obj = {};
@@ -168,8 +166,6 @@ function sendNtyMsg(userid,categoryid){
         console.log("retStr:"+retStr)
         var retList = retStr.split('|');
         if(retList.length==2){
-            console.log("retList[0]:"+retList[0])
-            console.log("retList[1]:"+retList[1])
             ryControl.sendNtfMsg(retList[0], userid, categoryid,retList[1]);
         }
     }
@@ -190,9 +186,8 @@ function getGroupMember(groupid){
 
 // 获取群成员回调
 function getGroupMemberCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
-        console.log("获取群成员成功");
         grpMemberListModel.clear();
         grpMemberListModel.append(data.group_info.user_list);
         grpMemberListModelFilter.clear();
@@ -206,7 +201,6 @@ function getGroupMemberCB(data){
             var id = data.group_info.user_list[i].user_id;
             API.photoObjMap[id] = data.group_info.user_list[i].user_photo;
         }
-        console.log(JSON.stringify(API.photoObjMap));
         grouptitle.text = qsTr("群成员（"+grpMemberListModel.count+"）")
     }else{
         console.log("获取群成员失败");
@@ -225,7 +219,7 @@ function saveFileMsg(fileinfo,messageid){
 
 // 保存云库文件回调
 function saveFileMsgCB(data,messageid){
-    console.log("保存文件回调:"+JSON.stringify(data));
+//    console.log("保存文件回调:"+JSON.stringify(data));
     if(data.errorcode === -1){
         // 上传成功，更新数据库MSG字段，未完成。
         var sendtxt = data.cloud_info.file_ext+"|"+data.cloud_info.file_mold+"|"
@@ -242,7 +236,11 @@ function saveFileMsgCB(data,messageid){
 
 // 获取用户信息
 var tempfmsg = "";
+var isGetUserInfoing = false;
 function getUserInfoById(user_id, msg){
+    if(isGetUserInfoing)
+        return;
+    isGetUserInfoing = true
     var url = API.api_root+API.api_frienddetail;
     var obj = "token="+API.token+"&search_key="+user_id;
     var verb = "POST";
@@ -252,7 +250,8 @@ function getUserInfoById(user_id, msg){
 
 // 获取好友信息回调
 function getUserInfoByIdCB(data){
-    console.log("data:"+JSON.stringify(data));
+    isGetUserInfoing = false;
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
         console.log("查询好友信息成功");
         var obj = data.search_user;
@@ -266,8 +265,12 @@ function getUserInfoByIdCB(data){
 
 var grouptempid = "";
 var tempgmsg = "";
+var isGetGourping = false;
 // 获取群组信息
 function getGroupInfoById(groupid, msg){
+    if(isGetGourping)
+        return;
+    isGetGourping = true;
     var url = API.api_root+API.api_groupmember;
     var obj = "token="+API.token+"&group_id="+groupid;
     var verb = "POST";
@@ -278,6 +281,7 @@ function getGroupInfoById(groupid, msg){
 
 // 获取群组信息回调
 function getGroupInfoByIdCB(data){
+    isGetGourping = false;
 //    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
         console.log("获取群组信息成功");
@@ -291,6 +295,11 @@ function getGroupInfoByIdCB(data){
 
 function setCurrentIdx(){
 //    console.log("curr_id:"+chatviewp.user_id);
+    if(contactListView.currentIndex==-1 || contactListView.model.get(contactListView.currentIndex).user_id == chatviewp.user_id){
+        // -1 表示没有选中任何列表,或者已经选中，不需要再修改
+        return;
+    }
+
     for( var i=0; i<contactListView.model.count; i++){
 //        console.log("user_id:"+contactListView.model.get(i).user_id);
         if(contactListView.model.get(i).user_id == chatviewp.user_id){
@@ -359,6 +368,7 @@ function sendCloudMsg(strPath){
     if(!chatview.chatListModel.addMessage(messageid, messageid, chatview.user_id, API.user_id, sendtxt, chatview.user_id,0,31,"")) // 空为发送时间，CPP中获取
         return; // 发送失败
 
+    chatview.converListView.positionViewAtEnd();
 
     sendtxt = qsTr("[云库文件]");
     // 更新会话列表

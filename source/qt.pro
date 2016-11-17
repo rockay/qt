@@ -27,7 +27,9 @@ SOURCES += main.cpp \
     ./src/MyGlobalShortCut/MyWinEventFilter.cpp \
     ./src/network/downloadmanager.cpp \
     3rd-party/update/Downloader.cpp \
-    3rd-party/update/Updater.cpp
+    3rd-party/update/Updater.cpp \
+    src/sql/tthread.cpp \
+    src/sql/tconversationthread.cpp
 
 RESOURCES += qml.qrc
 
@@ -64,7 +66,9 @@ HEADERS += \
     ./src/network/downloadmanager.h \
     src/common/lmouselistner.h \
     3rd-party/update/Downloader.h \
-    3rd-party/update/Updater.h
+    3rd-party/update/Updater.h \
+    src/sql/tthread.h \
+    src/sql/tconversationthread.h
 
 FORMS += \
     3rd-party/update/Downloader.ui

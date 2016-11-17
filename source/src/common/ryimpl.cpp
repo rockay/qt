@@ -66,7 +66,7 @@ void __stdcall message_callback(const wchar_t* json_str)
     QJsonObject obj = getJsonObjectFromString(msg);
     QJsonObject objContent = getJsonObjectFromString(obj.value("m_Message").toString());
 
-    qDebug()<<"message_callback:"<<msg;
+//    qDebug()<<"message_callback:"<<msg;
     // 这里判断是对方发送消息，还是对方在输入内容。
     QString content ="";
     MSGTYPE type = MSGTYPE::OTHER;
@@ -74,12 +74,14 @@ void __stdcall message_callback(const wchar_t* json_str)
     QString sender = obj.value("m_SenderId").toString();
     QString sendtime = obj.value("m_SendTime").toString();
     QString targetid = obj.value("m_TargetId").toString();
+    int SendStatus = obj.value("m_TargetId").toInt();
     int messageid = obj.value("m_MessageId").toInt();
     int conversationType = obj.value("m_ConversationType").toInt();
 
     if(objContent.contains("content") || objContent.contains("file_url"))
     {
         emit RYImpl::getInstance()->recccvMsg("");
+
         // 对方发送的消息
         type = MSGTYPE::MESSAGE;
         // 判断是文字还是图片，还是其它

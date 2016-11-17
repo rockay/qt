@@ -64,6 +64,11 @@ Rectangle{
             // 滚到最新的消息处
             chatviewp.converListView.positionViewAtEnd();
         }
+
+        onNeedRefresh:{
+//            listView.model.refresh();
+            listView.positionViewAtEnd()
+        }
     }
 
 
@@ -134,10 +139,10 @@ Rectangle{
 
                 Rectangle { // textarea
                     id: textarearect
-                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 24 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : model.ctype == 31 ? 250: (messageFile.width + 24)
+                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 24 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : model.ctype == 31 ? 250: (hidemessageText.width + 24)
                                     , listView.width - 2*UI.fChatImgH - messageRow.spacing-24)
                     height:{
-                        model.ctype == 4 ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : model.ctype == 31? 70 : (messageFile.height + 24)
+                        model.ctype == 4 ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : model.ctype == 31? 70 : (hidemessageText.height + 24)
                     }
                     color: UI.cTransparent //sentByMe ? UI.cRightBg : UI.cWhite
                     border.color: UI.cLeftBorder
