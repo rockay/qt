@@ -202,20 +202,19 @@ Rectangle{
                             text: model.message
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
-                            wrapMode: Label.Wrap
+                            wrapMode: Label.WordWrap
                             textFormat: Text.RichText
                             visible: false
                         }
                         LTextArea {
                             id: messageText
                             text: model.message
-//                            font.family: UI.emojiFont
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
-                            wrapMode: Label.Wrap
+                            wrapMode: Label.WordWrap
                             visible: model.ctype == 4 ? true : false
                             selectByMouse: true
-                            textFormat: Qt.RichText
+                            textFormat: Text.RichText
                             onLinkActivated: Qt.openUrlExternally(link)
                             readOnly : true
                             persistentSelection: true
@@ -267,7 +266,6 @@ Rectangle{
                                         console.log("复制");
                                         // 复制
                                         messageText.copy();
-                                        //                                    utilityControl.copy(messageText.text);
                                     }
                                 }
                                 MenuItem {
@@ -493,7 +491,7 @@ Rectangle{
                                         else if(model.ctype===31){
                                             msgMask.visible = true
                                             uploadprocess.text = percent+"%";
-//                                            console.log(uploadprocess.text)
+                                            console.log("percent:",percent);
                                         }
                                     }
                                 }

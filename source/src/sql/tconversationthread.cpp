@@ -23,7 +23,7 @@ void TConversationThread::run()
                 qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
             }
         }catch(QString exception) {
-            qDebug()<<"TThread exception:"<<exception;
+            qDebug()<<"TCONTACTTHREAD_H exception:"<<exception;
         }
     }
     emit updateFinished();

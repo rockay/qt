@@ -19,7 +19,7 @@ SqlConversationModel::SqlConversationModel(QObject *parent) :
     connect(TConversationThread::getInstance(),SIGNAL(updateFinished()), this,SLOT(receviedModel()));
     watchTimer = new QTimer(this);
     connect(watchTimer,SIGNAL(timeout()),this,SLOT(updateDBTable()));
-    watchTimer->setInterval(2000);
+    watchTimer->setInterval(3000);
 
     setTable(conversationsTableName);
     setSort(9, Qt::AscendingOrder);
@@ -32,7 +32,7 @@ QString SqlConversationModel::targetid() const
     return m_targetid;
 }
 
-void SqlConversationModel::setTargetid(const QString &targetid)
+void SqlConversationModel::setTargetid(QString targetid)
 {
     if (targetid == m_targetid)
         return;
@@ -67,12 +67,16 @@ QHash<int, QByteArray> SqlConversationModel::roleNames() const
     return names;
 }
 
-bool SqlConversationModel::addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
-                                       ,const QString &senderid, const QString &message, const QString &targetid
-                                       , int result, int ctype, const QString &sendtime,const QString &curuser_id)
+bool SqlConversationModel::addMessage(QString msgUId, QString messageid, QString recipient
+                                       ,QString senderid, QString message, QString targetid
+                                       , int result, int ctype, QString sendtime,QString curuser_id)
 {
     watchTimer->stop();
+
+
     QDateTime timestamp = QDateTime::currentDateTime();
+    QString tempMsg = message;
+    tempMsg = tempMsg.replace('\n',"<br/>");
     qDebug()<<"addMessage param..."<<msgUId<<messageid<<recipient<<senderid<<message<<targetid<<result<<ctype<<sendtime << curuser_id;
     QSqlRecord newRecord = record();
     newRecord.setValue("timestamp", timestamp.toString("yyyy-MM-dd hh:mm:ss"));
@@ -83,7 +87,7 @@ bool SqlConversationModel::addMessage(const QString &msgUId, const QString &mess
         newRecord.setValue("messageid", messageid);
         newRecord.setValue("recipient", recipient);
         newRecord.setValue("senderid", senderid);
-        newRecord.setValue("message", message);
+        newRecord.setValue("message", tempMsg);
         newRecord.setValue("targetid", targetid);
         newRecord.setValue("result", result);
         newRecord.setValue("ctype", ctype);
@@ -94,8 +98,19 @@ bool SqlConversationModel::addMessage(const QString &msgUId, const QString &mess
             return false;
         }
     }
+
+    // 替换转义符
+    msgUId = convert(msgUId);
+    messageid = convert(messageid);
+    recipient = convert(recipient);
+    senderid = convert(senderid);
+    tempMsg = convert(tempMsg);
+    targetid = convert(targetid);
+    sendtime = convert(sendtime);
+    curuser_id = convert(curuser_id);
+
     QString sql = tr(" INSERT into conversations(msgUId, messageid, recipient, senderid, message, targetid, result, ctype, timestamp, sendtime, rcvtime) VALUES('%1','%2','%3','%4','%5','%6',%7,%8,'%9','%10','%11')")
-            .arg(msgUId, messageid, recipient, senderid, message, targetid, QString::number(result), QString::number(ctype)).arg(newRecord.value("timestamp").toString(), newRecord.value("sendtime").toString(), newRecord.value("rcvtime").toString());
+            .arg(msgUId, messageid, recipient, senderid, tempMsg, targetid, QString::number(result), QString::number(ctype)).arg(newRecord.value("timestamp").toString(), newRecord.value("sendtime").toString(), newRecord.value("rcvtime").toString());
     TConversationThread::getInstance()->sqlList.push_back(sql);
     emit countChanged(rowCount());
     watchTimer->start();
@@ -116,38 +131,44 @@ QVariantMap SqlConversationModel::get(int row) {
     return res;
 }
 
-void SqlConversationModel::updateMsgStatus(const QString &msgUId, int result,uint timestamp)
+void SqlConversationModel::updateMsgStatus(QString msgUId, int result,uint timestamp)
 {
     qDebug()<<"updateMsgStatus()...:"<<rowCount()<<msgUId << result<<timestamp;
     watchTimer->stop();
-        for(int i=0; i< rowCount();i++){
-            QSqlRecord curRecord = record(i);
-            if(curRecord.value("messageid") == msgUId){
-                curRecord.setValue("result",result);
-                QString sendtime = QDateTime::fromTime_t(QString::number(timestamp).mid(0,10).toInt()).toString("yyyy-MM-dd hh:mm:ss");
-                if(timestamp!=0){
-                    curRecord.setValue("sendtime",sendtime);
-                }
-                setRecord(i,curRecord);
 
-                QString sql = "";
-                if(timestamp!=0){
-                    sql = tr(" UPDATE conversations SET result=%1,sendtime='%2' WHERE messageid='%3' ")
-                            .arg(QString::number(result),sendtime,msgUId);
-                }else{
-                    sql = tr(" UPDATE conversations SET result=%1 WHERE messageid='%2' ")
-                            .arg(QString::number(result),msgUId);
-                }\
-                TConversationThread::getInstance()->sqlList.push_back(sql);
-                break;
+
+    for(int i=0; i< rowCount();i++){
+        QSqlRecord curRecord = record(i);
+        if(curRecord.value("messageid") == msgUId){
+            curRecord.setValue("result",result);
+            QString sendtime = QDateTime::fromTime_t(QString::number(timestamp).mid(0,10).toInt()).toString("yyyy-MM-dd hh:mm:ss");
+            if(timestamp!=0){
+                curRecord.setValue("sendtime",sendtime);
             }
+            setRecord(i,curRecord);
+
+            // 替换转义符
+            msgUId = convert(msgUId);
+            QString sql = "";
+            if(timestamp!=0){
+                sql = tr(" UPDATE conversations SET result=%1,sendtime='%2' WHERE messageid='%3' ")
+                        .arg(QString::number(result),sendtime,msgUId);
+            }else{
+                sql = tr(" UPDATE conversations SET result=%1 WHERE messageid='%2' ")
+                        .arg(QString::number(result),msgUId);
+            }
+            TConversationThread::getInstance()->sqlList.push_back(sql);
+            break;
         }
-        watchTimer->start();
+    }
+    watchTimer->start();
 }
 
-void SqlConversationModel::updateMsgStatusByLastTime(const QString &lasttime, const QString &senderid, const QString &targetid, const QString &recvTime, int result)
+void SqlConversationModel::updateMsgStatusByLastTime(QString lasttime, QString senderid, QString targetid, QString recvTime, int result)
 {
     watchTimer->stop();
+
+
     for(int i=0; i< rowCount();i++){
         QSqlRecord curRecord = record(i);
         if(curRecord.value("senderid") == senderid
@@ -159,6 +180,12 @@ void SqlConversationModel::updateMsgStatusByLastTime(const QString &lasttime, co
             setRecord(i,curRecord);
         }
     }
+
+    // 替换转义符
+    lasttime = convert(lasttime);
+    senderid = convert(senderid);
+    targetid = convert(targetid);
+    recvTime = convert(recvTime);
     QString sql = tr(" UPDATE conversations SET result=%1,rcvTime='%2' WHERE senderid='%3' AND targetid='%4' AND result=1 AND sendtime<='%5' ")
             .arg(QString::number(result), recvTime, senderid, targetid, QDateTime::fromTime_t(lasttime.toLongLong()).toString("yyyy-MM-dd hh:mm:ss"));
     TConversationThread::getInstance()->sqlList.push_back(sql);
@@ -166,14 +193,20 @@ void SqlConversationModel::updateMsgStatusByLastTime(const QString &lasttime, co
 }
 
 
-void SqlConversationModel::updateMsgContent(const QString &msgUId, const QString &content)
+void SqlConversationModel::updateMsgContent(QString msgUId, QString content)
 {
     watchTimer->stop();
+
+
     for(int i=0; i< rowCount();i++){
         QSqlRecord curRecord = record(i);
         if(curRecord.value("messageid") == msgUId){
             curRecord.setValue("message",content);
             setRecord(i,curRecord);
+
+            // 替换转义符
+            msgUId = convert(msgUId);
+            content = convert(content);
             QString sql = tr(" UPDATE conversations SET message='%1' WHERE messageid='%2' ")
                     .arg(content, msgUId);
             TConversationThread::getInstance()->sqlList.push_back(sql);
@@ -183,13 +216,17 @@ void SqlConversationModel::updateMsgContent(const QString &msgUId, const QString
     watchTimer->start();
 }
 
-void SqlConversationModel::deleteMsgByID(const QString &msgUId)
+void SqlConversationModel::deleteMsgByID(QString msgUId)
 {
+
     qDebug()<<"deleteMsgByID()...:"<<msgUId;
     for(int i=0; i< rowCount();i++){
         QSqlRecord curRecord = record(i);
         if(curRecord.value("messageid") == msgUId){
             removeRow(i);
+
+            // 替换转义符
+            msgUId = convert(msgUId);
             QString sql = tr("DELETE FROM conversations WHERE messageid='%1' ").arg(msgUId);
             qDebug()<<"sql...:"<<sql;
             TConversationThread::getInstance()->sqlList.push_back(sql);
@@ -197,7 +234,7 @@ void SqlConversationModel::deleteMsgByID(const QString &msgUId)
             break;
         }
     }
-    refresh();
+//    refresh();
 }
 
 QString SqlConversationModel::getLastMsgId(int senderid)
@@ -216,8 +253,9 @@ QString SqlConversationModel::getLastMsgId(int senderid)
 void SqlConversationModel::refresh()
 {
     setTable(conversationsTableName);
+    // 替换转义符
     const QString filterString = QString::fromLatin1(
-        " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(m_targetid, RYImpl::getInstance()->m_userid);
+        " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(convert(m_targetid), convert(RYImpl::getInstance()->m_userid));
     setFilter(filterString);
     setSort(9, Qt::AscendingOrder);
     select();

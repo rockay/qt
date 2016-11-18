@@ -64,16 +64,16 @@ QVariant Utility::getPictureBase64(QString path)
 }
 
 
-bool Utility::uploadMaterial(QString url, QString filePath, QString materialType, int filefrom,QString messageid)
+bool Utility::uploadMaterial(QString url, QString filePath, QString materialType, int filefrom, QString messageid)
 {
+    // filefrom 0表示来自会话 1表示来自云上传
     crtUploadType = materialType;
-    m_filefrom = filefrom;  // 0表示来自会话 1表示来自云上传
     filePath = filePath.replace("file:///","");
     QFileInfo fileinfo(filePath);
     QString fileName = fileinfo.fileName();
     QString ext =  getFileExt(filePath);
     if(fileinfo.size() > 20 * 1024 * 1024){ // 20M
-        emit uploadMaterialRet(1, crtUploadType, "文件过大", m_filefrom, messageid);
+        emit uploadMaterialRet(1, crtUploadType, "文件过大", filefrom, messageid);
         return false;
     }
     QString cth = "";
@@ -83,7 +83,7 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
     }else if(ext == "PDF"){
         cth = "application/"+ext;
     }else{
-        emit uploadMaterialRet(2, crtUploadType, tr("文件格式不支持"), m_filefrom, messageid);
+        emit uploadMaterialRet(2, crtUploadType, tr("文件格式不支持"), filefrom, messageid);
         return false;
     }
 
@@ -137,8 +137,8 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
 
     QNetworkReply *reply;
     reply = networkAccessManager.post(request,send);
-    qDebug()<<currentUploads.contains(reply);
-    currentUploads.insert(reply,messageid);
+    currentUploadsID.insert(reply,messageid);
+    currentUploadsFrom.insert(reply,filefrom);
     connect(reply,&QNetworkReply::uploadProgress,this, &Utility::uploadProgress);
     return true;
 }
@@ -148,7 +148,7 @@ void Utility::replyFinished(QNetworkReply *reply)
     if(reply->error() != QNetworkReply::NoError)
     {
         qDebug()<<"http request failed."<<reply->errorString()<<endl;
-        emit uploadMaterialRet(1, crtUploadType, reply->errorString(), m_filefrom, currentUploads.value(reply));
+        emit uploadMaterialRet(1, crtUploadType, reply->errorString(), currentUploadsFrom.value(reply), currentUploadsID.value(reply));
     }
     else
     {
@@ -160,17 +160,19 @@ void Utility::replyFinished(QNetworkReply *reply)
             QJsonObject obj = doc.object();
             qDebug()<<"errorcode:"<<obj.value("errorcode").toInt();
             if(obj.value("errorcode").toInt()==-1){ // 上传成功
-                emit uploadMaterialRet(0, crtUploadType,obj.value("file_info").toString(), m_filefrom, currentUploads.value(reply));
+                emit uploadMaterialRet(0, crtUploadType,obj.value("file_info").toString(), currentUploadsFrom.value(reply), currentUploadsID.value(reply));
             }else{  // 错误码
-                qDebug()<<"errorcode:"<<obj.value("errorcode").toInt()<<" m_filefrom:"<<m_filefrom;
-                emit uploadMaterialRet(1, crtUploadType,tr("error code：%1").arg(obj.value("errorcode").toInt()), m_filefrom,  currentUploads.value(reply));
+                qDebug()<<"errorcode:"<<obj.value("errorcode").toInt()<<" m_filefrom:"<<currentUploadsFrom.value(reply);
+                emit uploadMaterialRet(1, crtUploadType,tr("error code：%1").arg(obj.value("errorcode").toInt()), currentUploadsFrom.value(reply),  currentUploadsID.value(reply));
             }
         }else{
-            emit uploadMaterialRet(1, crtUploadType,"上传失败", m_filefrom, currentUploads.value(reply));
+            qFatal("====上传失败 error message:%s",error.error);
+            emit uploadMaterialRet(1, crtUploadType,"上传失败", currentUploadsFrom.value(reply), currentUploadsID.value(reply));
         }
         reply->close();
         reply->deleteLater();
-        currentUploads.remove(reply);
+        currentUploadsFrom.remove(reply);
+        currentUploadsID.remove(reply);
     }
 }
 
@@ -178,9 +180,9 @@ void Utility::uploadProgress(qint64 up, qint64 toal)
 {
     QNetworkReply *reply = (QNetworkReply *)sender();
     if(up == toal){
-        emit updateProgress(100, m_filefrom,currentUploads.value(reply));
+        emit updateProgress(100, currentUploadsFrom.value(reply),currentUploadsID.value(reply));
     }else{
-        emit updateProgress(up*100/toal, m_filefrom, currentUploads.value(reply));
+        emit updateProgress(up*100/toal, currentUploadsFrom.value(reply), currentUploadsID.value(reply));
     }
 }
 
@@ -373,6 +375,14 @@ bool Utility::checkIdIsLogin(const QString &userid)
         m_hutex = temp;
         return false;
     }
+}
+
+bool Utility::isFileExist(const QString &path)
+{
+    if(QFile::exists(path)){
+        return true;
+    }
+    return false;
 }
 
 

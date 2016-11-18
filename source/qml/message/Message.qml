@@ -78,9 +78,9 @@ Item {
             switch(type){
             case 4: // 文字
             case 5: // 图片
-                MessageJS.sendMsg(content, chatview.user_type,chatview.ctype)
                 // 删除原来的记录
                 chatview.chatListModel.deleteMsgByID(msgid)
+                MessageJS.sendMsg(content, chatview.user_type,chatview.ctype)
                 break;
             case 31: // 云
                 var sendtxt = "[发送云库文件]"
@@ -142,19 +142,15 @@ Item {
                 keytimer.start();
                 break;
             case 3: // 最后发送时间，已读
-//                                    tips.text = msg
                 var contentJson = JSON.parse(msg);
                 var lasttime = contentJson.lastMessageSendTime+'';
                 console.log("lastMessageSendTime:"+lasttime);
-//                messageid = lasttime.substr(0,10);
                 chatview.chatListModel.updateMsgStatusByLastTime(lasttime,API.user_id,targetid,sendtime,2) // sendtime当成rcvtime 2为已读
                 break;
             case 4: //文字
             case 31: //云库
             case 5: //图片
             case 6: // 语音
-                if(senderid == API.user_id)
-                    return;
                 // 添加到所有的聊天记录
                 chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime, chatview.user_id);
                 chatview.converListView.positionViewAtEnd();
@@ -171,17 +167,18 @@ Item {
                     msg = "[有人@我] " + msg;
                 }
 
+                // 如果sender是自己，则把sender改成targetid，好入库更新最近联系人
+                if(senderid == API.user_id)
+                    senderid = targetid
                 if(conversationType == 1) // 单人
                 {
-
                     if(senderid == chatview.user_id && main.visible){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
                         console.log("回发消息...");
                         MessageJS.sendNtyMsg(senderid,conversationType);
-//                        chatListView.model.setCount(senderid, 0);
                         chatListView.model.addContactById(senderid, msg,0)
                     }
                     else{ // 不在当前会话列表
-                        chatListView.model.addContactById(senderid, msg,1)  // 不在会话列表根据发送者获取基本信息
+                        chatListView.model.addContactById(senderid, msg,1)
                         MessageJS.getUserInfoById(senderid, msg)
                     }
                 }
@@ -504,17 +501,18 @@ Item {
                     anchors.top: parent.top
                     anchors.leftMargin: UI.fMLsearch
                     anchors.topMargin: parent.height/5
-                    maximumLineCount:20
+                    maximumLineCount:12
                 }
 
                 LText{
                     id: msgContent
-                    text: model.last_msg === undefined ? "" : model.last_msg
-                    width: msgItem.width-photo.width-2*UI.fMLsearch
+                    text: model.last_msg === undefined ? "" : model.last_msg.replace('\n'," ")
+                    width: msgTitle.width-15
                     anchors.left: photo.right
                     anchors.top: msgTitle.bottom
                     anchors.leftMargin: UI.fMLsearch
                     fcolor: UI.cFTB
+                    height: 20
                     pointSize: UI.TinyFontPointSize
                 }
 

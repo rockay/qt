@@ -1,16 +1,16 @@
-#include "tthread.h"
+#include "tcontactthread.h"
 #include <QDebug>
 #include <QSqlQuery>
 #include <QSqlError>
 
-TThread* TThread::m_instance = NULL;
+TContactThread* TContactThread::m_instance = NULL;
 
-TThread::TThread(QObject *parent)
+TContactThread::TContactThread(QObject *parent)
     : QThread(parent)
 {
 }
 
-void TThread::run()
+void TContactThread::run()
 {
     QString sql="";
     while(sqlList.length()>0){
@@ -23,7 +23,7 @@ void TThread::run()
                 qFatal("Failed to query database: %s", qPrintable(query.lastError().text()));
             }
         }catch(QString exception) {
-            qDebug()<<"TThread exception:"<<exception;
+            qDebug()<<"TContactThread exception:"<<exception;
 
         }
     }

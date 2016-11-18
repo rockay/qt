@@ -55,11 +55,11 @@ public:
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE void addContacts(const QString &user_id, const QString &user_name, const QString &user_remark,
-                                 const QString &user_photo, const QString &last_msg,int categoryId, int newcount);
-    Q_INVOKABLE QString updateContacts(int idx, const QString &last_msg);
-    Q_INVOKABLE bool addContactById(const QString &user_id, const QString &last_msg, int newcount);
-    Q_INVOKABLE void setCount(const QString &user_id, int newcount);
+    Q_INVOKABLE void addContacts(QString user_id, QString user_name, QString user_remark,
+                                 QString user_photo, QString last_msg,int categoryId,int newcount);
+    Q_INVOKABLE QString updateContacts(int idx, QString last_msg);
+    Q_INVOKABLE bool addContactById(QString user_id, QString last_msg, int newcount);
+    Q_INVOKABLE void setCount(QString user_id, int newcount);
     Q_INVOKABLE int getId(int idx);
     Q_INVOKABLE QVariantMap get(int row);
     Q_INVOKABLE void remove(int row);
@@ -68,7 +68,7 @@ public:
 
 
     QString name() const;
-    void setName(const QString &name);
+    void setName(QString name);
 signals:
     void nameChanged();
     void countChanged(int c);
@@ -85,6 +85,11 @@ public slots:
 private:
     QString m_name;
     QTimer *watchTimer;
+
+    QString convert(QString orginalStr){
+        return orginalStr.replace("'","''"); // 将单引号转义，不然数据库出错
+    }
+
 
 };
 

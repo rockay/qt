@@ -54,19 +54,19 @@ public:
     SqlConversationModel(QObject *parent = 0);
 
     QString targetid() const;
-    void setTargetid(const QString &targetid);
+    void setTargetid(QString targetid);
 
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE bool addMessage(const QString &msgUId, const QString &messageid, const QString &recipient
-                                 ,const QString &senderid, const QString &message, const QString &targetid
-                                 , int result, int ctype, const QString &sendtime, const QString &curuser_id="");
-    Q_INVOKABLE void updateMsgStatus(const QString &msgUId, int result, uint timestamp=0);
-    Q_INVOKABLE void updateMsgStatusByLastTime(const QString &lasttime,const QString &senderid, const QString &targetid,const QString &recvTime, int result);
+    Q_INVOKABLE bool addMessage(QString msgUId, QString messageid, QString recipient
+                                 ,QString senderid, QString message, QString targetid
+                                 , int result, int ctype, QString sendtime, QString curuser_id="");
+    Q_INVOKABLE void updateMsgStatus(QString msgUId, int result, uint timestamp=0);
+    Q_INVOKABLE void updateMsgStatusByLastTime(QString lasttime,QString senderid, QString targetid,QString recvTime, int result);
     Q_INVOKABLE QVariantMap get(int row);
-    Q_INVOKABLE void updateMsgContent(const QString &msgUId, const QString &content);
-    Q_INVOKABLE void deleteMsgByID(const QString &msgUId);
+    Q_INVOKABLE void updateMsgContent(QString msgUId, QString content);
+    Q_INVOKABLE void deleteMsgByID(QString msgUId);
     Q_INVOKABLE void refresh();
     Q_INVOKABLE QString getLastMsgId(int senderid);         // 获取发送者给自己的最新messageid，也就是时间戳
 
@@ -84,6 +84,10 @@ public slots:
 private:
     QString m_targetid;
     QTimer *watchTimer;
+
+    QString convert(QString orginalStr){
+        return orginalStr.replace("'","''"); // 将单引号转义，不然数据库出错
+    }
 };
 
 #endif // SQLCONVERSATIONMODEL_H

@@ -211,7 +211,7 @@ Item {
                 width: msgView.width
                 height: UI.fHFItem
                 color:msgView.currentIndex==index? UI.cItemSelected:UI.cItem
-                Image{
+                LImage{
                     id: photo
                     anchors.left: parent.left
                     anchors.top: parent.top
@@ -219,6 +219,7 @@ Item {
                     anchors.topMargin: parent.height/5
                     height: parent.height*3/5
                     width: height
+                    picname: friend_id
                     source: friend_photo
                 }
                 LText{

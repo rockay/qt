@@ -28,8 +28,8 @@ SOURCES += main.cpp \
     ./src/network/downloadmanager.cpp \
     3rd-party/update/Downloader.cpp \
     3rd-party/update/Updater.cpp \
-    src/sql/tthread.cpp \
-    src/sql/tconversationthread.cpp
+    src/sql/tconversationthread.cpp \
+    src/sql/tcontactthread.cpp
 
 RESOURCES += qml.qrc
 
@@ -67,8 +67,8 @@ HEADERS += \
     src/common/lmouselistner.h \
     3rd-party/update/Downloader.h \
     3rd-party/update/Updater.h \
-    src/sql/tthread.h \
-    src/sql/tconversationthread.h
+    src/sql/tconversationthread.h \
+    src/sql/tcontactthread.h
 
 FORMS += \
     3rd-party/update/Downloader.ui

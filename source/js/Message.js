@@ -24,7 +24,6 @@ function sendFun(){
 
         if(txtList[i].indexOf(":&&:") !=0 ){
             subTxt += txtList[i];
-            console.log("subTxt:"+subTxt);
         }else if(txtList[i].indexOf(":&&:") ==0 ){// 图片或文件
             // 判断是否表情
             if(txtList[i].indexOf(":&&:qrc:/images/emoji/drawable-xhdpi/u") ==0){
@@ -238,13 +237,13 @@ function saveFileMsgCB(data,messageid){
 var tempfmsg = "";
 var isGetUserInfoing = false;
 function getUserInfoById(user_id, msg){
+    tempfmsg = msg;
     if(isGetUserInfoing)
         return;
     isGetUserInfoing = true
     var url = API.api_root+API.api_frienddetail;
     var obj = "token="+API.token+"&search_key="+user_id;
     var verb = "POST";
-    tempfmsg = msg;
     API.httpRequest(verb, url, obj, getUserInfoByIdCB);
 }
 
@@ -268,14 +267,14 @@ var tempgmsg = "";
 var isGetGourping = false;
 // 获取群组信息
 function getGroupInfoById(groupid, msg){
+    grouptempid = groupid;
+    tempgmsg = msg;
     if(isGetGourping)
         return;
     isGetGourping = true;
     var url = API.api_root+API.api_groupmember;
     var obj = "token="+API.token+"&group_id="+groupid;
     var verb = "POST";
-    grouptempid = groupid;
-    tempgmsg = msg;
     API.httpRequest(verb, url, obj, getGroupInfoByIdCB);
 }
 

@@ -50,6 +50,7 @@ public:
     QString m_rootPath;
     QString m_voicePath;
     QString m_picPath;
+    QString m_cachePicPath;
     bool m_locked;
     bool m_txtlocked;
 
@@ -76,6 +77,10 @@ public slots:
     QString saveImage(const QString & base64);
     QString saveVoice(const QString & base64);
     void SendImage(const QString &json, int imgid);    // 发送图片，返回图片存放路径
+
+    QString getCachePicPat(){
+        return m_cachePicPath;
+    }
 
 private:
     static RYImpl* m_instance;

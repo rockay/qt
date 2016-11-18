@@ -67,20 +67,60 @@ void __stdcall message_callback(const wchar_t* json_str)
     QJsonObject objContent = getJsonObjectFromString(obj.value("m_Message").toString());
 
 //    qDebug()<<"message_callback:"<<msg;
-    // 这里判断是对方发送消息，还是对方在输入内容。
+
+ /*
+    "m_TargetId":"99",          //交互方id
+    "m_SenderId": "" ,          //发方id
+    "m_ClazzName":"",		    //类别
+    "m_ExtraMessage":"",        //信息
+    "m_ExtraMessage":"",        //附加信息
+    "m_Push":"",                //推送消息
+    "m_AppData":"",             //AppData
+    "m_ConversationType":0,     //通道类型  1-PRIVATE 2-DISCUSSION 3-GROUP 4-CHATROOM 5-CUSTOMSERVICE
+    "m_MessageId":9,            //消息id   消息在数据库中的id号
+    "m_Direction":0,            //消息方向  0-发送的消息 1-接收的消息
+    "m_ReadStatus":0,           //读取状态  0-未读 1-已读
+    "m_SendStatus":20,          //发送状态  10-发送中 20-发送失败 30-发送成功
+    "m_SendTime":9,             //接收时间
+    "m_RcvTime":9,              //接收时间
+    "m_MessageType":0		    //信息类别  0-实时接收信息 1-历史漫游
+*/
     QString content ="";
     MSGTYPE type = MSGTYPE::OTHER;
     QString msgUId = obj.value("m_MsgUId").toString();
     QString sender = obj.value("m_SenderId").toString();
     QString sendtime = obj.value("m_SendTime").toString();
+    QString recvTime = obj.value("m_RcvTime").toString();
     QString targetid = obj.value("m_TargetId").toString();
-    int SendStatus = obj.value("m_TargetId").toInt();
+    int ReadStatus = obj.value("m_ReadStatus").toInt();
     int messageid = obj.value("m_MessageId").toInt();
     int conversationType = obj.value("m_ConversationType").toInt();
+    bool isDirection = obj.value("m_Direction").toBool();
+
+    // 如果是 1013463、 1011485 忽略这两个ID发的消息，直接忽略
+    if(sender.compare("1013463") == 0 || sender.compare("1011485") == 0)
+        return;
 
     if(objContent.contains("content") || objContent.contains("file_url"))
     {
+        // 告诉托盘闪烁
         emit RYImpl::getInstance()->recccvMsg("");
+
+        // 自己发的消息，且发送时间与现在大于10分钟
+        int seconds = QDateTime::fromString(sendtime,"yyyy-MM-dd hh:mm:ss").secsTo(QDateTime::fromString(recvTime,"yyyy-MM-dd hh:mm:ss"));
+        qDebug()<<"sendtime"<<sendtime<<"recvTime"<<recvTime;
+        qDebug()<<"seconds"<<seconds;
+        int outSeconds = 2*60 ; // 2分钟之前的已读或自己发的消息就不再看了
+        if(sender.compare(RYImpl::getInstance()->m_userid) == 0
+                && seconds > outSeconds ){
+            qDebug()<<"===自己发的消息...."<<msg;
+            return ;
+        }
+        else if(sender.compare(RYImpl::getInstance()->m_userid) != 0
+                && ReadStatus != 0 && isDirection && seconds > outSeconds ){ // 接收的消息，且已读，且时间超过可看时间
+            qDebug()<<"===其它端已读消息不接收到上层...."<<msg;
+            return;
+        }
 
         // 对方发送的消息
         type = MSGTYPE::MESSAGE;
@@ -211,6 +251,10 @@ void RYImpl::initLib(const QString &token, const QString &user_id)
     writeDir.setPath(m_voicePath);
     if (!writeDir.mkpath("."))
         qFatal("Failed to create writable voice directory at %s", qPrintable(writeDir.absolutePath()));
+    m_cachePicPath = m_rootPath +"/temp/pic/";
+    writeDir.setPath(m_cachePicPath);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable cache directory at %s", qPrintable(writeDir.absolutePath()));
 
     convertype[0]= 1;
     convertype[1]= 2;
@@ -393,9 +437,11 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
     m_targetid = targetId;
 
     qDebug()<<"sendMsg msg:"<<msg;
-    QString fmsg= tr("{\"content\":\"%1\"}").arg(msg.toUtf8().data());
+    QString tempmsg = msg;
+    tempmsg = tempmsg.replace('\n',"\\n");
+    QString fmsg= tr("{\"content\":\"%1\"}").arg(tempmsg.toUtf8().data());
     if(categoryId == 3 && !mention.isEmpty())
-        fmsg = tr("{\"content\":\"%1\",\"mentionedInfo\":{\"type\":2,\"userIdList\":%2}}").arg(msg.toUtf8().data(),mention);
+        fmsg = tr("{\"content\":\"%1\",\"mentionedInfo\":{\"type\":2,\"userIdList\":%2}}").arg(tempmsg.toUtf8().data(),mention);
     const wchar_t * msgw = reinterpret_cast<const wchar_t *>(fmsg.utf16());
     qDebug()<<tr("targetid:%1 \t categoryid:%2 \t content:%3").arg(targetId,QString::number(categoryId),msg);
     QString u16 = QString::fromUtf16((const ushort*)msgw);

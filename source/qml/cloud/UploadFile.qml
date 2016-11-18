@@ -45,7 +45,7 @@ Rectangle {
                 }
                 else{
                     console.log("失败",type,retMsg);
-                    upfilemodel.setProperty(curIdx, "percent", -1);
+                    upfilemodel.setProperty(messageid, "percent", -1);
                     curIdx++
                     CloudJS.uploadFie();
                 }
@@ -53,7 +53,7 @@ Rectangle {
         }
         onUpdateProgress:{
             if(filefrom == 1){
-                upfilemodel.setProperty(curIdx, "percent", percent);
+                upfilemodel.setProperty(messageid, "percent", percent);
                 console.log("percent:",percent);
             }
         }

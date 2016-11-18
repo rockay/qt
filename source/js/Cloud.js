@@ -60,7 +60,7 @@ function uploadFie(){
             return;
         }
         var fileType = upfilemodel.get(curIdx).file_mold === 1 ? "mImage":"mFile";
-        var ret = utilityControl.uploadMaterial(API.api_upload_file,upfilemodel.get(curIdx).file_url,fileType,1,"")
+        var ret = utilityControl.uploadMaterial(API.api_upload_file,upfilemodel.get(curIdx).file_url,fileType,1,curIdx) // messageid就传curIdx
         if(!ret){
             console.log("upload file failed...");
             upfilemodel.setProperty(curIdx, "percent", -1);

@@ -2,8 +2,8 @@
 
 
 // Font family
-var defaultFontFamily = "Microsoft YaHei UI"; // 微软雅黑
-var emojiFont = "Microsoft YaHei UI"//"Segoe UI Emoji"                // Emoji字体
+var defaultFontFamily = "微软雅黑"; // 微软雅黑 Microsoft YaHei UI
+var emojiFont = "微软雅黑"//"Segoe UI Emoji"                // Emoji字体
 
 var LenSearchTextMax = 10 // 文本框最大输入长度
 

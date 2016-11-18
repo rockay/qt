@@ -61,15 +61,16 @@ public slots:
     void releseAccount();
 
     bool checkIdIsLogin(const QString &userid); // 判断是否已经登录过
+
+    bool isFileExist(const QString &path); // 判断文件是否存在
 private:
     QNetworkAccessManager networkAccessManager;
     QString crtUploadType;
-    int m_filefrom;
 
     UpdaterHttp *updater;
     DLLFuncd screenshot;
-    QMap<QNetworkReply *,QString> currentUploads;
-
+    QMap<QNetworkReply *,QString> currentUploadsID;
+    QMap<QNetworkReply *,int> currentUploadsFrom;
 
     static Utility* m_instance;
 
