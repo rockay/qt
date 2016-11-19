@@ -1,5 +1,6 @@
 TEMPLATE = app
 
+DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
 QT += qml quick quickcontrols2 network sql multimedia multimediawidgets gui
 !contains(sql-drivers, sqlite): QTPLUGIN += qsqlite
 !no_desktop: QT += widgets

@@ -53,6 +53,7 @@ public:
     QString m_cachePicPath;
     QString m_cacheImagePath;
 
+    QStringList messageList;
 
 signals:
     void receivedMsg(int type,const QString &senderid,const QString &msgUid, const QString &messageid, const QString &msg,const QString &sendtime,int conversationType,const QString& targetid, bool isMetionedMe);

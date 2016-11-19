@@ -73,8 +73,9 @@ Rectangle{
 
                 }
             }
-            // 滚到最新的消息处
+            // 滚到最新的消息
             chatviewp.converListView.positionViewAtEnd();
+            chatviewp.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);
         }
 
         onNeedRefresh:{

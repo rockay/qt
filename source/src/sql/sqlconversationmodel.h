@@ -42,7 +42,8 @@
 #define SQLCONVERSATIONMODEL_H
 
 #include <QSqlTableModel>
-#include<QTimer>
+#include <QTimer>
+#include <QDateTime>
 
 class SqlConversationModel : public QSqlTableModel
 {
@@ -75,9 +76,11 @@ signals:
     void countChanged(int c);
     void needRefresh();
 
+    void saveMsgING();
+    void saveMsgINGNoRefresh();
+    void saveMsgFinished();
 public slots:
     void updateDBTable();
-    void commitAll();
     void receviedModel();
 
 
@@ -88,6 +91,7 @@ private:
     QString convert(QString orginalStr){
         return orginalStr.replace("'","''"); // 将单引号转义，不然数据库出错
     }
+    QDateTime m_lastTime;
 };
 
 #endif // SQLCONVERSATIONMODEL_H

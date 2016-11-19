@@ -1,5 +1,3 @@
-#include "ryimpl.h"
-#include "rcsdk.h"
 #include <QLibrary>
 #include <QDebug>
 #include <QFile>
@@ -14,6 +12,11 @@
 #include <QImage>
 #include <QPixmap>
 #include <QFile>
+#include <QApplication>
+#include <QEventLoop>
+#include <QTimer>
+#include "ryimpl.h"
+#include "rcsdk.h"
 #include "Utility.h"
 #include "downloadmanager.h"
 
@@ -26,7 +29,19 @@ QJsonObject getJsonObjectFromString(const QString jsonString){
     QJsonObject jsonObject = jsonDocument.object();
     return jsonObject;
 }
-
+void sleep(int msec)//自定义Qt延时函数,单位毫秒
+{
+    QDateTime last = QDateTime::currentDateTime();
+    QDateTime now;
+    while (1)
+    {
+        now = QDateTime::currentDateTime();
+        if (last.msecsTo(now) >= msec)
+        {
+            break;
+        }
+    }
+}
 
 //异常监听
 void __stdcall exception_callback(const wchar_t* json_str)
@@ -51,18 +66,20 @@ void __stdcall exception_callback(const wchar_t* json_str)
         emit RYImpl::getInstance()->receivedException(QString::number(err_code),result);
     };
     RYImpl::getInstance()->Connect(RYImpl::getInstance()->m_token.toUtf8().data(), connectCallback,false);
-
 }
 
 //消息监听
 void __stdcall message_callback(const wchar_t* json_str)
 {
-    Sleep(100);
+    qApp->processEvents();
 
     QString u16 = QString::fromUtf16((const ushort*)json_str);
 
     QString msg = u16.toUtf8();
 
+
+//    RYImpl::getInstance()->messageList.append(msg);
+//    return ;
     QJsonObject obj = getJsonObjectFromString(msg);
     QJsonObject objContent = getJsonObjectFromString(obj.value("m_Message").toString());
 
@@ -106,20 +123,16 @@ void __stdcall message_callback(const wchar_t* json_str)
 
         // 自己发的消息，且发送时间与现在大于10分钟
         int seconds = QDateTime::fromString(sendtime,"yyyy-MM-dd hh:mm:ss").secsTo(QDateTime::fromString(recvTime,"yyyy-MM-dd hh:mm:ss"));
-        qDebug()<<"sendtime"<<sendtime<<"recvTime"<<recvTime;
-        qDebug()<<"seconds"<<seconds;
-        qDebug()<<"RYImpl::getInstance()->m_userid"<<RYImpl::getInstance()->m_userid;
-        qDebug()<<"sender "<<sender;
         int outSeconds = 0.2*60 ; // 2分钟之前的已读或自己发的消息就不再看了
         if(sender.compare(RYImpl::getInstance()->m_userid) == 0
                 && (seconds > outSeconds)){
             // 群组会重复发，所以这里把群组屏蔽掉。
-            qDebug()<<"===自己发的消息...."<<msg;
+//            qDebug()<<"===自己发的消息...."<<msg;
             return ;
         }
         else if(sender.compare(RYImpl::getInstance()->m_userid) != 0
                 && ReadStatus != 0 && isDirection && seconds > outSeconds ){ // 接收的消息，且已读，且时间超过可看时间
-            qDebug()<<"===其它端已读消息不接收到上层...."<<msg;
+//            qDebug()<<"===其它端已读消息不接收到上层...."<<msg;
             return;
         }
 
@@ -135,28 +148,28 @@ void __stdcall message_callback(const wchar_t* json_str)
         if(className.compare("RC:TxtMsg")==0) // 文字
         {
             type = MSGTYPE::MSG_TXT;
-            qDebug()<<"文字消息:"<<content;
+//            qDebug()<<"文字消息:"<<content;
         }
         else if(className.compare("RC:ImgMsg")==0) // 图片
         {
             type = MSGTYPE::MSG_IMG;
             QString uri = objContent.value("imageUri").toString();
-            qDebug()<<"图片消息Uri:"<<uri;
+//            qDebug()<<"图片消息Uri:"<<uri;
             content = RYImpl::getInstance()->saveImage(content); // 返回路径保存
             QString localpath = RYImpl::getInstance()->m_cacheImagePath+Utility::getInstance()->getGuid()+".png";
             emit RYImpl::getInstance()->needDownload(uri, localpath);
             // 保存缩略图路径和远程路径
             content = content+"|"+uri+"|"+localpath;
-            qDebug()<<"图片缩略图消息message:"<<content;
+//            qDebug()<<"图片缩略图消息message:"<<content;
         }
         else if(className.compare("RC:VcMsg")==0) // 语音
         {
             type = MSGTYPE::MSG_VC;
-            qDebug()<<"语音消息:"<<content;
+//            qDebug()<<"语音消息:"<<content;
             int duration = objContent.value("duration").toInt(); // 语音长度
             content = RYImpl::getInstance()->saveVoice(content); // 返回路径保存
             content = QString::number(duration)+"|"+content; // 时长｜内容
-            qDebug()<<"语音存放路径:"<<content;
+//            qDebug()<<"语音存放路径:"<<content;
         }
         else if(className.compare("RC:ImgTextMsg")==0) // 文字+图片
         {
@@ -200,7 +213,7 @@ void __stdcall message_callback(const wchar_t* json_str)
              && objContent.contains("lastMessageSendTime")){
         type = MSGTYPE::SENDTIME;
         content = obj.value("m_Message").toString();
-        qDebug()<<"content..."<<content;
+//        qDebug()<<"content..."<<content;
         // 消息已读
     }else{
         content = obj.value("m_Message").toString();
@@ -209,10 +222,10 @@ void __stdcall message_callback(const wchar_t* json_str)
     }
 
     QString rcvTime = obj.value("m_RcvTime").toString();
-    qDebug()<<"m_MessageId"<<messageid;
+//    qDebug()<<"m_MessageId"<<messageid;
 
     QJsonObject objMention = objContent.value("mentionedInfo").toObject();
-    qDebug()<<"mentioned..."<<objMention;
+//    qDebug()<<"mentioned..."<<objMention;
     // 如果mentionedInfo，则有@
     bool isMentionedMe = false;
     if(!objMention.isEmpty()){
@@ -234,7 +247,11 @@ void __stdcall message_callback(const wchar_t* json_str)
         sendtime = rcvTime; // 把sendtime当接收时间来传递。
         sender = RYImpl::getInstance()->m_userid; // 发送者为本人
     }
+//    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     emit RYImpl::getInstance()->receivedMsg(type,sender,msgUId,QString::number(messageid),content,sendtime,conversationType,targetid, isMentionedMe);
+//    qApp->processEvents();
+    qApp->processEvents();
+
 }
 
 void RYImpl::initLib(const QString &token, const QString &user_id)
@@ -529,6 +546,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             break;
         }
     }
+
     return messageId;
 }
 

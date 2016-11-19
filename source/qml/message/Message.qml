@@ -150,6 +150,8 @@ Item {
             case 31: //云库
             case 5: //图片
             case 6: // 语音
+//                console.debug ("收到消息:"+msg)
+                tips.text = "正在收取新消息..."
                 // 添加到所有的聊天记录
                 chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime, chatview.user_id);
                 chatview.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);;
@@ -257,10 +259,35 @@ Item {
         }
     }
 
-    Connections{
+    Timer{
+        id: watchSend
+        interval: 5000
+        repeat: false
+        onTriggered: {
+            MessageJS.isSending = false;
+        }
+    }
+
+    Connections{ // contact model
         target: contactListView.model
         onNeedRefresh:{
             contactListView.model.refresh()
+        }
+    }
+
+    Connections{
+        target: chatview.chatListModel
+        onSaveMsgING:{
+            tips.text = "<font color='red'>正在保存收取的消息...</font>"
+            keytimer.start();
+        }
+        onSaveMsgINGNoRefresh:{
+            tips.text = "<font color='red'>正在保存收取的消息...请稍后再切换!</font>"
+        }
+
+        onSaveMsgFinished:{
+            tips.text = "<font color='red'>消息保存成功!</font>"
+            keytimer.start();
         }
     }
 
@@ -344,7 +371,7 @@ Item {
             clip: true
             maximumFlickVelocity: 5000
             orientation: ListView.Vertical
-            focus: true
+//            focus: true
             highlightFollowsCurrentItem: false
             spacing: 1
             delegate: msgDelegate
@@ -703,7 +730,7 @@ Item {
                                 }
                                 Timer {
                                     id: keytimer
-                                    interval: 5000
+                                    interval: 3000
                                     repeat: false
                                     onTriggered:{
                                         tips.text = "";
@@ -823,7 +850,6 @@ Item {
                                         clip: true
                                         maximumFlickVelocity: 5000
                                         orientation: ListView.Vertical
-                                        focus: true
                                         spacing: 0
                                         delegate: popupUsrDelegate
 
@@ -1142,6 +1168,7 @@ Item {
                             anchors.leftMargin: 5
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 5
+                            textFormat: Text.RichText
                         }
 
                         LButton{
@@ -1192,7 +1219,7 @@ Item {
                         clip: true
                         maximumFlickVelocity: 5000
                         orientation: ListView.Vertical
-                        focus: true
+//                        focus: true
                         highlightFollowsCurrentItem: false
                         spacing: 2
                         delegate: groupDelegate

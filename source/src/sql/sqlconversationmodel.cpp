@@ -8,6 +8,7 @@
 #include <QSqlRecord>
 #include <QSqlQuery>
 #include <QSettings>
+#include <QApplication>
 #include "ryimpl.h"
 #include "tconversationthread.h"
 
@@ -250,27 +251,32 @@ QString SqlConversationModel::getLastMsgId(int senderid)
 
 void SqlConversationModel::refresh()
 {
-    if(TConversationThread::getInstance()->isRunning())
+    if(TConversationThread::getInstance()->isRunning()){
+        emit saveMsgINGNoRefresh();
         return;
+    }
     // 替换转义符
     const QString filterString = QString::fromLatin1(
         " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(convert(m_targetid), convert(RYImpl::getInstance()->m_userid));
     setFilter(filterString);
     select();
+    int count = rowCount();
+    int limit = 3;
+    if(count>limit){
+        removeRows(limit,count-limit);
+    }
     emit countChanged(rowCount());
 }
 void SqlConversationModel::updateDBTable()
 {
     qDebug()<<"SqlConversationModel Thread start:"<<QDateTime::currentDateTime();
+    m_lastTime = QDateTime::currentDateTime();
+    if(TConversationThread::getInstance()->sqlList.count()>20){
+        // 超过10条才发消息
+        emit saveMsgING();
+    }
     TConversationThread::getInstance()->start();
     watchTimer->stop();
-}
-
-void SqlConversationModel::commitAll()
-{
-//    submitAll();
-//    refresh();
-//    emit needRefresh();
 }
 
 void SqlConversationModel::receviedModel()
@@ -278,7 +284,8 @@ void SqlConversationModel::receviedModel()
     qDebug()<<"SqlConversationModel Thread completed:"<<QDateTime::currentDateTime();
     TConversationThread::getInstance()->quit();
     refresh(); // 更新完了刷新一次
-
+    if(m_lastTime.secsTo(QDateTime::currentDateTime()) > 3) // 超过3秒
+        emit saveMsgFinished();
 }
 
 

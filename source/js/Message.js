@@ -73,10 +73,14 @@ var imgMsgObj = [];
 var isSending = false;
 
 function loopSendMsg(){
+    console.log("loopSendMsg isSending:"+isSending);
     if(imgMsgObj.length>0){
+        isSending = true;
         ryControl.sendMsg(imgMsgObj[0].messageid, imgMsgObj[0].targetid, imgMsgObj[0].categoryId, imgMsgObj[0].sendtxt, imgMsgObj[0].ctype,imgMsgObj[0].mention);
+        watchSend.start();
         imgMsgObj.shift();
     }else{
+        console.log("is sending false");
         isSending = false;
     }
 }

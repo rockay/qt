@@ -31,7 +31,8 @@
 #include "lmouselistner.h"
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
- {// 加锁
+ {
+    // 加锁
     static QMutex mutex;
     mutex.lock();
     QByteArray localMsg = msg.toUtf8();
