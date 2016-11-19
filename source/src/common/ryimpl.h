@@ -51,6 +51,7 @@ public:
     QString m_voicePath;
     QString m_picPath;
     QString m_cachePicPath;
+    QString m_cacheImagePath;
     bool m_locked;
     bool m_txtlocked;
 
@@ -64,6 +65,8 @@ signals:
     void sendMsgDealCallback(int msgid, int result, uint timestamp);
     void sendImageFailed(int messageid,int errorcode);
     void recccvMsg(const QString &senderid);
+
+    void needDownload(QString url, QString fileName);
 public slots:
     void initLib(const QString &token, const QString &user_id);
     void connect();
@@ -82,6 +85,7 @@ public slots:
         return m_cachePicPath;
     }
 
+    void initPath( const QString &user_id);
 private:
     static RYImpl* m_instance;
     int convertype[3];

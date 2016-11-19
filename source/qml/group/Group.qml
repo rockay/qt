@@ -89,7 +89,7 @@ Item {
                 width: groupView.width
                 height: UI.fHFItem
                 color:groupView.currentIndex==index? UI.cItemSelected:UI.cItem
-                Image{
+                LImage{
                     id: photo
                     anchors.left: parent.left
                     anchors.top: parent.top
@@ -97,6 +97,7 @@ Item {
                     anchors.topMargin: parent.height/5
                     height: parent.height*3/5
                     width: height
+                    picname: group_id
                     source: group_cover
                 }
                 LText{
@@ -115,6 +116,7 @@ Item {
                         card.visible = true
                         groupView.currentIndex = index
                         photoc.source = group_cover
+                        photoc.picname = group_id;
                         namec.text = group_name
                         phonec.text = "共"+group_number+"人"
                         typec.text = "个人用户" //type
@@ -186,7 +188,7 @@ Item {
                 color: UI.cTransparent
                 anchors.centerIn: parent
                 visible: false
-                Image{
+                LImage{
                     id: photoc
                     anchors.left: parent.left
                     anchors.top: parent.top

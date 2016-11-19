@@ -34,7 +34,7 @@ Item {
             for(var i=0; i <allmodel.count; i++){
                 // 添加图片数组
                 if(allmodel.get(i).file_mold === 1){
-                    imgList.append({"path": allmodel.get(i).file_url,"file_ext": allmodel.get(i).file_ext})
+                    imgList.append({"path": allmodel.get(i).file_url,"file_ext": allmodel.get(i).file_ext,"url":allmodel.get(i).file_url})
                 }
             }
         }

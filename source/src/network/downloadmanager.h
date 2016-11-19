@@ -23,10 +23,18 @@ class DownloadManager: public QObject
 {
     Q_OBJECT
     QNetworkAccessManager manager;
-    QList<QNetworkReply *> currentDownloads;
 
 public:
     DownloadManager();
+
+    static DownloadManager* getInstance()
+    {
+        if(m_instance == NULL){
+            m_instance = new DownloadManager;
+        }
+        return m_instance;
+    }
+
     QString saveFileName(const QUrl &url);
     bool saveToDisk(const QString &filename, QIODevice *data);
 
@@ -36,13 +44,14 @@ public slots:
     void sslErrors(const QList<QSslError> &errors);
     void downloadProgress(qint64 up, qint64 toal);
 signals:
-    void downloadSuccessed();
-    void downloadFailed();
-    void downProcess(int percent,const QString &file_id);
+    void downloadSuccessed(QString fileName);
+    void downloadFailed(QString fileName);
+    void downProcess(int percent,const QString fileName);
 
 private:
-    QString m_fileName;
-    QNetworkReply *m_reply;
+    QMap<QNetworkReply *,QString> currentDownloadsID;
+
+    static DownloadManager* m_instance;
 };
 
 #endif // DOWNLOADMANAGER_H

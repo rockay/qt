@@ -54,10 +54,22 @@ Rectangle{
                     var idx = listView.model.get(i).message.split('|')[0].lastIndexOf(".")
                     var localpath = listView.model.get(i).message.split('|')[0];
                     var file_ext = localpath.substring(idx+1);
-                    imgList.append({"path": listView.model.get(i).message.split('|')[1],"file_ext":file_ext})
+                    var filepath = ""
+                    var fileurl = "" ;
+                    if(listView.model.get(i).result==0 || listView.model.get(i).result==-1){
+                        fileurl = "" ;
+                        filepath = listView.model.get(i).message.split('|')[0];
+                    }
+                    else{
+                        filepath = listView.model.get(i).message.split('|')[2] ;
+                        fileurl = listView.model.get(i).message.split('|')[1] ;
+                    }
+                    imgList.append({"path": filepath,"file_ext":file_ext,"url": fileurl})
                 }
                 else if(listView.model.get(i).ctype === 31 && listView.model.get(i).message.split('|')[1].toString() === "1"){
-                    imgList.append({"path": listView.model.get(i).message.split('|')[4],"file_ext":listView.model.get(i).message.split('|')[0]})
+                    var filepath1 = listView.model.get(i).message.split('|')[4];
+                    var file_ext1 = listView.model.get(i).message.split('|')[0];
+                    imgList.append({"path": filepath1,"file_ext":file_ext1,"url": filepath1})
 
                 }
             }
@@ -66,8 +78,7 @@ Rectangle{
         }
 
         onNeedRefresh:{
-//            listView.model.refresh();
-            listView.positionViewAtEnd()
+            chatviewp.converListView.positionViewAtEnd();
         }
     }
 
@@ -130,10 +141,11 @@ Rectangle{
                 spacing: 4
                 anchors.right: sentByMe ? parent.right : undefined
 
-                Image {
+                LImage {
                     id: you
                     height: UI.fChatImgH
                     width: height
+                    picname: model.senderid
                     source: !sentByMe ? (chatroot.user_type==1 ? chatroot.user_photo : API.photoObjMap[model.senderid] == undefined? "":API.photoObjMap[model.senderid]) : ""
                 }
 
@@ -202,7 +214,7 @@ Rectangle{
                             text: model.message
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
-                            wrapMode: Label.WordWrap
+                            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
                             textFormat: Text.RichText
                             visible: false
                         }
@@ -211,7 +223,7 @@ Rectangle{
                             text: model.message
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
-                            wrapMode: Label.WordWrap
+                            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
                             visible: model.ctype == 4 ? true : false
                             selectByMouse: true
                             textFormat: Text.RichText
@@ -290,12 +302,12 @@ Rectangle{
                             }
                         }
                     }
-                    Image{
-                        id: imgOrignal
-                        visible: false
-                        asynchronous: true
-                        source: model.ctype === 5? ((model.result==-1 || model.result==0) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2]) : ""
-                    }
+//                    Image{
+//                        id: imgOrignal
+//                        visible: false
+//                        asynchronous: true
+//                        source: model.ctype === 5? ((model.result==-1 || model.result==0) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2]) : ""
+//                    }
 
                     Image {
                         id: messageImg
@@ -339,13 +351,14 @@ Rectangle{
                                 imageshow.curIdx = imgIndx;
 
                                 imageshow.imgSrc = ""
-                                imageshow.imgSrc = model.message.split('|')[1];
+                                imageshow.imgSrc = (model.result==-1 || model.result==0) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2];
                                 imageshow.imgshowList = imgList
                                 imageshow.show();
                                 imageshow.requestActivate();
                             }
                         }
                     }
+
                     Rectangle{
                         id: voiceRect
                         anchors.fill: parent
@@ -372,8 +385,11 @@ Rectangle{
 
                         MouseArea{
                             anchors.fill: parent
+                            propagateComposedEvents: true
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 console.log("语音：" + "file:///"+model.message.split('|')[1])
+                                acceptedButtons: Qt.LeftButton // 激活右键
                                 if(play.playing)
                                     play.stop();
                                 else{
@@ -529,8 +545,9 @@ Rectangle{
                     height: UI.fChatImgH
                     width: height+UI.fChatMargin
                     color: UI.cTransparent
-                    Image {
+                    LImage {
                         id: me
+                        picname: API.user_id
                         width: parent.height
                         height: parent.height
                         source: sentByMe ? API.user_photo : ""

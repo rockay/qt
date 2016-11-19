@@ -12,6 +12,9 @@
 #include <QDebug>
 # pragma execution_character_set("utf-8")
 
+#include "tcontactthread.h"
+#include "tconversationthread.h"
+
 //! [0]
 SystemTray::SystemTray()
 {
@@ -54,6 +57,12 @@ void SystemTray::showMessage()
     trayIcon->showMessage("消息提示", "你有新消息", icon, 2 * 1000);
 }
 
+void SystemTray::showCriticalMessage()
+{
+    QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::MessageIcon(QSystemTrayIcon::Information);
+    trayIcon->showMessage("消息提示", "后台还要提交聊天数据，请稍片刻再退出！", icon, 2 * 1000);
+}
+
 void SystemTray::stopFlash()
 {
     timer->stop();
@@ -89,6 +98,12 @@ void SystemTray::changeIcon()
 
 void SystemTray::quitApp()
 {
+    // 先判断线程数据库是否已经完成，不然弹出阻止。
+    if(TConversationThread::getInstance()->isRunning()
+            ||TContactThread::getInstance()->isRunning()){
+        showCriticalMessage();
+        return;
+    }
     timer->stop();
     trayIcon->setIcon(QIcon(":/images/qt-logo.png"));
     RYImpl::getInstance()->disconnect();
@@ -107,7 +122,7 @@ void SystemTray::showApp()
 
 void SystemTray::rcvMsg(const QString &userid)
 {
-    qDebug()<<"change icon...";
+    timer->stop();
     timer->start();
 }
 //! [6]

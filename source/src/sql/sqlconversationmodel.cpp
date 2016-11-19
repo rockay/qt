@@ -19,7 +19,7 @@ SqlConversationModel::SqlConversationModel(QObject *parent) :
     connect(TConversationThread::getInstance(),SIGNAL(updateFinished()), this,SLOT(receviedModel()));
     watchTimer = new QTimer(this);
     connect(watchTimer,SIGNAL(timeout()),this,SLOT(updateDBTable()));
-    watchTimer->setInterval(3000);
+    watchTimer->setInterval(1000);
 
     setTable(conversationsTableName);
     setSort(9, Qt::AscendingOrder);
@@ -73,7 +73,6 @@ bool SqlConversationModel::addMessage(QString msgUId, QString messageid, QString
 {
     watchTimer->stop();
 
-
     QDateTime timestamp = QDateTime::currentDateTime();
     QString tempMsg = message;
     tempMsg = tempMsg.replace('\n',"<br/>");
@@ -112,7 +111,6 @@ bool SqlConversationModel::addMessage(QString msgUId, QString messageid, QString
     QString sql = tr(" INSERT into conversations(msgUId, messageid, recipient, senderid, message, targetid, result, ctype, timestamp, sendtime, rcvtime) VALUES('%1','%2','%3','%4','%5','%6',%7,%8,'%9','%10','%11')")
             .arg(msgUId, messageid, recipient, senderid, tempMsg, targetid, QString::number(result), QString::number(ctype)).arg(newRecord.value("timestamp").toString(), newRecord.value("sendtime").toString(), newRecord.value("rcvtime").toString());
     TConversationThread::getInstance()->sqlList.push_back(sql);
-    emit countChanged(rowCount());
     watchTimer->start();
     return true;
 }
@@ -234,7 +232,7 @@ void SqlConversationModel::deleteMsgByID(QString msgUId)
             break;
         }
     }
-//    refresh();
+    refresh();
 }
 
 QString SqlConversationModel::getLastMsgId(int senderid)
@@ -252,17 +250,18 @@ QString SqlConversationModel::getLastMsgId(int senderid)
 
 void SqlConversationModel::refresh()
 {
-    setTable(conversationsTableName);
+    if(TConversationThread::getInstance()->isRunning())
+        return;
     // 替换转义符
     const QString filterString = QString::fromLatin1(
         " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(convert(m_targetid), convert(RYImpl::getInstance()->m_userid));
     setFilter(filterString);
-    setSort(9, Qt::AscendingOrder);
     select();
     emit countChanged(rowCount());
 }
 void SqlConversationModel::updateDBTable()
 {
+    qDebug()<<"SqlConversationModel Thread start:"<<QDateTime::currentDateTime();
     TConversationThread::getInstance()->start();
     watchTimer->stop();
 }
@@ -276,7 +275,10 @@ void SqlConversationModel::commitAll()
 
 void SqlConversationModel::receviedModel()
 {
-    qDebug()<<"SqlConversationModel Thread completed...............";
+    qDebug()<<"SqlConversationModel Thread completed:"<<QDateTime::currentDateTime();
+    TConversationThread::getInstance()->quit();
+    refresh(); // 更新完了刷新一次
+
 }
 
 

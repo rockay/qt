@@ -171,10 +171,10 @@ Window {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                console.log("上一张")
                 if(imgWindow.curIdx>0){
                     imgWindow.curIdx--;
-                    imgWindow.imgSrc = imgshowList.get(imgWindow.curIdx).path;
+                    console.log("上一张"+imgshowList.get(imgWindow.curIdx).path)
+                    imgWindow.imgSrc = "file:///"+imgshowList.get(imgWindow.curIdx).path;
                 }
             }
         }
@@ -193,10 +193,10 @@ Window {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                console.log("下一张")
                 if(imgWindow.curIdx<imgshowList.count-1){
                     imgWindow.curIdx++;
-                    imgWindow.imgSrc = imgshowList.get(imgWindow.curIdx).path;
+                    console.log("下一张"+imgshowList.get(imgWindow.curIdx).path)
+                    imgWindow.imgSrc = "file:///"+imgshowList.get(imgWindow.curIdx).path;
                 }
             }
         }
@@ -313,7 +313,7 @@ Window {
                 onClicked: {
                     console.log("保存")
                     saveDialog.file_ext = imgshowList.get(imgWindow.curIdx).file_ext
-                    saveDialog.httpurl = showimage.source
+                    saveDialog.httpurl = imgshowList.get(imgWindow.curIdx).url
                     saveDialog.open();
                 }
             }

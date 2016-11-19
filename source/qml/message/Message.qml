@@ -47,7 +47,6 @@ Item {
             // 将图片路径转成base64发送
             console.log("message send image path:"+path)
             chattool.document.insertImage("strPath","file:///"+path);
-            //MessageJS.sendMsg(path,chatview.user_type,chatview.ctype);
         }
         onSigquit: {
             console.log("hide");
@@ -107,14 +106,14 @@ Item {
         target: networkControl
         onDownProcess:{
             if(percent<100)
-                tips.text = "下载进度："+percent+"%";
+                tips.text = fileName+"下载进度："+percent+"%";
         }
         onDownloadSuccessed:{
             keytimer.start();
-            tips.text = "下载完成"
+            tips.text = "下载完成:"+fileName
         }
         onDownloadFailed:{
-            tips.text = "下载失败"
+            tips.text = "下载失败:"+fileName
         }
 
     }
@@ -153,7 +152,6 @@ Item {
             case 6: // 语音
                 // 添加到所有的聊天记录
                 chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime, chatview.user_id);
-                chatview.converListView.positionViewAtEnd();
                 // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
                 // 如果是图片
                 if(type==5)
@@ -192,6 +190,7 @@ Item {
                 MessageJS.setCurrentIdx();
                 tips.text = "";
                 msgSound.play();
+                chatview.converListView.positionViewAtEnd();
                 break;
             case 32: // 收到回执类消息
                 console.log("qml 收到回执消息:"+msg)
@@ -435,8 +434,9 @@ Item {
                 width: contactListView.width
                 height: UI.fHItem
                 color:contactListView.currentIndex==index? UI.cItemSelected:UI.cItem
-                Image{
+                LImage{
                     id: photo
+                    picname: user_id
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.leftMargin: UI.fMLsearch
@@ -446,17 +446,6 @@ Item {
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     source: model.user_photo === undefined ? "" : model.user_photo
-                    onProgressChanged: {
-                        if(progress == 1)
-                            loadingpic.visible = false;
-                    }
-                    // 默认图片
-                    Image{
-                        id: loadingpic
-                        anchors.fill: parent
-                        fillMode: Image.PreserveAspectFit
-                        source: "qrc:/images/icon/default.png"
-                    }
 
 
                     Rectangle {
@@ -530,7 +519,6 @@ Item {
                             contactMenu.open();
                             return;
                         }
-                        console.log("onclicked2..."+index);
                         contactListView.currentIndex = -1
                         contactListView.currentIndex = index
                     }
@@ -716,7 +704,7 @@ Item {
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
                                 onPressed: {
                                     gUserView.visible = false;
-                                    if (mouse.button == Qt.LeftButton) { // 右键菜单
+                                    if (mouse.button == Qt.LeftButton) { // 左键忽略
                                         mouse.accepted = false
                                     }
                                 }
@@ -757,12 +745,16 @@ Item {
                                 if(gUserView.visible && subtipslistview.currentIndex < (subtipslistview.model.count-1) && (chatview.user_type+'') == "3"){
                                     subtipslistview.currentIndex++
                                     console.log("++")
+                                }else{
+                                    event.accepted = false;
                                 }
                             }
                             Keys.onUpPressed: {
                                 if(gUserView.visible && subtipslistview.currentIndex > 0 && (chatview.user_type+'') == "3"){
                                     subtipslistview.currentIndex--
                                     console.log("--")
+                                }else{
+                                    event.accepted = false;
                                 }
                             }
 
@@ -793,7 +785,6 @@ Item {
                                     }else{
                                         gUserView.visible = false;
                                     }
-
                                 }
                             }
 
@@ -966,8 +957,9 @@ Item {
                             width: groupListView.width
                             height: gusername.contentHeight * 1.5
                             color:groupListView.currentIndex==index? UI.cRightBg : UI.cTransparent
-                            Image{
+                            LImage{
                                 id: guserphoto
+                                picname: user_id
                                 anchors.left: parent.left
                                 anchors.leftMargin: 15
                                 anchors.top: parent.top
@@ -1008,13 +1000,12 @@ Item {
                                     var idx = -1;
                                     console.log(user_id)
                                     for(var i=0; i<chatListModel.rowCount(); i++){
-                                        console.log(chatListModel.getId(i))
                                         if(chatListModel.getId(i) === user_id){
                                             idx = i;
                                             break;
                                         }
                                     }
-                                    console.log(idx)
+                                    console.log("exist at:"+idx)
 
                                     //添加或更新
                                     if(idx>-1){

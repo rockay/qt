@@ -10,7 +10,6 @@ function copySettings2API(){
     API.user_photo = settings.user_photo;
     API.is_vip_user = settings.is_vip_user;
     API.is_company_user = settings.is_company_user;
-    main.pphoto = API.user_photo;
 }
 
 // 获取验证码
@@ -116,13 +115,14 @@ function getUserInfoByIdCB(data){
             return ;
         }
         console.log("快捷登录成功");
+        copySettings2API();
+        ryControl.initLib(API.rong_token, API.user_id);
+        ryControl.connect();
+        main.pphoto = API.user_photo;
         main.show();
         login.hide();
         main.reLogin = false;
         main.reLogin = true;
-        copySettings2API();
-        ryControl.initLib(API.rong_token, API.user_id);
-        ryControl.connect();
         clearCodeLogin();
         isLogin = true;
     }else if(data.errorcode === 10){
@@ -183,12 +183,13 @@ function loginCB(data){
         copySettings2API();
         tips.text = "";
         dbControl.initDB(API.user_id)
+        ryControl.initLib(API.rong_token, API.user_id);
+        ryControl.connect();
+        main.pphoto = API.user_photo;
         main.reLogin = false;
         main.reLogin = true;
         main.show();
         login.hide();
-        ryControl.initLib(API.rong_token, API.user_id);
-        ryControl.connect();
 
 
     }else{

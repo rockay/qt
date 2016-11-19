@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QFile>
 #include "Utility.h"
+#include "downloadmanager.h"
 
 RYImpl* RYImpl::m_instance = NULL;
 
@@ -59,6 +60,8 @@ void __stdcall exception_callback(const wchar_t* json_str)
 //消息监听
 void __stdcall message_callback(const wchar_t* json_str)
 {
+    Sleep(100);
+
     QString u16 = QString::fromUtf16((const ushort*)json_str);
 
     QString msg = u16.toUtf8();
@@ -103,16 +106,17 @@ void __stdcall message_callback(const wchar_t* json_str)
 
     if(objContent.contains("content") || objContent.contains("file_url"))
     {
-        // 告诉托盘闪烁
-        emit RYImpl::getInstance()->recccvMsg("");
 
         // 自己发的消息，且发送时间与现在大于10分钟
         int seconds = QDateTime::fromString(sendtime,"yyyy-MM-dd hh:mm:ss").secsTo(QDateTime::fromString(recvTime,"yyyy-MM-dd hh:mm:ss"));
         qDebug()<<"sendtime"<<sendtime<<"recvTime"<<recvTime;
         qDebug()<<"seconds"<<seconds;
-        int outSeconds = 2*60 ; // 2分钟之前的已读或自己发的消息就不再看了
+        qDebug()<<"RYImpl::getInstance()->m_userid"<<RYImpl::getInstance()->m_userid;
+        qDebug()<<"sender "<<sender;
+        int outSeconds = 0.2*60 ; // 2分钟之前的已读或自己发的消息就不再看了
         if(sender.compare(RYImpl::getInstance()->m_userid) == 0
-                && seconds > outSeconds ){
+                && (seconds > outSeconds)){
+            // 群组会重复发，所以这里把群组屏蔽掉。
             qDebug()<<"===自己发的消息...."<<msg;
             return ;
         }
@@ -121,6 +125,9 @@ void __stdcall message_callback(const wchar_t* json_str)
             qDebug()<<"===其它端已读消息不接收到上层...."<<msg;
             return;
         }
+
+        // 告诉托盘闪烁
+        emit RYImpl::getInstance()->recccvMsg("");
 
         // 对方发送的消息
         type = MSGTYPE::MESSAGE;
@@ -139,9 +146,11 @@ void __stdcall message_callback(const wchar_t* json_str)
             QString uri = objContent.value("imageUri").toString();
             qDebug()<<"图片消息Uri:"<<uri;
             content = RYImpl::getInstance()->saveImage(content); // 返回路径保存
+            QString localpath = RYImpl::getInstance()->m_cacheImagePath+Utility::getInstance()->getGuid()+".png";
+            emit RYImpl::getInstance()->needDownload(uri, localpath);
             // 保存缩略图路径和远程路径
-            content = content+"|"+uri;
-            qDebug()<<"图片缩略图路径:"<<content;
+            content = content+"|"+uri+"|"+localpath;
+            qDebug()<<"图片缩略图消息message:"<<content;
         }
         else if(className.compare("RC:VcMsg")==0) // 语音
         {
@@ -242,19 +251,28 @@ void RYImpl::initLib(const QString &token, const QString &user_id)
     writeDir.setPath(writeDir.path()+"/"+m_userid);
     if (!writeDir.mkpath("."))
         qFatal("Failed to create writable root directory at %s", qPrintable(writeDir.absolutePath()));
+
     m_rootPath =  writeDir.absolutePath();
     m_picPath = m_rootPath +"/images/";
     writeDir.setPath(m_picPath);
     if (!writeDir.mkpath("."))
         qFatal("Failed to create writable picture directory at %s", qPrintable(writeDir.absolutePath()));
+
     m_voicePath = m_rootPath +"/voice/";
     writeDir.setPath(m_voicePath);
     if (!writeDir.mkpath("."))
         qFatal("Failed to create writable voice directory at %s", qPrintable(writeDir.absolutePath()));
+
     m_cachePicPath = m_rootPath +"/temp/pic/";
     writeDir.setPath(m_cachePicPath);
     if (!writeDir.mkpath("."))
         qFatal("Failed to create writable cache directory at %s", qPrintable(writeDir.absolutePath()));
+
+    m_cacheImagePath = m_rootPath +"/temp/images/";
+    writeDir.setPath(m_cacheImagePath);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable cache directory at %s", qPrintable(writeDir.absolutePath()));
+
 
     convertype[0]= 1;
     convertype[1]= 2;
@@ -575,9 +593,6 @@ int RYImpl::sendCustMsg(int messageId,const QString &targetId,int categoryId, co
     return messageId;
 }
 
-
-
-
 void RYImpl::sendNtfMsg(const QString& msguid, const QString &targetId, int categoryId, const QString &msg)
 {
     QString fmsg= tr("{\"lastMessageSendTime\":%1,\"type\":1,\"messageUId\":\"%2\"}").arg(msg.toUtf8().data(), msguid);
@@ -726,4 +741,35 @@ void RYImpl::SendImage(const QString &json, int imgid)
         qDebug()<<"results!=succes:"<<result;
         emit RYImpl::getInstance()->sendImageFailed(imgid,errCode);
     }
+}
+
+void RYImpl::initPath(const QString &user_id)
+{
+    m_userid = user_id;
+
+    QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    writeDir.setPath(writeDir.path()+"/"+m_userid);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable root directory at %s", qPrintable(writeDir.absolutePath()));
+    m_rootPath =  writeDir.absolutePath();
+
+    m_picPath = m_rootPath +"/images/";
+    writeDir.setPath(m_picPath);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable picture directory at %s", qPrintable(writeDir.absolutePath()));
+
+    m_voicePath = m_rootPath +"/voice/";
+    writeDir.setPath(m_voicePath);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable voice directory at %s", qPrintable(writeDir.absolutePath()));
+
+    m_cachePicPath = m_rootPath +"/temp/pic/";
+    writeDir.setPath(m_cachePicPath);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable cache directory at %s", qPrintable(writeDir.absolutePath()));
+
+    m_cacheImagePath = m_rootPath +"/temp/images/";
+    writeDir.setPath(m_cacheImagePath);
+    if (!writeDir.mkpath("."))
+        qFatal("Failed to create writable cache directory at %s", qPrintable(writeDir.absolutePath()));
 }

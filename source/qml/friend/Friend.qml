@@ -238,6 +238,7 @@ Item {
                         card.visible = true
                         msgView.currentIndex = index;
                         photoc.source = friend_photo
+                        photoc.picname = friend_id;
                         namec.text = friend_name;
                         phonec.text = friend_mobile;
                         nameremark.text = friend_remark_name;
@@ -341,7 +342,7 @@ Item {
                 color: UI.cTransparent
                 anchors.centerIn: parent
                 visible: false
-                Image{
+                LImage{
                     id: photoc
                     anchors.left: parent.left
                     anchors.top: parent.top

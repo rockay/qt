@@ -22,6 +22,11 @@ Window {
     property bool reLogin: false
     property string pphoto: ""
 
+    onPphotoChanged: {
+        console.log("onPphotoChanged:"+pphoto)
+        leftPhoto.source = main.pphoto;
+        leftPhoto.picname = API.user_id;
+    }
 
     onClosing:{
         ryControl.disconnect();
@@ -116,8 +121,19 @@ Window {
                 anchors.top: parent.top
 
                 columns: 1
-                LToolButton { source: pphoto ;
-                    width: parent.width; height: UI.fHToolButton-20
+                Rectangle{
+                    width: parent.width;
+                    height: UI.fHToolButton
+                    color: UI.cMainLBg
+                    LImage {
+                        id: leftPhoto
+                        source: ""
+                        width: parent.width/2
+                        height: width
+                        fillMode: Image.PreserveAspectFit
+                        picname: ""
+                        anchors.centerIn: parent
+                    }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {

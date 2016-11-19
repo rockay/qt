@@ -62,8 +62,6 @@ SqlContactModel::SqlContactModel(QObject *parent) :
     setEditStrategy(OnManualSubmit);
     setTable(contactsTableName);
     setSort(7, Qt::DescendingOrder);
-    select();
-    emit countChanged(rowCount());
 }
 
 QVariant SqlContactModel::data(const QModelIndex &index, int role) const
@@ -174,9 +172,10 @@ void SqlContactModel::addContacts( QString user_id, QString user_name, QString u
 
 QString SqlContactModel::updateContacts(int idx, QString last_msg)
 {
-    watchTimer->stop();
+    // 因为此不被线程调用，所以可以直接启动
 
     QDateTime timestamp = QDateTime::currentDateTime();
+
     QSqlRecord curRecord = record(idx);
     if(!last_msg.isNull() && !last_msg.isEmpty())
         curRecord.setValue("last_msg", last_msg);
@@ -198,9 +197,9 @@ QString SqlContactModel::updateContacts(int idx, QString last_msg)
         sql = tr(" UPDATE contacts SET timestamp='%1' WHERE user_id='%2' ")
                     .arg(timestamp.toString("yyyy-MM-dd hh:mm:ss"),curRecord.value("user_id").toString());
     }
-    TContactThread::getInstance()->sqlList.push_back(sql);
-    watchTimer->start();
-
+    QSqlQuery query;
+    query.exec(sql);
+    refresh();
     QString str = curRecord.value(0).toString()+"|"+curRecord.value(1).toString()+"|"+curRecord.value(5).toString();
     return str;
 }
@@ -208,7 +207,6 @@ QString SqlContactModel::updateContacts(int idx, QString last_msg)
 bool SqlContactModel::addContactById(QString user_id, QString last_msg, int newcount){
     bool flag = false;
     watchTimer->stop();
-
 
     QDateTime timestamp = QDateTime::currentDateTime();
     for(int i=0; i< rowCount();i++){
@@ -241,7 +239,6 @@ bool SqlContactModel::addContactById(QString user_id, QString last_msg, int newc
             break;
         }
     }
-    emit countChanged(rowCount());
     watchTimer->start();
     return flag;
 }
@@ -299,10 +296,10 @@ void SqlContactModel::remove(int row)
 
 void SqlContactModel::refresh()
 {
-    setTable(contactsTableName);
+    if(TContactThread::getInstance()->isRunning())
+        return;
     const QString filterString = QString::fromLatin1(
         " user_name LIKE '%%1%' OR user_remark LIKE '%%1%' ").arg(convert(m_name));
-    setSort(7, Qt::DescendingOrder);
     setFilter(filterString);
     select();
     emit countChanged(rowCount());
@@ -311,7 +308,7 @@ void SqlContactModel::refresh()
 
 void SqlContactModel::updateDBTable()
 {
-//    TContactThread::getInstance()->setContact(this);
+    qDebug()<<"TContactThread Thread start:"<<QDateTime::currentDateTime();
     TContactThread::getInstance()->start();
     watchTimer->stop();
 }
@@ -324,7 +321,7 @@ void SqlContactModel::commitAll()
 
 void SqlContactModel::receviedModel()
 {
-    qDebug()<<"Thread completed...............";
-//    this = model;
-//    memcpy(this,model,sizeof(SqlContactModel));
+    qDebug()<<"TContactThread Thread completed:"<<QDateTime::currentDateTime();
+    TContactThread::getInstance()->quit();
+    refresh(); // 更新完了刷新一次
 }

@@ -127,10 +127,11 @@ Window {
         anchors.topMargin: UI.fHLoginM
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
-        Image {
+        LImage {
             id: photop
             anchors.fill: parent
             source: settings.user_photo == "" ? "qrc:/images/qt-logo.png" : settings.user_photo
+            picname: settings.user_id
         }
     }
 

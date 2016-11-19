@@ -83,6 +83,7 @@ public slots:
     void showApp();
     void rcvMsg(const QString &userid);
     void showMessage();
+    void showCriticalMessage();
     void stopFlash();
 private:
     void createActions();

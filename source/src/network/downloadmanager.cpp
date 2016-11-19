@@ -1,9 +1,17 @@
 #include "downloadmanager.h"
 #include <QCoreApplication>
+#include "Utility.h"
+#include <QPixmap>
+#include "ryimpl.h"
+
+DownloadManager* DownloadManager::m_instance = NULL;
+
 DownloadManager::DownloadManager()
 {
     connect(&manager, SIGNAL(finished(QNetworkReply*)),
             SLOT(downloadFinished(QNetworkReply*)));
+
+    connect(RYImpl::getInstance(),SIGNAL(needDownload(QString,QString)), this, SLOT(doDownload(QString,QString)));
 }
 
 void DownloadManager::doDownload(const QString &url, const QString &saveFileName)
@@ -11,8 +19,7 @@ void DownloadManager::doDownload(const QString &url, const QString &saveFileName
     qDebug()<<"url:"<<url;
     qDebug()<<"save path:"<< saveFileName;
     QUrl urlpath = QUrl::fromEncoded(url.toUtf8());
-    m_reply = manager.get(QNetworkRequest(urlpath));
-    m_fileName = saveFileName;
+    QNetworkReply *m_reply = manager.get(QNetworkRequest(urlpath));
 
     connect(m_reply,&QNetworkReply::downloadProgress,this, &DownloadManager::downloadProgress);
 
@@ -20,15 +27,17 @@ void DownloadManager::doDownload(const QString &url, const QString &saveFileName
     connect(m_reply, SIGNAL(sslErrors(QList<QSslError>)), SLOT(sslErrors(QList<QSslError>)));
 #endif
 
-//    currentDownloads.append(reply);
+    currentDownloadsID.insert(m_reply,saveFileName);
 }
 
 void DownloadManager::downloadProgress(qint64 up, qint64 toal)
 {
+    QNetworkReply *reply = (QNetworkReply *)sender();
+    qDebug()<<"下载进度:"<<up*100/toal;
     if(up == toal){
-        emit downProcess(100, "123");
+        emit downProcess(100,currentDownloadsID.value(reply));
     }else{
-        emit downProcess(up*100/toal, "123");
+        emit downProcess(up*100/toal, currentDownloadsID.value(reply));
     }
 }
 
@@ -55,10 +64,12 @@ QString DownloadManager::saveFileName(const QUrl &url)
 
 bool DownloadManager::saveToDisk(const QString &filename, QIODevice *data)
 {
-    QFile file(filename);
+    QString path = filename;
+    path = path.replace("file:///","");
+    QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
         fprintf(stderr, "Could not open %s for writing: %s\n",
-                qPrintable(filename),
+                qPrintable(path),
                 qPrintable(file.errorString()));
         return false;
     }
@@ -66,6 +77,33 @@ bool DownloadManager::saveToDisk(const QString &filename, QIODevice *data)
     file.write(data->readAll());
     file.close();
 
+    // 对图片特殊处理，因为有格式问题
+    QString file_ext = Utility::getInstance()->getFileExt(path);
+    if(file_ext == "JPG" || file_ext == "BMP" || file_ext == "GIF"
+            || file_ext == "JPEG" || file_ext == "ICO" || file_ext == "PNG") {
+        QString orignalFile_ext = file_ext; // 原来的后缀名
+        QPixmap img;
+        if(!img.load(path,file_ext.toUtf8().data())) // 一直试图片格式
+        {
+            file_ext = "JPG";
+            if(!img.load(path,"JPG")){
+                file_ext = "PNG";
+                if(!img.load(path,"PNG")){
+                    file_ext = "BMP";
+                    if(!img.load(path,"BMP")){
+                        file_ext = "GIF";
+                        if(!img.load(path,"GIF")){
+                            file_ext = "ICO";
+                            if(!img.load(path,"ICO")){
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        img.save(filename,orignalFile_ext.toUtf8().data());
+    }
     return true;
 }
 
@@ -86,26 +124,27 @@ void DownloadManager::downloadFinished(QNetworkReply *reply)
     QUrl redurl = reply->attribute (
                    QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if (!redurl.isEmpty()) {
-        doDownload (redurl.toString(), m_fileName);
+        doDownload (redurl.toString(),currentDownloadsID.value(reply));
         return;
     }
 
     QUrl url = reply->url();
     if (reply->error()) {
         qDebug()<<"Download of %s failed: %s\n"<<url.toEncoded().constData()<<qPrintable(reply->errorString());
-        emit downloadFailed();
-        return;
+        emit downloadFailed(currentDownloadsID.value(reply));
     } else {
-        QString filename = m_fileName; //saveFileName(url);
-        if (saveToDisk(filename, reply))
+        QString filename = currentDownloadsID.value(reply);
+        if (saveToDisk(filename, reply)){
             printf("Download of %s succeeded (saved to %s)\n",
                    url.toEncoded().constData(), qPrintable(filename));
+            emit downloadFailed(currentDownloadsID.value(reply));
+        }
     }
 
-//    currentDownloads.removeAll(reply);
     reply->close();
     reply->deleteLater();
     qDebug()<<"下载完成";
-    emit downloadSuccessed();
+    currentDownloadsID.remove(reply);
+    emit downloadSuccessed(currentDownloadsID.value(reply));
 
 }

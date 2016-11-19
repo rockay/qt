@@ -93,6 +93,9 @@ int main(int argc,char* argv[])
 
     QQmlApplicationEngine engine;
 
+    // 先初始化下融云
+    RYImpl::getInstance()->initPath(user_id);
+
     // 数据库
     QTDataBase::getInstance()->initDB(user_id);
     engine.rootContext()->setContextProperty("dbControl", QTDataBase::getInstance());
@@ -120,8 +123,7 @@ int main(int argc,char* argv[])
     engine.rootContext()->setContextProperty("utilityControl", unit);
 
     // 下载
-    DownloadManager download;
-    engine.rootContext()->setContextProperty("networkControl", &download);
+    engine.rootContext()->setContextProperty("networkControl", DownloadManager::getInstance());
 
     // 托盘
     SystemTray stray;

@@ -188,7 +188,7 @@ void Utility::uploadProgress(qint64 up, qint64 toal)
 
 QString Utility::getGuid()
 {
-    return QUuid::createUuid().toString();
+    return QUuid::createUuid().toString().replace("{","").replace("}","");
 }
 
 int Utility::getMessageId()
