@@ -52,8 +52,6 @@ public:
     QString m_picPath;
     QString m_cachePicPath;
     QString m_cacheImagePath;
-    bool m_locked;
-    bool m_txtlocked;
 
 
 signals:

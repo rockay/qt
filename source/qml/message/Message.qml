@@ -124,7 +124,7 @@ Item {
             tips.text = "发送图片失败，请重试！"
 
             // 更新数据库为-1
-            ryControl.updateMsgStatus(messageid,-1)
+            chatview.chatListModel.updateMsgStatus(messageid,-1)
         }
 
         onReceivedMsg: {
@@ -152,6 +152,7 @@ Item {
             case 6: // 语音
                 // 添加到所有的聊天记录
                 chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,msg,targetid,1,type,sendtime, chatview.user_id);
+                chatview.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);;
                 // 更新左侧会话列表，将此对话置顶，可能要将联系人基本信息存本地，定时更新
                 // 如果是图片
                 if(type==5)
@@ -190,7 +191,6 @@ Item {
                 MessageJS.setCurrentIdx();
                 tips.text = "";
                 msgSound.play();
-                chatview.converListView.positionViewAtEnd();
                 break;
             case 32: // 收到回执类消息
                 console.log("qml 收到回执消息:"+msg)
@@ -655,235 +655,483 @@ Item {
                             }
                         }
 
-                        LTextArea{
-                            id: sendText
+                        Flickable {
+                            id: flickable
+                            flickableDirection: Flickable.VerticalFlick
                             width: parent.width
                             height: rightBottom.height - toolBar.height - sendBtn.height
                             anchors.left: parent.left
                             anchors.top: toolBar.bottom
-                            selectByMouse: true
-                            Accessible.name: "document"
-                            //baseUrl: "qrc:/images/yibanface"
-                            text: chattool.document.text
-                            textFormat: Qt.RichText
-                            Component.onCompleted: forceActiveFocus()
-                            property point clickPos: "0,0"
-                            onLinkActivated: Qt.openUrlExternally(link)
-                            persistentSelection: true
 
-                            Shortcut {
-                                sequence: "Ctrl+Return"
-                                onActivated:  {
-                                    console.log("发送消息");
+                            TextArea.flickable: LTextArea{
+                                id: sendText
+//                                width: parent.width
+//                                height: rightBottom.height - toolBar.height - sendBtn.height
+//                                anchors.left: parent.left
+//                                anchors.top: toolBar.bottom
+                                leftPadding: 6
+                                rightPadding: 6
+                                topPadding: 0
+                                bottomPadding: 0
+                                focus: true
+                                background: null
+                                selectByMouse: true
+                                Accessible.name: "document"
+                                //baseUrl: "qrc:/images/yibanface"
+                                text: chattool.document.text
+                                textFormat: Qt.RichText
+                                property point clickPos: "0,0"
+                                onLinkActivated: Qt.openUrlExternally(link)
+                                persistentSelection: true
 
-                                    MessageJS.sendFun();
-                                }
-                            }
-                            Shortcut {
-                                sequence: "Ctrl+Enter"
-                                onActivated:  {
-                                    console.log("发送消息");
+                                Shortcut {
+                                    sequence: "Ctrl+Return"
+                                    onActivated:  {
+                                        console.log("发送消息");
 
-                                    MessageJS.sendFun();
-                                }
-                            }
-                            Timer {
-                                id: keytimer
-                                interval: 5000
-                                repeat: false
-                                onTriggered:{
-                                    tips.text = "";
-                                    stop();
-                                }
-                            }
-
-                            MouseArea{
-                                anchors.fill: parent
-                                propagateComposedEvents: true
-                                cursorShape: Qt.IBeamCursor
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
-                                onPressed: {
-                                    gUserView.visible = false;
-                                    if (mouse.button == Qt.LeftButton) { // 左键忽略
-                                        mouse.accepted = false
+                                        MessageJS.sendFun();
                                     }
                                 }
-                                onClicked: {
-                                    gUserView.visible = false;
-                                    if (mouse.button == Qt.RightButton) { // 右键菜单
-                                        sendText.clickPos  = Qt.point(mouse.x,mouse.y)
-                                        copyMenu.open();
+                                Shortcut {
+                                    sequence: "Ctrl+Enter"
+                                    onActivated:  {
+                                        console.log("发送消息");
+
+                                        MessageJS.sendFun();
                                     }
                                 }
-                            }
+                                Timer {
+                                    id: keytimer
+                                    interval: 5000
+                                    repeat: false
+                                    onTriggered:{
+                                        tips.text = "";
+                                        stop();
+                                    }
+                                }
 
-                            Keys.onReturnPressed: {
-                                if( gUserView.visible && grpMemberListModelFilter.count>0){
-                                    var sendtxt = chattool.document.sourceText;
-                                    var lastIdx = sendtxt.lastIndexOf("@");
-                                    var tiptxt = sendtxt.substring(lastIdx+1);
-                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
-                                    sendText.focus = true;
-                                    gUserView.visible = false;
-                                }else{
-                                    event.accepted = false;
-                                }
-                            }
-                            Keys.onEnterPressed: {
-                                if( gUserView.visible && grpMemberListModelFilter.count>0){
-                                    var sendtxt = chattool.document.sourceText;
-                                    var lastIdx = sendtxt.lastIndexOf("@");
-                                    var tiptxt = sendtxt.substring(lastIdx+1);
-                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
-                                    sendText.focus = true;
-                                    gUserView.visible = false;
-                                }else{
-                                    event.accepted = false;
-                                }
-                            }
-                            Keys.onDownPressed: {
-                                if(gUserView.visible && subtipslistview.currentIndex < (subtipslistview.model.count-1) && (chatview.user_type+'') == "3"){
-                                    subtipslistview.currentIndex++
-                                    console.log("++")
-                                }else{
-                                    event.accepted = false;
-                                }
-                            }
-                            Keys.onUpPressed: {
-                                if(gUserView.visible && subtipslistview.currentIndex > 0 && (chatview.user_type+'') == "3"){
-                                    subtipslistview.currentIndex--
-                                    console.log("--")
-                                }else{
-                                    event.accepted = false;
-                                }
-                            }
-
-                            onTextChanged: {
-                                if( (chatview.user_type+'') === "3"){
-                                    var sendtxt = chattool.document.sourceText;
-                                    // 取最后一个@
-                                    if(sendtxt.length>0){
-                                        var lastchar = sendtxt.charAt(sendtxt.length - 1);
-                                        var lastIdx = sendtxt.lastIndexOf("@");
-                                        if(lastchar === "@"){
-                                            MessageJS.search("")
-                                            gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
-                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
-                                            gUserView.visible = true;
+                                MouseArea{
+                                    anchors.fill: parent
+                                    propagateComposedEvents: true
+                                    cursorShape: Qt.IBeamCursor
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
+                                    onPressed: {
+                                        gUserView.visible = false;
+                                        if (mouse.button == Qt.LeftButton) { // 左键忽略
+                                            mouse.accepted = false
                                         }
-                                        else if(gUserView.visible && lastIdx >= 0){
-                                            console.log(sendtxt.substring(lastIdx+1))
-                                            MessageJS.search(sendtxt.substring(lastIdx+1))
-                                            gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
-                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
-                                            console.log(grpMemberListModelFilter.count)
-                                            if(grpMemberListModelFilter.count == 0)
+                                    }
+                                    onClicked: {
+                                        gUserView.visible = false;
+                                        if (mouse.button == Qt.RightButton) { // 右键菜单
+                                            sendText.clickPos  = Qt.point(mouse.x,mouse.y)
+                                            copyMenu.open();
+                                        }
+                                    }
+                                }
+
+                                Keys.onReturnPressed: {
+                                    if( gUserView.visible && grpMemberListModelFilter.count>0){
+                                        var sendtxt = chattool.document.sourceText;
+                                        var lastIdx = sendtxt.lastIndexOf("@");
+                                        var tiptxt = sendtxt.substring(lastIdx+1);
+                                        chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
+                                        sendText.focus = true;
+                                        gUserView.visible = false;
+                                    }else{
+                                        event.accepted = false;
+                                    }
+                                }
+                                Keys.onEnterPressed: {
+                                    if( gUserView.visible && grpMemberListModelFilter.count>0){
+                                        var sendtxt = chattool.document.sourceText;
+                                        var lastIdx = sendtxt.lastIndexOf("@");
+                                        var tiptxt = sendtxt.substring(lastIdx+1);
+                                        chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
+                                        sendText.focus = true;
+                                        gUserView.visible = false;
+                                    }else{
+                                        event.accepted = false;
+                                    }
+                                }
+                                Keys.onDownPressed: {
+                                    if(gUserView.visible && subtipslistview.currentIndex < (subtipslistview.model.count-1) && (chatview.user_type+'') == "3"){
+                                        subtipslistview.currentIndex++
+                                        console.log("++")
+                                    }else{
+                                        event.accepted = false;
+                                    }
+                                }
+                                Keys.onUpPressed: {
+                                    if(gUserView.visible && subtipslistview.currentIndex > 0 && (chatview.user_type+'') == "3"){
+                                        subtipslistview.currentIndex--
+                                        console.log("--")
+                                    }else{
+                                        event.accepted = false;
+                                    }
+                                }
+
+                                onTextChanged: {
+                                    if( (chatview.user_type+'') === "3"){
+                                        var sendtxt = chattool.document.sourceText;
+                                        // 取最后一个@
+                                        if(sendtxt.length>0){
+                                            var lastchar = sendtxt.charAt(sendtxt.length - 1);
+                                            var lastIdx = sendtxt.lastIndexOf("@");
+                                            if(lastchar === "@"){
+                                                MessageJS.search("")
+                                                gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
+                                                gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
+                                                gUserView.visible = true;
+                                            }
+                                            else if(gUserView.visible && lastIdx >= 0){
+                                                console.log(sendtxt.substring(lastIdx+1))
+                                                MessageJS.search(sendtxt.substring(lastIdx+1))
+                                                gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
+                                                gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
+                                                console.log(grpMemberListModelFilter.count)
+                                                if(grpMemberListModelFilter.count == 0)
+                                                    gUserView.visible = false;
+                                            }else{
                                                 gUserView.visible = false;
+                                            }
                                         }else{
                                             gUserView.visible = false;
                                         }
-                                    }else{
-                                        gUserView.visible = false;
                                     }
                                 }
-                            }
 
-                            Rectangle{
-                                id: gUserView
-                                visible: false
-                                border.width: 1
-                                border.color: UI.cMainCBg
-                                width: 180
-                                height: Math.min(grpMemberListModelFilter.count*26,150)
-                                ListView {
-                                    id: subtipslistview
-                                    currentIndex: -1
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 1
-                                    anchors.top: parent.top
-                                    anchors.topMargin: 1
-                                    width: parent.width-2
-                                    height: parent.height-2
+                                Rectangle{
+                                    id: gUserView
+                                    visible: false
+                                    border.width: 1
+                                    border.color: UI.cMainCBg
+                                    width: 180
+                                    height: Math.min(grpMemberListModelFilter.count*26,150)
+                                    ListView {
+                                        id: subtipslistview
+                                        currentIndex: -1
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 1
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 1
+                                        width: parent.width-2
+                                        height: parent.height-2
 
-                                    model: grpMemberListModelFilter
-                                    clip: true
-                                    maximumFlickVelocity: 5000
-                                    orientation: ListView.Vertical
-                                    focus: true
-                                    spacing: 0
-                                    delegate: popupUsrDelegate
+                                        model: grpMemberListModelFilter
+                                        clip: true
+                                        maximumFlickVelocity: 5000
+                                        orientation: ListView.Vertical
+                                        focus: true
+                                        spacing: 0
+                                        delegate: popupUsrDelegate
 
-                                    ScrollIndicator.vertical: ScrollIndicator { }
-                                }
-                                Component{
-                                    id: popupUsrDelegate
-                                    Rectangle{
-                                        width: gUserView.width
-                                        height: 25
-                                        color: subtipslistview.currentIndex==index ? UI.cItemSelected:UI.cItem
-                                        LText{
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 10
-                                            text: user_name
-                                            color: subtipslistview.currentIndex == index ? "red" : "black"
-                                        }
-                                        MouseArea{
-                                            anchors.fill: parent
-                                            onClicked: {
-                                                var sendtxt = chattool.document.sourceText;
-                                                var lastIdx = sendtxt.lastIndexOf("@");
-                                                var tiptxt = sendtxt.substring(lastIdx+1);
-                                                chattool.document.insertText(grpMemberListModelFilter.get(0).user_name.replace(tiptxt,"")+" ")
-                                                sendText.focus = true;
-                                                gUserView.visible = false;
+                                        ScrollIndicator.vertical: ScrollIndicator { }
+                                    }
+                                    Component{
+                                        id: popupUsrDelegate
+                                        Rectangle{
+                                            width: gUserView.width
+                                            height: 25
+                                            color: subtipslistview.currentIndex==index ? UI.cItemSelected:UI.cItem
+                                            LText{
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 10
+                                                text: user_name
+                                                color: subtipslistview.currentIndex == index ? "red" : "black"
+                                            }
+                                            MouseArea{
+                                                anchors.fill: parent
+                                                onClicked: {
+                                                    var sendtxt = chattool.document.sourceText;
+                                                    var lastIdx = sendtxt.lastIndexOf("@");
+                                                    var tiptxt = sendtxt.substring(lastIdx+1);
+                                                    chattool.document.insertText(grpMemberListModelFilter.get(0).user_name.replace(tiptxt,"")+" ")
+                                                    sendText.focus = true;
+                                                    gUserView.visible = false;
 
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            ListModel{
-                                id: grpMemberListModelFilter
-                            }
+                                ListModel{
+                                    id: grpMemberListModelFilter
+                                }
 
-                            LMenu {
-                                id: copyMenu
-                                x: sendText.clickPos.x
-                                y: sendText.clickPos.y
-                                z: sendText.z +10
-                                width: 50
-                                LMenuItem {
-                                    text: qsTr("复制")
-                                    height: 25
-                                    onTriggered:{
-                                        console.log("复制");
-                                        // 复制
-                                        //                                        utilityControl.copy();
-                                        sendText.copy();
+                                LMenu {
+                                    id: copyMenu
+                                    x: sendText.clickPos.x
+                                    y: sendText.clickPos.y
+                                    z: sendText.z +10
+                                    width: 50
+                                    LMenuItem {
+                                        text: qsTr("复制")
+                                        height: 25
+                                        enabled: sendText.selectedText
+                                        onTriggered:{
+                                            console.log("复制");
+                                            // 复制
+                                            //                                        utilityControl.copy();
+                                            sendText.copy();
+                                        }
+                                    }
+                                    LMenuItem {
+                                        text: qsTr("剪切")
+                                        height: 25
+                                        enabled: sendText.selectedText
+                                        onTriggered:{
+                                            console.log("剪切");
+                                            // 剪切
+                                            sendText.cut();
+                                        }
+                                    }
+                                    LMenuItem {
+                                        text: qsTr("粘贴")
+                                        height: 25
+                                        enabled: sendText.canPaste
+                                        onTriggered:{
+                                            console.log("粘贴");
+                                            // 粘贴
+                                            sendText.paste();
+                                        }
                                     }
                                 }
-                                LMenuItem {
-                                    text: qsTr("剪切")
-                                    height: 25
-                                    onTriggered:{
-                                        console.log("剪切");
-                                        // 剪切
-                                        sendText.cut();
-                                    }
-                                }
-                                LMenuItem {
-                                    text: qsTr("粘贴")
-                                    height: 25
-                                    onTriggered:{
-                                        console.log("粘贴");
-                                        // 粘贴
-                                        sendText.paste();
-                                    }
-                                }
                             }
 
+
+                            ScrollBar.vertical: ScrollBar {}
                         }
+
+//                        LTextArea{
+//                            id: sendText
+//                            width: parent.width
+//                            height: rightBottom.height - toolBar.height - sendBtn.height
+//                            anchors.left: parent.left
+//                            anchors.top: toolBar.bottom
+//                            selectByMouse: true
+//                            Accessible.name: "document"
+//                            //baseUrl: "qrc:/images/yibanface"
+//                            text: chattool.document.text
+//                            textFormat: Qt.RichText
+//                            Component.onCompleted: forceActiveFocus()
+//                            property point clickPos: "0,0"
+//                            onLinkActivated: Qt.openUrlExternally(link)
+//                            persistentSelection: true
+
+//                            Shortcut {
+//                                sequence: "Ctrl+Return"
+//                                onActivated:  {
+//                                    console.log("发送消息");
+
+//                                    MessageJS.sendFun();
+//                                }
+//                            }
+//                            Shortcut {
+//                                sequence: "Ctrl+Enter"
+//                                onActivated:  {
+//                                    console.log("发送消息");
+
+//                                    MessageJS.sendFun();
+//                                }
+//                            }
+//                            Timer {
+//                                id: keytimer
+//                                interval: 5000
+//                                repeat: false
+//                                onTriggered:{
+//                                    tips.text = "";
+//                                    stop();
+//                                }
+//                            }
+
+//                            MouseArea{
+//                                anchors.fill: parent
+//                                propagateComposedEvents: true
+//                                cursorShape: Qt.IBeamCursor
+//                                acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
+//                                onPressed: {
+//                                    gUserView.visible = false;
+//                                    if (mouse.button == Qt.LeftButton) { // 左键忽略
+//                                        mouse.accepted = false
+//                                    }
+//                                }
+//                                onClicked: {
+//                                    gUserView.visible = false;
+//                                    if (mouse.button == Qt.RightButton) { // 右键菜单
+//                                        sendText.clickPos  = Qt.point(mouse.x,mouse.y)
+//                                        copyMenu.open();
+//                                    }
+//                                }
+//                            }
+
+//                            Keys.onReturnPressed: {
+//                                if( gUserView.visible && grpMemberListModelFilter.count>0){
+//                                    var sendtxt = chattool.document.sourceText;
+//                                    var lastIdx = sendtxt.lastIndexOf("@");
+//                                    var tiptxt = sendtxt.substring(lastIdx+1);
+//                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
+//                                    sendText.focus = true;
+//                                    gUserView.visible = false;
+//                                }else{
+//                                    event.accepted = false;
+//                                }
+//                            }
+//                            Keys.onEnterPressed: {
+//                                if( gUserView.visible && grpMemberListModelFilter.count>0){
+//                                    var sendtxt = chattool.document.sourceText;
+//                                    var lastIdx = sendtxt.lastIndexOf("@");
+//                                    var tiptxt = sendtxt.substring(lastIdx+1);
+//                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
+//                                    sendText.focus = true;
+//                                    gUserView.visible = false;
+//                                }else{
+//                                    event.accepted = false;
+//                                }
+//                            }
+//                            Keys.onDownPressed: {
+//                                if(gUserView.visible && subtipslistview.currentIndex < (subtipslistview.model.count-1) && (chatview.user_type+'') == "3"){
+//                                    subtipslistview.currentIndex++
+//                                    console.log("++")
+//                                }else{
+//                                    event.accepted = false;
+//                                }
+//                            }
+//                            Keys.onUpPressed: {
+//                                if(gUserView.visible && subtipslistview.currentIndex > 0 && (chatview.user_type+'') == "3"){
+//                                    subtipslistview.currentIndex--
+//                                    console.log("--")
+//                                }else{
+//                                    event.accepted = false;
+//                                }
+//                            }
+
+//                            onTextChanged: {
+//                                if( (chatview.user_type+'') === "3"){
+//                                    var sendtxt = chattool.document.sourceText;
+//                                    // 取最后一个@
+//                                    if(sendtxt.length>0){
+//                                        var lastchar = sendtxt.charAt(sendtxt.length - 1);
+//                                        var lastIdx = sendtxt.lastIndexOf("@");
+//                                        if(lastchar === "@"){
+//                                            MessageJS.search("")
+//                                            gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
+//                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
+//                                            gUserView.visible = true;
+//                                        }
+//                                        else if(gUserView.visible && lastIdx >= 0){
+//                                            console.log(sendtxt.substring(lastIdx+1))
+//                                            MessageJS.search(sendtxt.substring(lastIdx+1))
+//                                            gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
+//                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
+//                                            console.log(grpMemberListModelFilter.count)
+//                                            if(grpMemberListModelFilter.count == 0)
+//                                                gUserView.visible = false;
+//                                        }else{
+//                                            gUserView.visible = false;
+//                                        }
+//                                    }else{
+//                                        gUserView.visible = false;
+//                                    }
+//                                }
+//                            }
+
+//                            Rectangle{
+//                                id: gUserView
+//                                visible: false
+//                                border.width: 1
+//                                border.color: UI.cMainCBg
+//                                width: 180
+//                                height: Math.min(grpMemberListModelFilter.count*26,150)
+//                                ListView {
+//                                    id: subtipslistview
+//                                    currentIndex: -1
+//                                    anchors.left: parent.left
+//                                    anchors.leftMargin: 1
+//                                    anchors.top: parent.top
+//                                    anchors.topMargin: 1
+//                                    width: parent.width-2
+//                                    height: parent.height-2
+
+//                                    model: grpMemberListModelFilter
+//                                    clip: true
+//                                    maximumFlickVelocity: 5000
+//                                    orientation: ListView.Vertical
+//                                    focus: true
+//                                    spacing: 0
+//                                    delegate: popupUsrDelegate
+
+//                                    ScrollIndicator.vertical: ScrollIndicator { }
+//                                }
+//                                Component{
+//                                    id: popupUsrDelegate
+//                                    Rectangle{
+//                                        width: gUserView.width
+//                                        height: 25
+//                                        color: subtipslistview.currentIndex==index ? UI.cItemSelected:UI.cItem
+//                                        LText{
+//                                            anchors.fill: parent
+//                                            anchors.leftMargin: 10
+//                                            text: user_name
+//                                            color: subtipslistview.currentIndex == index ? "red" : "black"
+//                                        }
+//                                        MouseArea{
+//                                            anchors.fill: parent
+//                                            onClicked: {
+//                                                var sendtxt = chattool.document.sourceText;
+//                                                var lastIdx = sendtxt.lastIndexOf("@");
+//                                                var tiptxt = sendtxt.substring(lastIdx+1);
+//                                                chattool.document.insertText(grpMemberListModelFilter.get(0).user_name.replace(tiptxt,"")+" ")
+//                                                sendText.focus = true;
+//                                                gUserView.visible = false;
+
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+
+//                            ListModel{
+//                                id: grpMemberListModelFilter
+//                            }
+
+//                            LMenu {
+//                                id: copyMenu
+//                                x: sendText.clickPos.x
+//                                y: sendText.clickPos.y
+//                                z: sendText.z +10
+//                                width: 50
+//                                LMenuItem {
+//                                    text: qsTr("复制")
+//                                    height: 25
+//                                    onTriggered:{
+//                                        console.log("复制");
+//                                        // 复制
+//                                        //                                        utilityControl.copy();
+//                                        sendText.copy();
+//                                    }
+//                                }
+//                                LMenuItem {
+//                                    text: qsTr("剪切")
+//                                    height: 25
+//                                    onTriggered:{
+//                                        console.log("剪切");
+//                                        // 剪切
+//                                        sendText.cut();
+//                                    }
+//                                }
+//                                LMenuItem {
+//                                    text: qsTr("粘贴")
+//                                    height: 25
+//                                    onTriggered:{
+//                                        console.log("粘贴");
+//                                        // 粘贴
+//                                        sendText.paste();
+//                                    }
+//                                }
+//                            }
+//                        }
 
                         LText{
                             id: tips

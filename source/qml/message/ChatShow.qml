@@ -78,7 +78,7 @@ Rectangle{
         }
 
         onNeedRefresh:{
-            chatviewp.converListView.positionViewAtEnd();
+//            chatviewp.converListView.positionViewAtEnd();
         }
     }
 
@@ -294,7 +294,8 @@ Rectangle{
                             }
 
                             Component.onCompleted: {
-                                var transferText = model.message.replace(/\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]/g, function(match){
+                                var transferText = model.message.replace(/\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u261d\u270c\u270a\u263a\u270b\u2600\u2615\u26c4\u2601\u2744\u26a1\u2614\u26c5\u270f\u2b50\u26bd\u23f0\u23f3]/g
+                                                                         , function(match){
                                     return "<img src='qrc:/images/emoji/drawable-xhdpi/u"+ConvertJS.getCPfromChar(match).toLowerCase().trim()+".png' width=25 height=25/>";
                                  });
                                 messageText.text= transferText ;

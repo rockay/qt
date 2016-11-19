@@ -29,11 +29,7 @@ Rectangle {
                 anchors.centerIn: parent
                 verticalAlignment: Text.AlignVCenter
                 textFormat: Text.RichText
-//                text: utilityControl.getEmoji(ConvertJS.convertHexNCR2CP(emojicode.replace("0x","&#x")+";"));
                 text: "<img src='qrc:/images/emoji/drawable-xhdpi/u"+emojicode.replace("0x","")+".png' width=25 height=25/>"
-                Component.onCompleted: {
-//                    var txt = "<img src='qrc:/images/emoji/drawable-xhdpi/u"+emojicode.replace("0x","")+".png' width=25 height=25/>"
-                }
             }
 
             MouseArea{
@@ -55,6 +51,7 @@ Rectangle {
                 }
                 onClicked: {
                     sigFaceClicked(emotiontxt.text)
+                    console.log("face:"+emotiontxt.text);
                     ppFace.hide()
                 }
             }

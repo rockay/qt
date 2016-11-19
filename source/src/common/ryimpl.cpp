@@ -18,7 +18,6 @@
 #include "downloadmanager.h"
 
 RYImpl* RYImpl::m_instance = NULL;
-
 QJsonObject getJsonObjectFromString(const QString jsonString){
     QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonString.toUtf8().data());
     if( jsonDocument.isNull() ){
@@ -41,8 +40,6 @@ void __stdcall exception_callback(const wchar_t* json_str)
 
     emit RYImpl::getInstance()->receivedException(code, data);
 
-    RYImpl::getInstance()->m_txtlocked = false;
-    RYImpl::getInstance()->m_locked = false;
     auto connectCallback = [](const wchar_t* json_str)
     {
         QString str1= QString::fromWCharArray(json_str);
@@ -242,8 +239,7 @@ void __stdcall message_callback(const wchar_t* json_str)
 
 void RYImpl::initLib(const QString &token, const QString &user_id)
 {
-    m_locked = false;
-    m_txtlocked = false;
+
     m_token = token;
     m_userid = user_id;
 
@@ -466,7 +462,6 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
     qDebug()<<"msgw src:"<<u16.toUtf8()<<endl;
     auto sendMessageCallback = [](const wchar_t* json_str)
     {
-        RYImpl::getInstance()->m_txtlocked = false;
         QString str1= QString::fromWCharArray(json_str);
         qDebug()<< "发送回执:"+str1;
         QString u16 = QString::fromUtf16((const ushort*)json_str);
@@ -489,7 +484,6 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             QString msg = u16.toUtf8();
             QJsonObject obj = getJsonObjectFromString(msg);
             QString img_id = obj.value("img_id").toString();
-            RYImpl::getInstance()->m_locked = false;
             RYImpl::getInstance()->SendImage(u16,img_id.toInt());
         };
         auto processImageCallback = [](const wchar_t* json_str)
@@ -501,7 +495,6 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
             QString img_id = obj.value("img_id").toString();
             int process = obj.value("process").toInt();
             int targetId = obj.value("targetId").toInt();
-            RYImpl::getInstance()->m_locked = false;
             emit RYImpl::getInstance()->proceeFile(img_id,process,targetId);
         };
 
@@ -520,17 +513,12 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
         if(!img_idmap.contains(QString::number(messageId))){
             img_idmap.insert(QString::number(messageId),msg);
         }
-//        while(m_locked);
-//        m_locked  = true;
         UpLoadFile(targetId.toUtf8().data(),categoryId,1,picData,blob.size(),QString::number(messageId).toUtf8().data(),sendImageCallback,processImageCallback);
         qDebug()<<"UpLoadFile ok:"<<messageId;
     }
     if(sendMessage!=NULL){
         switch(type){
         case MSGTYPE::MSG_TXT:
-            qDebug()<<"sendMessage m_txtlocked:"<<m_txtlocked;
-//            while(m_txtlocked);
-//            m_txtlocked = true;
             sendMessage(targetId.toUtf8().data(), categoryId, 3, "RC:TxtMsg", msgw, "", "", messageId, sendMessageCallback);
             break;
         case MSGTYPE::MSG_VC:
@@ -721,7 +709,6 @@ void RYImpl::SendImage(const QString &json, int imgid)
 
         auto sendMessageCallback1 = [](const wchar_t* json_str)
         {
-            RYImpl::getInstance()->m_txtlocked = false;
             QString u16 = QString::fromUtf16((const ushort*)json_str);
             QString retMsg = u16.toUtf8();
             qDebug()<<"send image callback..."<<retMsg;

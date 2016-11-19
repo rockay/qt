@@ -120,7 +120,7 @@ function sendMsg(sendtxt,user_type,ctype){
         // 先保存数据库
         var messageid = utilityControl.getMessageId();
         chatview.chatListModel.addMessage(utilityControl.getGuid(),messageid,targetid, API.user_id,sendtxt,targetid,0,ctype,""); // 空为发送时间，CPP中获取
-        chatview.converListView.positionViewAtEnd();
+        chatview.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);
 
         if(ctype==5){ // 图片进入消息队列
             var obj = {};
@@ -367,7 +367,7 @@ function sendCloudMsg(strPath){
     if(!chatview.chatListModel.addMessage(messageid, messageid, chatview.user_id, API.user_id, sendtxt, chatview.user_id,0,31,"")) // 空为发送时间，CPP中获取
         return; // 发送失败
 
-    chatview.converListView.positionViewAtEnd();
+    chatview.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);
 
     sendtxt = qsTr("[云库文件]");
     // 更新会话列表

@@ -69,9 +69,6 @@ function uploadFie(){
             uploadFie();
         }
     }else{
-//        upFinishDialog.open();
-//        bottomtips.text = qsTr("文件上传完成");
-
         if(upFinishDialog.visible)
             upFinishDialog.requestActivate();
         else

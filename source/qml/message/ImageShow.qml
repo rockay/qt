@@ -174,7 +174,7 @@ Window {
                 if(imgWindow.curIdx>0){
                     imgWindow.curIdx--;
                     console.log("上一张"+imgshowList.get(imgWindow.curIdx).path)
-                    imgWindow.imgSrc = "file:///"+imgshowList.get(imgWindow.curIdx).path;
+                    imgWindow.imgSrc = imgshowList.get(imgWindow.curIdx).path.indexOf("http://")>=0 ? imgshowList.get(imgWindow.curIdx).path : "file:///"+imgshowList.get(imgWindow.curIdx).path;
                 }
             }
         }
@@ -196,7 +196,7 @@ Window {
                 if(imgWindow.curIdx<imgshowList.count-1){
                     imgWindow.curIdx++;
                     console.log("下一张"+imgshowList.get(imgWindow.curIdx).path)
-                    imgWindow.imgSrc = "file:///"+imgshowList.get(imgWindow.curIdx).path;
+                    imgWindow.imgSrc = imgshowList.get(imgWindow.curIdx).path.indexOf("http://")>=0 ? imgshowList.get(imgWindow.curIdx).path : "file:///"+imgshowList.get(imgWindow.curIdx).path;
                 }
             }
         }

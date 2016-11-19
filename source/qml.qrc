@@ -25,7 +25,6 @@
         <file>controls/LTabBar.qml</file>
         <file>qml/textarea.html</file>
         <file>controls/FaceModel.qml</file>
-        <file>images/ybemxml_new.xml</file>
         <file>controls/ChatTipsImage.qml</file>
         <file>qml/message/ChatToolBar.qml</file>
         <file>images/icon/allfile.png</file>
