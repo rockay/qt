@@ -452,7 +452,7 @@ int RYImpl::sendMsg(int messageId, const QString &targetId,int categoryId, const
 
     qDebug()<<"sendMsg msg:"<<msg;
     QString tempmsg = msg;
-    tempmsg = tempmsg.replace('\n',"\\n");
+    tempmsg = tempmsg.replace('\\',"\\\\").replace('\n',"\\n"); // 解决苹果上面显示问题
     QString fmsg= tr("{\"content\":\"%1\"}").arg(tempmsg.toUtf8().data());
     if(categoryId == 3 && !mention.isEmpty())
         fmsg = tr("{\"content\":\"%1\",\"mentionedInfo\":{\"type\":2,\"userIdList\":%2}}").arg(tempmsg.toUtf8().data(),mention);

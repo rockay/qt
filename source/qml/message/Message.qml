@@ -252,7 +252,8 @@ Item {
             // 消息发送成功，入库
             console.log("消息发送成功，入库:"+msgid)
             chatview.chatListModel.updateMsgStatus(msgid, result,timestamp);
-            MessageJS.loopSendImg();
+            // 发送下一个
+            MessageJS.loopSendMsg();
         }
     }
 
@@ -350,7 +351,7 @@ Item {
             property int relativeY: header.y
             ScrollIndicator.vertical: ScrollIndicator { }
             onCurrentIndexChanged: {
-                console.log("changed..."+currentIndex)
+//                console.log("changed..."+currentIndex)
                 if(currentIndex>-1){
                     topTitle.text = model.get(currentIndex).user_remark == ""? model.get(currentIndex).user_name : model.get(currentIndex).user_remark
                     chatview.user_id = model.get(currentIndex).user_id

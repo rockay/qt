@@ -72,9 +72,9 @@ function sendFun(){
 var imgMsgObj = [];
 var isSending = false;
 
-function loopSendImg(){
+function loopSendMsg(){
     if(imgMsgObj.length>0){
-        ryControl.sendMsg(imgMsgObj[0].messageid, imgMsgObj[0].targetid, imgMsgObj[0].categoryId, imgMsgObj[0].sendtxt, imgMsgObj[0].ctype,"");
+        ryControl.sendMsg(imgMsgObj[0].messageid, imgMsgObj[0].targetid, imgMsgObj[0].categoryId, imgMsgObj[0].sendtxt, imgMsgObj[0].ctype,imgMsgObj[0].mention);
         imgMsgObj.shift();
     }else{
         isSending = false;
@@ -122,23 +122,27 @@ function sendMsg(sendtxt,user_type,ctype){
         chatview.chatListModel.addMessage(utilityControl.getGuid(),messageid,targetid, API.user_id,sendtxt,targetid,0,ctype,""); // 空为发送时间，CPP中获取
         chatview.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);
 
+        var obj = {};
+        obj.messageid = messageid;
+        obj.targetid = targetid;
+        obj.categoryId = categoryId;
+        obj.sendtxt = sendtxt;
+        obj.ctype = ctype;
+        obj.mention = "";
         if(ctype==5){ // 图片进入消息队列
-            var obj = {};
-            obj.messageid = messageid;
-            obj.targetid = targetid;
-            obj.categoryId = categoryId;
-            obj.sendtxt = sendtxt;
-            obj.ctype = ctype;
-            imgMsgObj.push(obj);
-            if(!isSending){
-                isSending = true;
-                loopSendImg();
-            }
+            obj.mention = "";
         }else{
             if(mentionList.length==0 || categoryId !=3 )
-                ryControl.sendMsg(messageid, targetid,categoryId,sendtxt,ctype,"");
+                obj.mention = "";
+//                ryControl.sendMsg(messageid, targetid,categoryId,sendtxt,ctype,"");
             else
-                ryControl.sendMsg(messageid, targetid,categoryId,sendtxt,ctype,JSON.stringify(mentionList));
+                obj.mention = JSON.stringify(mentionList);
+//                ryControl.sendMsg(messageid, targetid,categoryId,sendtxt,ctype,JSON.stringify(mentionList));
+        }
+        imgMsgObj.push(obj);
+        if(!isSending){
+            isSending = true;
+            loopSendMsg();
         }
 
         // 如果是图片
