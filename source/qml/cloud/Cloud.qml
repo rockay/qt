@@ -10,6 +10,8 @@ import QtQuick.Controls 2.0
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
+import org.lt.controls 1.1
+
 import "qrc:/controls/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
@@ -51,10 +53,8 @@ Item {
         okTitle: "确定"
     }
 
-    FileDialog {
+    FileSaveDialog {
         id: saveFileDialog
-        folder: shortcuts.pictures
-        selectExisting: false
         property string httpurl: ""
         property string file_ext: "pdf"
         onAccepted: {
@@ -355,6 +355,7 @@ Item {
                             text: qsTr("下载")
                             onTriggered:{
                                 console.log("下载");
+                                saveFileDialog.filename = file_name.replace("."+file_ext,"");
                                 saveFileDialog.file_ext =  file_ext;
                                 saveFileDialog.httpurl = file_url
                                 saveFileDialog.open();

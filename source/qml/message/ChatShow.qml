@@ -92,10 +92,8 @@ Rectangle{
         }
     }
 
-    FileDialog {
+    FileSaveDialog {
         id: saveFileDialog
-        folder: shortcuts.pictures
-        selectExisting: false
         property string httpurl: ""
         property string file_ext: "pdf"
         onAccepted: {
@@ -160,8 +158,8 @@ Rectangle{
 
                 Rectangle { // textarea
                     id: textarearect
-                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 24 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : model.ctype == 31 ? 250: (hidemessageText.width + 24)
-                                    , listView.width - 2*UI.fChatImgH - messageRow.spacing-24)
+                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 30 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : model.ctype == 31 ? 250: (hidemessageText.width + 24)
+                                    , listView.width - 2*UI.fChatImgH - messageRow.spacing-30)
                     height:{
                         model.ctype == 4 ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : model.ctype == 31? 70 : (hidemessageText.height + 24)
                     }
@@ -357,9 +355,10 @@ Rectangle{
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
-                            onClicked: { // 右键菜单
+                            onClicked: {
                                 if ( mouse.button == Qt.RightButton )
-                                { // 右键菜单
+                                {
+                                    // 右键菜单
                                     console.log("右键菜单保存")
                                     var pp  = Qt.point(mouse.x,mouse.y)
                                     saveMenu.x = pp.x;
@@ -371,6 +370,7 @@ Rectangle{
                                     var localpath = model.message.split('|')[0];
                                     var file_ext = localpath.substring(idx+1);
                                     saveFileDialog.file_ext =  file_ext;
+                                    saveFileDialog.filename = utilityControl.getDefaultFileName();
                                     chooseFriendGroup.msgid = model.messageid;
                                     chooseFriendGroup.msgtype = model.ctype;
                                     chooseFriendGroup.msgcontent = model.message;
@@ -502,6 +502,7 @@ Rectangle{
                                     saveMenu.y = pp.y;
                                     saveMenu.ctype = model.ctype
                                     saveFileDialog.file_ext =  model.message.split('|')[0].toString().toLowerCase()
+                                    saveFileDialog.filename = model.message.split('|')[3].toString().replace("."+saveFileDialog.file_ext,"");
                                     saveMenu.httpurl = model.message.split('|')[4]
                                     saveMenu.msgid = model.messageid
                                     saveMenu.open()

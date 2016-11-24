@@ -58,7 +58,7 @@ var api_groupmember = "api_v2/group/group_detail"       // 获取群内成员和
 
 // 云库相关
 var api_getcloudfile = "/api_v2/chat/get_file"           // 获取云库文件
-var api_getcloudfile_new = "/api_v3.0.4/cloud/file_list"    // 获取云库文件新
+var api_getcloudfile_new = "/api_v3.0.4/cloud/all_file" //"api_v3.0.4/cloud/file_list"    // 获取云库文件新
 var api_savefile = "/api_v3/cloud/save"                 // 保存上传云库文件
 var api_removefile = "/api_v3/cloud/file_remove"        // 移除云库文件
 

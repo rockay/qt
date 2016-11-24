@@ -17,11 +17,16 @@ QtObject {
     property var set: Settings{
         id: settings
         property string token: ""
+        property string rong_token: ""
+        property string weix_token: ""
         property string user_id: ""
         property string user_mobile: ""
         property string user_name: ""
+        property string user_wx_name: ""
         property string user_photo: ""
-        property string user_loginame: ""
+        property string is_vip_user: ""
+        property string is_company_user: ""
+        property string code: ""
     }
 
     property var lWindow:Login {

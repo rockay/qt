@@ -57,7 +57,10 @@ Rectangle {
         }
         onUpdateProgress:{
             if(filefrom == 1){
-                upfilemodel.setProperty(messageid, "percent", percent);
+                if(percent!=100)
+                    upfilemodel.setProperty(messageid, "percent", percent);
+                else
+                    upfilemodel.setProperty(messageid, "percent", 99);
                 console.log("percent:",percent);
             }
         }
@@ -72,13 +75,6 @@ Rectangle {
         flag: 1
         okTitle: "确定"
     }
-//    MessageDialog {
-//        id: upFinishDialog
-//        title: "温馨提示"
-//        text: "文件上传完成"
-//        icon: StandardIcon.NoIcon
-//        standardButtons:StandardButton.Ok
-//    }
 
     Rectangle{
         id: headbar
@@ -113,6 +109,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
+                    uploadFileSuccessed();
                     uploadfile.visible = false;
                     uploadfile.allSize = 0;
                     uploadfile.curIdx = 0;

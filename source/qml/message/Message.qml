@@ -107,7 +107,7 @@ Item {
         target: networkControl
         onDownProcess:{
             if(percent<100)
-                tips.text = fileName+"下载进度："+percent+"%";
+                tips.text = fileName+"    "+percent+"%";
         }
         onDownloadSuccessed:{
 //            keytimer.start();
@@ -250,6 +250,11 @@ Item {
                 tips.text = "通讯正常";
                 ryControl.m_isConnected = true;
 //                keytimer.start();
+            }
+            else if(code ==  "31004"){
+                tips.text = "你的登录验证已经过期，请重新登录"
+                ryControl.m_isConnected = false;
+                utilityControl.quit();
             }
             else{
                 tips.text = "通讯故障"

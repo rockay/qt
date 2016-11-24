@@ -140,8 +140,9 @@ void SqlConversationModel::updateMsgStatus(QString msgUId, int result,uint times
         QSqlRecord curRecord = record(i);
         if(curRecord.value("messageid") == msgUId){
             curRecord.setValue("result",result);
-            QString sendtime = QDateTime::fromTime_t(QString::number(timestamp).mid(0,10).toInt()).toString("yyyy-MM-dd hh:mm:ss");
+            QString sendtime = "";
             if(timestamp!=0){
+                sendtime = QDateTime::fromTime_t(QString::number(timestamp).mid(0,10).toInt()).toString("yyyy-MM-dd hh:mm:ss");
                 curRecord.setValue("sendtime",sendtime);
             }
             setRecord(i,curRecord);
@@ -160,6 +161,7 @@ void SqlConversationModel::updateMsgStatus(QString msgUId, int result,uint times
             break;
         }
     }
+    qDebug()<<"updateMsgStatus()...End";
     watchTimer->start();
 }
 

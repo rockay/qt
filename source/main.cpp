@@ -30,6 +30,8 @@
 #include "systemtray.h"
 #include "downloadmanager.h"
 #include "lmouselistner.h"
+#include "filesavedialog.h"
+#include "fileopendialog.h"
 
 #pragma comment(lib,"AdvAPI32.lib")
 
@@ -119,6 +121,10 @@ int main(int argc,char* argv[])
     qmlRegisterType<DocumentHandler>("org.lt.controls", 1, 1, "DocumentHandler");
     qmlRegisterType<TextBalloon>("org.lt.controls", 1, 1, "TextBalloon");
 
+    // 自定义保存、打开dialog
+    qmlRegisterType<FileOpenDialog>("org.lt.controls", 1, 1, "FileOpenDialog");
+    qmlRegisterType<FileSaveDialog>("org.lt.controls", 1, 1, "FileSaveDialog");
+
     // 截图
 //    ScreenShot screenshot;
 //    engine.rootContext()->setContextProperty("screenControl", &screenshot);
@@ -141,8 +147,6 @@ int main(int argc,char* argv[])
     engine.rootContext()->setContextProperty("systrayControl", &stray);
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
 
-//    LMouseListner mouselistner;
-//    app.installNativeEventFilter(&mouselistner);
 
     if (engine.rootObjects().isEmpty())
         return -1;

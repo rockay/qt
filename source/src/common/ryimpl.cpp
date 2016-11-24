@@ -308,8 +308,14 @@ void RYImpl::connect()
     if(Connect != NULL){
         auto connectCallback = [](const wchar_t* json_str)
         {
-            QString str1= QString::fromWCharArray(json_str);
-            qDebug()<<"connectCallback json_str:"<<str1;
+            QString u16 = QString::fromUtf16((const ushort*)json_str);
+            qDebug()<<"异常监听:"<<u16.toUtf8();
+
+            QJsonObject obj = getJsonObjectFromString(u16.toUtf8());
+            QString data = obj.value("data").toString();
+            int code = obj.value("nstatus").toInt();
+
+            emit RYImpl::getInstance()->receivedException(QString::number(code), data);
         };
         if(Connect(m_token.toUtf8().data(), connectCallback,false)){
             m_isConnected = true;

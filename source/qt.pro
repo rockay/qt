@@ -3,6 +3,10 @@ TEMPLATE = app
 #DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
 
 QT += qml quick quickcontrols2 network sql multimedia multimediawidgets gui
+QT += core-private
+QT += gui-private
+QT += widgets
+
 !contains(sql-drivers, sqlite): QTPLUGIN += qsqlite
 !no_desktop: QT += widgets
 CONFIG += c++11
@@ -31,7 +35,9 @@ SOURCES += main.cpp \
     3rd-party/update/Downloader.cpp \
     3rd-party/update/Updater.cpp \
     src/sql/tconversationthread.cpp \
-    src/sql/tcontactthread.cpp
+    src/sql/tcontactthread.cpp \
+    src/common/fileopendialog.cpp \
+    src/common/filesavedialog.cpp
 
 RESOURCES += qml.qrc
 
@@ -70,7 +76,9 @@ HEADERS += \
     3rd-party/update/Downloader.h \
     3rd-party/update/Updater.h \
     src/sql/tconversationthread.h \
-    src/sql/tcontactthread.h
+    src/sql/tcontactthread.h \
+    src/common/fileopendialog.h \
+    src/common/filesavedialog.h
 
 FORMS += \
     3rd-party/update/Downloader.ui

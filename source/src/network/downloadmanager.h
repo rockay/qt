@@ -39,7 +39,7 @@ public:
     bool saveToDisk(const QString &filename, QIODevice *data);
 
 public slots:
-    void doDownload(const QString &url, const QString &saveFileName);
+    void doDownload(const QString &url, const QString &saveFileName, bool isCallback = true);   // isCallback用来判断是否向上提交进度和结果，因为悄悄下载的不用提醒
     void downloadFinished(QNetworkReply *reply);
     void sslErrors(const QList<QSslError> &errors);
     void downloadProgress(qint64 up, qint64 toal);

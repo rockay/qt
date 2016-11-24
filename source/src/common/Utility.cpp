@@ -142,7 +142,7 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
     request.setHeader(QNetworkRequest::ContentTypeHeader, contentType.toUtf8());
     request.setHeader(QNetworkRequest::ContentLengthHeader, QVariant(send.size()).toString());
 
-
+    qDebug()<< "begin upload...";
     QNetworkReply *reply;
     reply = networkAccessManager.post(request,send);
     emit updateProgress(1, currentUploadsFrom.value(reply),currentUploadsID.value(reply));
@@ -429,6 +429,11 @@ void Utility::changeFileNameByHandle()
         //Get a handle for the "=" button
         EnumChildWindows(hwndSave,EnumChildProc,0);
     }
+}
+
+QString Utility::getDefaultFileName()
+{
+    return QString("圈图图片_"+QDateTime::currentDateTime().addSecs(-1).toString("yyyyMMddhhmmss"));
 }
 
 

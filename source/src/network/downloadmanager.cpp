@@ -14,7 +14,7 @@ DownloadManager::DownloadManager()
     connect(RYImpl::getInstance(),SIGNAL(needDownload(QString,QString)), this, SLOT(doDownload(QString,QString)));
 }
 
-void DownloadManager::doDownload(const QString &url, const QString &saveFileName)
+void DownloadManager::doDownload(const QString &url, const QString &saveFileName, bool isCallback)
 {
     qDebug()<<"url:"<<url;
     qDebug()<<"save path:"<< saveFileName;
@@ -26,8 +26,8 @@ void DownloadManager::doDownload(const QString &url, const QString &saveFileName
 #ifndef QT_NO_SSL
     connect(m_reply, SIGNAL(sslErrors(QList<QSslError>)), SLOT(sslErrors(QList<QSslError>)));
 #endif
-
-    currentDownloadsID.insert(m_reply,saveFileName);
+    if(isCallback)
+        currentDownloadsID.insert(m_reply,saveFileName);
 }
 
 void DownloadManager::downloadProgress(qint64 up, qint64 toal)

@@ -19,7 +19,7 @@ function getClouds(){
 
 // 获取云库文件回调
 function getCloudsCB(data){
-    console.log("data:"+JSON.stringify(data));
+//    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
         console.log("获取云库文件成功");
         allFiles = data.cloud_list;
@@ -77,6 +77,11 @@ function uploadFie(){
             uploadFie();
         }
     }else{
+        console.log("文件上传完成...");
+        for(var i=0; i<upfilemodel.count; i++){
+            upfilemodel.setProperty(i, "percent", 101);
+        }
+
         upFinishDialog.msg = "文件上传完成";
         if(upFinishDialog.visible)
             upFinishDialog.requestActivate();
@@ -99,8 +104,7 @@ function saveFile(fileinfo){
 function saveFileCB(data){
 //    console.log("保存云库文件回调:"+JSON.stringify(data));
     if(data.errorcode === -1){
-        uploadFileSuccessed();
-        upfilemodel.setProperty(curIdx, "percent", 101);
+        upfilemodel.setProperty(curIdx, "percent", 100);
 //        console.log("保存云库文件成功");
     }else{
         upfilemodel.setProperty(curIdx, "percent", -1);
@@ -158,7 +162,7 @@ function selectFiles(fileUrls){
             var fsize = fileinfo.length>1 ? Number(fileinfo[0]) : 0;
             var file_nme = fileinfo.length>1 ? fileinfo[1] : "";
             console.log(strPath);
-            upfilemodel.append({"percent": 0 , "file_url": strPath, "size": fsize, "file_ext": ext,
+            upfilemodel.append({"percent": 0 , "file_url": strPath, "size": fsize, "file_ext": ext.toUpperCase(),
                                    "file_name":file_nme,
                                    "file_mold": API.getFileMode(strPath)
                                })

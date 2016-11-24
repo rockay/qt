@@ -65,6 +65,7 @@ public slots:
     bool isFileExist(const QString &path); // 判断文件是否存在
 
     void changeFileNameByHandle();
+    QString getDefaultFileName();
 private:
     QNetworkAccessManager networkAccessManager;
     QString crtUploadType;
