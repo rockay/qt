@@ -233,5 +233,6 @@
         <file>images/icon/arr_down.png</file>
         <file>qml/message/FileWebview.qml</file>
         <file>controls/LImage.qml</file>
+        <file>controls/ChooseFriendGroup.qml</file>
     </qresource>
 </RCC>

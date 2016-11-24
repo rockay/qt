@@ -68,6 +68,13 @@ void SystemTray::stopFlash()
     timer->stop();
     trayIcon->setIcon(QIcon(":/images/qt-logo.png"));
 }
+
+void SystemTray::startFlash()
+{
+    if(timer->isActive())
+        return;
+    timer->start();
+}
 //! [4]
 void SystemTray::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
@@ -116,8 +123,8 @@ void SystemTray::showApp()
         emit Utility::getInstance()->sigshow(true);
     else
         emit Utility::getInstance()->sigshow(false);
-    timer->stop();
-    trayIcon->setIcon(QIcon(":/images/qt-logo.png"));
+//    timer->stop();
+//    trayIcon->setIcon(QIcon(":/images/qt-logo.png"));
 }
 
 void SystemTray::rcvMsg(const QString &userid)

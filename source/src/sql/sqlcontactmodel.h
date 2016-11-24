@@ -74,6 +74,7 @@ signals:
     void countChanged(int c);
 
     void needRefresh();
+    void sigRemoveResult(bool result);
 
 public slots:
     void updateDBTable();

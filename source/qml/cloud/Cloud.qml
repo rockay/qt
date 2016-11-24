@@ -51,6 +51,20 @@ Item {
         okTitle: "确定"
     }
 
+    FileDialog {
+        id: saveFileDialog
+        folder: shortcuts.pictures
+        selectExisting: false
+        property string httpurl: ""
+        property string file_ext: "pdf"
+        onAccepted: {
+            var urlNoProtocol = (fileUrl+"."+file_ext).replace('file:///', '');
+            if(httpurl!=""){
+                networkControl.doDownload(httpurl,urlNoProtocol);
+            }
+        }
+    }
+
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -160,11 +174,11 @@ Item {
                 cover:"qrc:/images/icon/officefile.png"
                 bcolor:"#B3DEEA"
             }
-//            ListElement{
-//                name:qsTr("其他文档")
-//                cover:"qrc:/images/icon/otherfile.png"
-//                bcolor:"#C8E2D0"
-//            }
+            ListElement{
+                name:qsTr("其他文档")
+                cover:"qrc:/images/icon/otherfile.png"
+                bcolor:"#C8E2D0"
+            }
         }
 
         ListModel{
@@ -319,7 +333,7 @@ Item {
                                 imageshow.imgshowList = imgList
                                 imageshow.show();
                                 imageshow.requestActivate();
-                            }else if( file_mold === 2){
+                            }else if( file_mold === 2 ||　file_mold === 3){
                                 Qt.openUrlExternally(file_url);
                             }else{
                                 console.log("==unsupport file...")
@@ -335,6 +349,15 @@ Item {
                             onTriggered:{
                                 console.log("删除");
                                 CloudJS.deleteFile(cloud_id)
+                            }
+                        }
+                        LMenuItem {
+                            text: qsTr("下载")
+                            onTriggered:{
+                                console.log("下载");
+                                saveFileDialog.file_ext =  file_ext;
+                                saveFileDialog.httpurl = file_url
+                                saveFileDialog.open();
                             }
                         }
                     }

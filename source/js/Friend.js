@@ -1,5 +1,6 @@
-var allContacts ;   // 所有通讯录好友
-var allCompany ;    // 所有企业好友
+var allContacts ;       // 所有通讯录好友
+var allCompany ;        // 所有企业好友
+var allFriendGroup = [];    // 选择页面通讯录好友和群组
 
 // 获取通讯录好友
 function getContacts(){
@@ -61,16 +62,56 @@ function getCompanyCB(data){
         busimodel.append(allobj);
         console.log("allobj");
         console.log(JSON.stringify(allobj));
-        // 将头像放到头像列表
-//        for(var i=0; i< data.friend_list.length;i++){
-//            var id = data.friend_list[i].friend_id;
-//            API.photoObjMap[id] = data.friend_list[i].friend_photo;
-//        }
     }else{
         console.log("获取企业好友失败");
     }
 }
 
+// 获取通讯录好友及群组
+function getFriendGroup(){
+    var url = API.api_root+API.api_friendgroup;
+    var obj = "token="+API.token;
+    var verb = "POST";
+    API.httpRequest(verb, url, obj, getFriendGroupCB);
+
+}
+
+// 获取通讯录好友及群组回调
+function getFriendGroupCB(data){
+//    console.log("获取通讯录好友及群组回调 data:"+JSON.stringify(data));
+    if(data.errorcode === -1){
+        friendgroupmodel.clear();
+        var allChooseFriend = {};
+        var allChooseGroup = {};
+        allChooseFriend = data.friend_list;
+        allChooseGroup = data.group_list;
+        console.log("friend length:"+allChooseFriend.length)
+        console.log("group length:"+allChooseGroup.length)
+
+        for(var k=0;k<allChooseFriend.length;k++){
+            var obj = {};
+            obj.type = 1 ;
+            obj.id = allChooseFriend[k].friend_id;
+            obj.name = allChooseFriend[k].friend_name;
+            obj.remark_name = allChooseFriend[k].friend_remark_name;
+            obj.photo = allChooseFriend[k].friend_photo;
+            allFriendGroup.push(obj);
+        }
+
+        for(var i=0;i<allChooseGroup.length; i++){
+            var objg = {};
+            objg.type = 3 ;
+            objg.id = allChooseGroup[i].group_id;
+            objg.name = allChooseGroup[i].group_name;
+            objg.remark_name = "";
+            objg.photo = allChooseGroup[i].group_cover;
+            allFriendGroup.push(objg);
+        }
+        friendgroupmodel.append(allFriendGroup);
+    }else{
+        console.log("获取通讯录好友及群组失败");
+    }
+}
 
 function search(mode, name) {
     var tempdata;
@@ -90,3 +131,14 @@ function search(mode, name) {
         busimodel.append(tempdata);
     }
 }
+
+function searchChoose(name) {
+    var tempdata;
+
+    friendgroupmodel.clear();
+    tempdata = allFriendGroup.filter(function(item){
+        return  (item.name.indexOf(name)>=0 || item.remark_name.indexOf(name)>=0);
+    });
+    friendgroupmodel.append(tempdata);
+}
+

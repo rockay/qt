@@ -21,6 +21,7 @@ Item {
     property ChatShow chatviewp: chatview
     property ChatToolBar chattoolp: chattool
     property LTextArea txtAreaInput: sendText
+    property LText tip: tips
     property string file_messageid: ""
 
     Connections{ // utilityControl
@@ -109,11 +110,13 @@ Item {
                 tips.text = fileName+"下载进度："+percent+"%";
         }
         onDownloadSuccessed:{
-            keytimer.start();
-            tips.text = "下载完成:"+fileName
+//            keytimer.start();
+            if(fileName !="")
+                tips.text = "下载完成:"+fileName
         }
         onDownloadFailed:{
-            tips.text = "下载失败:"+fileName
+            if(fileName !="")
+                tips.text = "下载失败:"+fileName
         }
 
     }
@@ -185,14 +188,19 @@ Item {
                 }
                 else if(conversationType == 3) // 群聊
                 {
-                    chatListView.model.addContactById(targetid, msg,1) // 不在会话列表根据发送者获取基本信息
-                    MessageJS.getGroupInfoById(targetid, msg)
+                    if(targetid == chatview.user_id)
+                        chatListView.model.addContactById(targetid, msg,0) // 不在当前会话
+                    else{
+                        chatListView.model.addContactById(targetid, msg,1) // 不在会话列表根据发送者获取基本信息
+                        MessageJS.getGroupInfoById(targetid, msg)
+                    }
 
                 }
                 // 让选中的人还是被选中
                 MessageJS.setCurrentIdx();
                 tips.text = "";
                 msgSound.play();
+                watchNewMsg.start();
                 break;
             case 32: // 收到回执类消息
                 console.log("qml 收到回执消息:"+msg)
@@ -211,7 +219,7 @@ Item {
                 {
 
                     if(senderid == chatview.user_id && main.visible){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
-                        console.log("回发消息...");
+//                        console.log("回发消息...");
                         MessageJS.sendNtyMsg(senderid,conversationType);
                         chatListView.model.setCount(senderid, 0);
                     }
@@ -238,10 +246,16 @@ Item {
         }
         onReceivedException:{
             console.log("exception code:"+ code)
-            if(code == "0")
+            if(code == "0"){
                 tips.text = "通讯正常";
-            else
+                ryControl.m_isConnected = true;
+//                keytimer.start();
+            }
+            else{
                 tips.text = "通讯故障"
+                ryControl.m_isConnected = false;
+//                keytimer.start();
+            }
         }
 //        onProceeFile:{
 //            tips.text = "图片上传："+process+"%"
@@ -259,6 +273,66 @@ Item {
         }
     }
 
+    Connections{ // chooseFirnedGroup 转发
+        target: chooseFriendGroup
+        onChooseFriendGroupAfter:{
+            chatview.user_type = ctype
+            chatview.ctype = msgtype
+            chatview.user_photo = photo
+            console.log("msgtype:"+msgtype)
+            switch(msgtype){
+            case 4: // 文字
+                var content = msgcontent;
+                content = content.replace(/<br\/>/g,'\n');
+                console.log("transfer text:"+content);
+                MessageJS.sendMsg(content, chatview.user_type,chatview.ctype)
+                break;
+            case 5: // 图片
+                MessageJS.sendMsg(msgcontent.split('|')[2], chatview.user_type,chatview.ctype)
+                break;
+            case 31: // 云
+                var sendtxt = "[发送云库文件]"
+                var strList = msgcontent.split("|");
+                console.log(msgcontent);
+                console.log(strList.length);
+                if(strList.length>=5){
+                    message.chatviewp.ctype = 31;
+
+                    var sendtxt = "[发送云库文件]"
+
+                    var idx = message.chatListView.currentIndex;
+                    var retStr = message.chatListView.model.updateContacts(idx,sendtxt);
+                    if(retStr !== ""){
+                        var kk = retStr.split("|");
+                        if(kk.length !== 3)
+                            return;
+                        var targetid = kk[0];
+                        var recipient = kk[1];
+                        var categoryId = kk[2];
+
+                        var messgeid = utilityControl.getMessageId();
+                        message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,msgcontent,targetid,0,31,"");
+                        message.chatviewp.converListView.positionViewAtEnd();
+                        var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,msgcontent,31);
+
+                        chooseCloudFile.visible = false;
+                    }
+                }else{
+                    message.tip.text = "转发失败，消息格式不正确";
+                }
+                break;
+            default:
+                message.tip.text = "转发失败，消息格式不正确";
+                break;
+            }
+        }
+
+    }
+
+    Component.onCompleted: {
+        keytimer.start()
+    }
+
     Timer{
         id: watchSend
         interval: 5000
@@ -268,10 +342,40 @@ Item {
         }
     }
 
+    Timer{ // 用来监控是否有红点,有就要闪烁
+        id: watchNewMsg
+        interval: 500
+        repeat: true
+        onTriggered: {
+            var hasNewMsg = false;
+            for(var i=0; i<contactListView.model.count;i++){
+                if(contactListView.model.get(i).newcount>0){
+                    hasNewMsg = true;
+                    break;
+                }
+            }
+            if(hasNewMsg){
+                systrayControl.startFlash();
+                console.log("开始闪烁")
+            }else{
+                console.log("停止闪烁")
+                systrayControl.stopFlash();
+                watchNewMsg.stop();
+            }
+        }
+    }
+
     Connections{ // contact model
         target: contactListView.model
         onNeedRefresh:{
             contactListView.model.refresh()
+            contactListView.currentIndex = -1;
+            contactListView.currentIndex = 0;
+        }
+        onSigRemoveResult:{
+            console.log("删除成功");
+            contactListView.currentIndex = -1;
+            contactListView.currentIndex = 0;
         }
     }
 
@@ -279,15 +383,14 @@ Item {
         target: chatview.chatListModel
         onSaveMsgING:{
             tips.text = "<font color='red'>正在保存收取的消息...</font>"
-            keytimer.start();
+//            keytimer.start();
         }
         onSaveMsgINGNoRefresh:{
             tips.text = "<font color='red'>正在保存收取的消息...请稍后再切换!</font>"
         }
 
         onSaveMsgFinished:{
-            tips.text = "<font color='red'>消息保存成功!</font>"
-            keytimer.start();
+//            tips.text = "<font color='red'>消息保存成功!</font>"
         }
     }
 
@@ -378,8 +481,9 @@ Item {
             property int relativeY: header.y
             ScrollIndicator.vertical: ScrollIndicator { }
             onCurrentIndexChanged: {
-//                console.log("changed..."+currentIndex)
+                console.log("changed..."+currentIndex)
                 if(currentIndex>-1){
+                    tips.text = "";
                     topTitle.text = model.get(currentIndex).user_remark == ""? model.get(currentIndex).user_name : model.get(currentIndex).user_remark
                     chatview.user_id = model.get(currentIndex).user_id
                     chatview.user_type = model.get(currentIndex).categoryId // 1:person 3:group
@@ -431,25 +535,7 @@ Item {
                 LMenuItem {
                     text: qsTr("删除")
                     onTriggered:{
-                        console.log("删除");
                         chatListView.model.remove(contactMenu.curIndex);
-                        if(chatListView.currentIndex==0)
-                            chatListView.currentIndex = -1;
-                        chatListView.currentIndex = 0;
-//                        if(chatListView.currentIndex>0 && chatListView.currentIndex < chatListView.model.count){
-//                            if(chatListView.currentIndex >= contactMenu.curIndex)
-//                                chatListView.currentIndex--;
-//                        }
-//                        else if(chatListView.model.count==0){
-//                            chatListView.currentIndex = -1;
-//                            messageRect.visible = false;
-//                            topTitle.text = "";
-//                            chatview.user_id="";
-//                            chatview.user_type=1;
-//                        }else if(chatListView.currentIndex == 0 && chatListView.model.count>0){
-//                            chatListView.currentIndex = -1;
-//                            chatListView.currentIndex = 0;
-//                        }
                     }
                 }
             }
@@ -731,10 +817,14 @@ Item {
                                 Timer {
                                     id: keytimer
                                     interval: 3000
-                                    repeat: false
+                                    repeat: true
                                     onTriggered:{
                                         tips.text = "";
-                                        stop();
+                                        if(ryControl.m_isConnected == false){
+                                            // 重新连接
+                                            tips.text = "通讯中断,正在连接服务器...";
+                                            ryControl.connect();
+                                        }
                                     }
                                 }
 
@@ -930,235 +1020,6 @@ Item {
 
                             ScrollBar.vertical: ScrollBar {}
                         }
-
-//                        LTextArea{
-//                            id: sendText
-//                            width: parent.width
-//                            height: rightBottom.height - toolBar.height - sendBtn.height
-//                            anchors.left: parent.left
-//                            anchors.top: toolBar.bottom
-//                            selectByMouse: true
-//                            Accessible.name: "document"
-//                            //baseUrl: "qrc:/images/yibanface"
-//                            text: chattool.document.text
-//                            textFormat: Qt.RichText
-//                            Component.onCompleted: forceActiveFocus()
-//                            property point clickPos: "0,0"
-//                            onLinkActivated: Qt.openUrlExternally(link)
-//                            persistentSelection: true
-
-//                            Shortcut {
-//                                sequence: "Ctrl+Return"
-//                                onActivated:  {
-//                                    console.log("发送消息");
-
-//                                    MessageJS.sendFun();
-//                                }
-//                            }
-//                            Shortcut {
-//                                sequence: "Ctrl+Enter"
-//                                onActivated:  {
-//                                    console.log("发送消息");
-
-//                                    MessageJS.sendFun();
-//                                }
-//                            }
-//                            Timer {
-//                                id: keytimer
-//                                interval: 5000
-//                                repeat: false
-//                                onTriggered:{
-//                                    tips.text = "";
-//                                    stop();
-//                                }
-//                            }
-
-//                            MouseArea{
-//                                anchors.fill: parent
-//                                propagateComposedEvents: true
-//                                cursorShape: Qt.IBeamCursor
-//                                acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
-//                                onPressed: {
-//                                    gUserView.visible = false;
-//                                    if (mouse.button == Qt.LeftButton) { // 左键忽略
-//                                        mouse.accepted = false
-//                                    }
-//                                }
-//                                onClicked: {
-//                                    gUserView.visible = false;
-//                                    if (mouse.button == Qt.RightButton) { // 右键菜单
-//                                        sendText.clickPos  = Qt.point(mouse.x,mouse.y)
-//                                        copyMenu.open();
-//                                    }
-//                                }
-//                            }
-
-//                            Keys.onReturnPressed: {
-//                                if( gUserView.visible && grpMemberListModelFilter.count>0){
-//                                    var sendtxt = chattool.document.sourceText;
-//                                    var lastIdx = sendtxt.lastIndexOf("@");
-//                                    var tiptxt = sendtxt.substring(lastIdx+1);
-//                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
-//                                    sendText.focus = true;
-//                                    gUserView.visible = false;
-//                                }else{
-//                                    event.accepted = false;
-//                                }
-//                            }
-//                            Keys.onEnterPressed: {
-//                                if( gUserView.visible && grpMemberListModelFilter.count>0){
-//                                    var sendtxt = chattool.document.sourceText;
-//                                    var lastIdx = sendtxt.lastIndexOf("@");
-//                                    var tiptxt = sendtxt.substring(lastIdx+1);
-//                                    chattool.document.insertText(grpMemberListModelFilter.get(subtipslistview.currentIndex).user_name.replace(tiptxt,"")+" ")
-//                                    sendText.focus = true;
-//                                    gUserView.visible = false;
-//                                }else{
-//                                    event.accepted = false;
-//                                }
-//                            }
-//                            Keys.onDownPressed: {
-//                                if(gUserView.visible && subtipslistview.currentIndex < (subtipslistview.model.count-1) && (chatview.user_type+'') == "3"){
-//                                    subtipslistview.currentIndex++
-//                                    console.log("++")
-//                                }else{
-//                                    event.accepted = false;
-//                                }
-//                            }
-//                            Keys.onUpPressed: {
-//                                if(gUserView.visible && subtipslistview.currentIndex > 0 && (chatview.user_type+'') == "3"){
-//                                    subtipslistview.currentIndex--
-//                                    console.log("--")
-//                                }else{
-//                                    event.accepted = false;
-//                                }
-//                            }
-
-//                            onTextChanged: {
-//                                if( (chatview.user_type+'') === "3"){
-//                                    var sendtxt = chattool.document.sourceText;
-//                                    // 取最后一个@
-//                                    if(sendtxt.length>0){
-//                                        var lastchar = sendtxt.charAt(sendtxt.length - 1);
-//                                        var lastIdx = sendtxt.lastIndexOf("@");
-//                                        if(lastchar === "@"){
-//                                            MessageJS.search("")
-//                                            gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
-//                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
-//                                            gUserView.visible = true;
-//                                        }
-//                                        else if(gUserView.visible && lastIdx >= 0){
-//                                            console.log(sendtxt.substring(lastIdx+1))
-//                                            MessageJS.search(sendtxt.substring(lastIdx+1))
-//                                            gUserView.x = sendText.positionToRectangle(chattool.document.cursorPosition).x+10;
-//                                            gUserView.y = sendText.positionToRectangle(chattool.document.cursorPosition).y - gUserView.height
-//                                            console.log(grpMemberListModelFilter.count)
-//                                            if(grpMemberListModelFilter.count == 0)
-//                                                gUserView.visible = false;
-//                                        }else{
-//                                            gUserView.visible = false;
-//                                        }
-//                                    }else{
-//                                        gUserView.visible = false;
-//                                    }
-//                                }
-//                            }
-
-//                            Rectangle{
-//                                id: gUserView
-//                                visible: false
-//                                border.width: 1
-//                                border.color: UI.cMainCBg
-//                                width: 180
-//                                height: Math.min(grpMemberListModelFilter.count*26,150)
-//                                ListView {
-//                                    id: subtipslistview
-//                                    currentIndex: -1
-//                                    anchors.left: parent.left
-//                                    anchors.leftMargin: 1
-//                                    anchors.top: parent.top
-//                                    anchors.topMargin: 1
-//                                    width: parent.width-2
-//                                    height: parent.height-2
-
-//                                    model: grpMemberListModelFilter
-//                                    clip: true
-//                                    maximumFlickVelocity: 5000
-//                                    orientation: ListView.Vertical
-//                                    focus: true
-//                                    spacing: 0
-//                                    delegate: popupUsrDelegate
-
-//                                    ScrollIndicator.vertical: ScrollIndicator { }
-//                                }
-//                                Component{
-//                                    id: popupUsrDelegate
-//                                    Rectangle{
-//                                        width: gUserView.width
-//                                        height: 25
-//                                        color: subtipslistview.currentIndex==index ? UI.cItemSelected:UI.cItem
-//                                        LText{
-//                                            anchors.fill: parent
-//                                            anchors.leftMargin: 10
-//                                            text: user_name
-//                                            color: subtipslistview.currentIndex == index ? "red" : "black"
-//                                        }
-//                                        MouseArea{
-//                                            anchors.fill: parent
-//                                            onClicked: {
-//                                                var sendtxt = chattool.document.sourceText;
-//                                                var lastIdx = sendtxt.lastIndexOf("@");
-//                                                var tiptxt = sendtxt.substring(lastIdx+1);
-//                                                chattool.document.insertText(grpMemberListModelFilter.get(0).user_name.replace(tiptxt,"")+" ")
-//                                                sendText.focus = true;
-//                                                gUserView.visible = false;
-
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-
-//                            ListModel{
-//                                id: grpMemberListModelFilter
-//                            }
-
-//                            LMenu {
-//                                id: copyMenu
-//                                x: sendText.clickPos.x
-//                                y: sendText.clickPos.y
-//                                z: sendText.z +10
-//                                width: 50
-//                                LMenuItem {
-//                                    text: qsTr("复制")
-//                                    height: 25
-//                                    onTriggered:{
-//                                        console.log("复制");
-//                                        // 复制
-//                                        //                                        utilityControl.copy();
-//                                        sendText.copy();
-//                                    }
-//                                }
-//                                LMenuItem {
-//                                    text: qsTr("剪切")
-//                                    height: 25
-//                                    onTriggered:{
-//                                        console.log("剪切");
-//                                        // 剪切
-//                                        sendText.cut();
-//                                    }
-//                                }
-//                                LMenuItem {
-//                                    text: qsTr("粘贴")
-//                                    height: 25
-//                                    onTriggered:{
-//                                        console.log("粘贴");
-//                                        // 粘贴
-//                                        sendText.paste();
-//                                    }
-//                                }
-//                            }
-//                        }
 
                         LText{
                             id: tips
@@ -1366,7 +1227,7 @@ Item {
                 return false;
             }
             tips.text = qsTr("释放鼠标发送文件");
-            keytimer.start();
+//            keytimer.start();
         }
         onExited: {
             tips.text = qsTr("");

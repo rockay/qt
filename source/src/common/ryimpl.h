@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QTimer>
 typedef void(__stdcall *ConnectAckListenerCallback)(const wchar_t* json_str);
 
 typedef void(__stdcall *PublishAckListenerCallback)(const wchar_t* json_str);
@@ -36,6 +37,7 @@ public:
             m_instance->m_isLoaded = false; // 初始化没有加载
             m_instance->m_isConnected = false;
             m_instance->m_token = "";
+            m_instance->isReceving = false;
         }
         return m_instance;
     }
@@ -52,8 +54,12 @@ public:
     QString m_picPath;
     QString m_cachePicPath;
     QString m_cacheImagePath;
+    QString m_logPath;
 
     QStringList messageList;
+    QTimer *delayTimer;
+    bool isReceving;
+    bool m_isConnected;
 
 signals:
     void receivedMsg(int type,const QString &senderid,const QString &msgUid, const QString &messageid, const QString &msg,const QString &sendtime,int conversationType,const QString& targetid, bool isMetionedMe);
@@ -66,6 +72,7 @@ signals:
     void recccvMsg(const QString &senderid);
 
     void needDownload(QString url, QString fileName);
+    void recallMessageFinished(bool result);
 public slots:
     void initLib(const QString &token, const QString &user_id);
     void connect();
@@ -85,12 +92,14 @@ public slots:
     }
 
     void initPath( const QString &user_id);
+
+    void slotSendMsg();
+    void reCallMessage(const QString &msgid);
 private:
     static RYImpl* m_instance;
     int convertype[3];
 
     bool m_isLoaded;
-    bool m_isConnected;
     int m_imgmessageId;
     QMap<QString,QString> img_idmap;
 
@@ -129,6 +138,9 @@ public:
 
     typedef void (*DLLFunUP)(const char* targetId, int categoryId, int nType, const unsigned char* pbData, long nl, const char* img_id, PublishAckListenerCallback callback,PublishAckListenerCallback process_callback);
     DLLFunUP UpLoadFile;
+
+    typedef bool (*DLLFunRecall)(const char* messageUId);
+    DLLFunRecall Recall;
 };
 
 #endif // RYIMPL_H

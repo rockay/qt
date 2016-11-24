@@ -79,8 +79,7 @@ bool DownloadManager::saveToDisk(const QString &filename, QIODevice *data)
 
     // 对图片特殊处理，因为有格式问题
     QString file_ext = Utility::getInstance()->getFileExt(path);
-    if(file_ext == "JPG" || file_ext == "BMP" || file_ext == "GIF"
-            || file_ext == "JPEG" || file_ext == "ICO" || file_ext == "PNG") {
+    if(file_ext == "JPG" || file_ext == "JPEG" || file_ext == "PNG") {
         QString orignalFile_ext = file_ext; // 原来的后缀名
         QPixmap img;
         if(!img.load(path,file_ext.toUtf8().data())) // 一直试图片格式
@@ -137,14 +136,15 @@ void DownloadManager::downloadFinished(QNetworkReply *reply)
         if (saveToDisk(filename, reply)){
             printf("Download of %s succeeded (saved to %s)\n",
                    url.toEncoded().constData(), qPrintable(filename));
+            qDebug()<<"下载成功";
+            emit downloadSuccessed(currentDownloadsID.value(reply));
+        }else{
             emit downloadFailed(currentDownloadsID.value(reply));
         }
     }
 
     reply->close();
     reply->deleteLater();
-    qDebug()<<"下载完成";
     currentDownloadsID.remove(reply);
-    emit downloadSuccessed(currentDownloadsID.value(reply));
 
 }

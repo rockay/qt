@@ -219,6 +219,7 @@ void SqlConversationModel::deleteMsgByID(QString msgUId)
 {
 
     qDebug()<<"deleteMsgByID()...:"<<msgUId;
+    TConversationThread::getInstance()->quit();
     for(int i=0; i< rowCount();i++){
         QSqlRecord curRecord = record(i);
         if(curRecord.value("messageid") == msgUId){
@@ -233,7 +234,7 @@ void SqlConversationModel::deleteMsgByID(QString msgUId)
             break;
         }
     }
-    refresh();
+//    refresh();
 }
 
 QString SqlConversationModel::getLastMsgId(int senderid)
@@ -259,12 +260,14 @@ void SqlConversationModel::refresh()
     const QString filterString = QString::fromLatin1(
         " targetid = '%1'  OR (senderid = '%1' AND targetid='%2') ").arg(convert(m_targetid), convert(RYImpl::getInstance()->m_userid));
     setFilter(filterString);
+
+    QSqlQuery query;
+    // 如果5分钟都状态为0的，改为-1发送失败
+    QString sql = "UPDATE Conversations SET result=-1 WHERE result=0 AND timestamp < '" + QDateTime::currentDateTime().addSecs(-300).toString("yyyy-MM-dd hh:mm:ss") + "'";
+    query.exec(sql);
+    qDebug()<<sql;
+
     select();
-    int count = rowCount();
-    int limit = 3;
-    if(count>limit){
-        removeRows(limit,count-limit);
-    }
     emit countChanged(rowCount());
 }
 void SqlConversationModel::updateDBTable()

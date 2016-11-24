@@ -81,8 +81,16 @@ Rectangle{
         onNeedRefresh:{
 //            chatviewp.converListView.positionViewAtEnd();
         }
+
     }
 
+    Connections{
+        target: ryControl
+
+        onRecallMessageFinished:{
+           tips.text = "onRecallMessageFinished..."+result;
+        }
+    }
 
     FileDialog {
         id: saveFileDialog
@@ -244,52 +252,20 @@ Rectangle{
                                     if (mouse.button == Qt.LeftButton) { // 右键菜单
                                         mouse.accepted = false
                                     }
-                                    else if (mouse.button == Qt.RightButton && messageText.selectedText !="")
-                                    { // 右键菜单
+                                    else if (mouse.button == Qt.RightButton)
+                                    {
+                                        messageText.selectAll();
+                                        // 右键菜单
                                         var pp  = Qt.point(mouse.x,mouse.y)
+                                        chooseFriendGroup.msgid = model.messageid;
+                                        chooseFriendGroup.msgtype = model.ctype;
+                                        chooseFriendGroup.msgcontent = model.message;
                                         saveMenu.x = pp.x;
                                         saveMenu.y = pp.y;
                                         saveMenu.ctype = 4
                                         saveMenu.httpurl = "";
+                                        saveMenu.msgid = model.messageid
                                         saveMenu.open()
-                                    }
-                                }
-                            }
-
-                            Menu {
-                                id: saveMenu
-                                width: 60
-                                property int ctype : -1
-                                property string httpurl: ""
-                                background: Item{
-                                    Rectangle{
-                                        anchors.fill: parent
-                                        color: UI.cWhite
-                                        border.width: 1
-                                        border.color: UI.cMainCBg
-                                    }
-                                }
-
-                                MenuItem {
-                                    id: copyitem
-                                    text: qsTr("复制")
-                                    height: saveMenu.ctype == 4 ? 25 : 0
-                                    visible: saveMenu.ctype == 4 ? true : false
-                                    onTriggered:{
-                                        console.log("复制");
-                                        // 复制
-                                        messageText.copy();
-                                    }
-                                }
-                                MenuItem {
-                                    id: saveitem
-                                    text: "保存"
-                                    height: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? 25 : 0
-                                    visible: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? true : false
-                                    onTriggered:{
-                                        console.log("保存")
-                                        saveFileDialog.httpurl = saveMenu.httpurl
-                                        saveFileDialog.open();
                                     }
                                 }
                             }
@@ -304,12 +280,70 @@ Rectangle{
                             }
                         }
                     }
-//                    Image{
-//                        id: imgOrignal
-//                        visible: false
-//                        asynchronous: true
-//                        source: model.ctype === 5? ((model.result==-1 || model.result==0) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2]) : ""
-//                    }
+
+                    LMenu {
+                        id: saveMenu
+                        width: 60
+                        property int ctype : -1
+                        property string httpurl: ""
+                        property string msgid: ""
+                        LMenuItem {
+                            id: deleteitem
+                            text: "删除"
+                            height: 25
+                            onTriggered:{
+                                console.log("删除")
+                                if(saveMenu.msgid != "")
+                                    listView.model.deleteMsgByID(saveMenu.msgid)
+                            }
+                        }
+                        LMenuItem {
+                            id: transferitem
+                            text: "转发"
+                            height: saveMenu.ctype != 6 ? 25 : 0  // 6是语音
+                            visible: saveMenu.ctype != 6 ? true : false
+                            onTriggered:{
+                                console.log("转发")
+                                chooseFriendGroup.visible = true;
+                            }
+                        }
+                        LMenuItem {
+                            id: copyitem
+                            text: qsTr("复制")
+                            height: saveMenu.ctype == 4 ? 25 : 0
+                            visible: saveMenu.ctype == 4 ? true : false
+                            onTriggered:{
+                                console.log("复制");
+                                // 复制
+                                messageText.copy();
+                            }
+                        }
+                        LMenuItem {
+                            id: saveitem
+                            text: "保存"
+                            height: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? 25 : 0
+                            visible: (saveMenu.ctype == 5 || saveMenu.ctype == 31) ? true : false
+                            onTriggered:{
+                                console.log("保存")
+                                saveFileDialog.httpurl = saveMenu.httpurl
+                                saveFileDialog.open();
+                            }
+                        }
+
+
+//                        LMenuItem {
+//                            id: recallitem
+//                            text: "撤回"  // 2分钟内
+//                            height: 25
+////                            height: (sentByMe && API.compareDate(API.getNowFormatDate(),model.timestamp)<2) ? 25 : 0
+////                            visible: (sentByMe && API.compareDate(API.getNowFormatDate(),model.timestamp)<2) ? true : false
+//                            onTriggered:{
+//                                console.log("撤回")
+//                                if(saveMenu.msgid != "")
+//                                    ryControl.reCallMessage(listView.model.get(index-1).msgUId)
+//                            }
+//                        }
+                    }
 
                     Image {
                         id: messageImg
@@ -331,11 +365,15 @@ Rectangle{
                                     saveMenu.x = pp.x;
                                     saveMenu.y = pp.y;
                                     saveMenu.httpurl = model.message.split('|')[1];
+                                    saveMenu.msgid = model.messageid
 
                                     var idx = model.message.split('|')[0].lastIndexOf(".")
                                     var localpath = model.message.split('|')[0];
                                     var file_ext = localpath.substring(idx+1);
                                     saveFileDialog.file_ext =  file_ext;
+                                    chooseFriendGroup.msgid = model.messageid;
+                                    chooseFriendGroup.msgtype = model.ctype;
+                                    chooseFriendGroup.msgcontent = model.message;
                                     saveMenu.ctype = model.ctype
                                     saveMenu.open()
                                 }
@@ -389,9 +427,17 @@ Rectangle{
                             anchors.fill: parent
                             propagateComposedEvents: true
                             cursorShape: Qt.PointingHandCursor
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton // 激活右键
                             onClicked: {
-                                console.log("语音：" + "file:///"+model.message.split('|')[1])
-                                acceptedButtons: Qt.LeftButton // 激活右键
+                                if (mouse.button == Qt.RightButton) { // 右键菜单
+                                    var pp  = Qt.point(mouse.x,mouse.y)
+                                    saveMenu.x = pp.x;
+                                    saveMenu.y = pp.y;
+                                    saveMenu.ctype = model.ctype
+                                    saveMenu.msgid = model.messageid
+                                    saveMenu.open()
+                                    return;
+                                }
                                 if(play.playing)
                                     play.stop();
                                 else{
@@ -449,16 +495,20 @@ Rectangle{
                             onClicked: { // 右键菜单
                                 if (mouse.button == Qt.RightButton) { // 右键菜单
                                     var pp  = Qt.point(mouse.x,mouse.y)
+                                    chooseFriendGroup.msgid = model.messageid;
+                                    chooseFriendGroup.msgtype = model.ctype;
+                                    chooseFriendGroup.msgcontent = model.message;
                                     saveMenu.x = pp.x;
                                     saveMenu.y = pp.y;
                                     saveMenu.ctype = model.ctype
                                     saveFileDialog.file_ext =  model.message.split('|')[0].toString().toLowerCase()
                                     saveMenu.httpurl = model.message.split('|')[4]
+                                    saveMenu.msgid = model.messageid
                                     saveMenu.open()
                                 }
                             }
                             onDoubleClicked: {
-                                if( model.message.split('|')[1].toString() === "1") //file_mold：文件类型，1 表示图片类型，2 表示 PDF 类型
+                                if( model.message.split('|')[1].toString() === "1") //file_mold：文件类型，1 表示图片类型，2 表示 PDF 类型,3是word,4是其它
                                 {
                                     imageshow.imgSrc = ""
                                     imageshow.imgSrc = model.ctype===31 ? model.message.split('|')[4] : ""
@@ -476,7 +526,7 @@ Rectangle{
                                     imageshow.imgshowList = imgList
                                     imageshow.show()
                                     imageshow.requestActivate();
-                                }else if( model.message.split('|')[1].toString() === "2"){
+                                }else if( model.message.split('|')[1].toString() === "2" ||　model.message.split('|')[1].toString() === "3"){
 //                                    fileshow.fileUrl = ""
 //                                    fileshow.fileUrl = model.message.split('|')[4];
 //                                    fileshow.show()

@@ -1,10 +1,11 @@
 TEMPLATE = app
 
-DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+#DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+
 QT += qml quick quickcontrols2 network sql multimedia multimediawidgets gui
 !contains(sql-drivers, sqlite): QTPLUGIN += qsqlite
 !no_desktop: QT += widgets
-CONFIG += c++11 localize_deployment
+CONFIG += c++11
 INCLUDEPATH += ./src ./src/sql ./src/common ./src/screenshot ./src/MyGlobalShortCut/ ./src/network ./3rd-party/update
 #QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'true\'\" #以管理员运行
 #QMAKE_LFLAGS += /SUBSYSTEM:WINDOWS,\"5.01\" #VS2013 在XP运行
@@ -73,4 +74,7 @@ HEADERS += \
 
 FORMS += \
     3rd-party/update/Downloader.ui
+
+DISTFILES += \
+    icon.rc
 

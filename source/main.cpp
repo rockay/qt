@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QSystemTrayIcon>
+#include <winreg.h>
 
 #include "qtquickcontrolsapplication.h"
 #include "documenthandler.h"
@@ -30,45 +31,47 @@
 #include "downloadmanager.h"
 #include "lmouselistner.h"
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
- {
-    // 加锁
-    static QMutex mutex;
-    mutex.lock();
-    QByteArray localMsg = msg.toUtf8();
-    QString strMsg("");
-    switch(type)
-    {
-    case QtDebugMsg:
-        strMsg = QString("Debug:");
-        break;
-    case QtWarningMsg:
-        strMsg = QString("Warning:");
-        break;
-    case QtCriticalMsg:
-        strMsg = QString("Critical:");
-        break;
-    case QtFatalMsg:
-        strMsg = QString("Fatal:");
-        break;
-    }
+#pragma comment(lib,"AdvAPI32.lib")
 
-    // 设置输出信息格式
-    QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
-    QString strMessage = QString("%5 Message:%1 File:%2  Line:%3  Function:%4  ")
-            .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
+//void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+// {
+//    // 加锁
+//    static QMutex mutex;
+//    mutex.lock();
+//    QByteArray localMsg = msg.toUtf8();
+//    QString strMsg("");
+//    switch(type)
+//    {
+//    case QtDebugMsg:
+//        strMsg = QString("Debug:");
+//        break;
+//    case QtWarningMsg:
+//        strMsg = QString("Warning:");
+//        break;
+//    case QtCriticalMsg:
+//        strMsg = QString("Critical:");
+//        break;
+//    case QtFatalMsg:
+//        strMsg = QString("Fatal:");
+//        break;
+//    }
 
-    // 输出信息至文件中（读写、追加形式）
-    QFile file(strDateTime.mid(0,10)+".log");
-    file.open(QIODevice::ReadWrite | QIODevice::Append);
-    QTextStream stream(&file);
-    stream << strMessage << "\r\n";
-    file.flush();
-    file.close();
+//    // 设置输出信息格式
+//    QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+//    QString strMessage = QString("%5 Message:%1 File:%2  Line:%3  Function:%4  ")
+//            .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
 
-    // 解锁
-    mutex.unlock();
- }
+//    // 输出信息至文件中（读写、追加形式）
+//    QFile file(strDateTime.mid(0,10)+".log");
+//    file.open(QIODevice::ReadWrite | QIODevice::Append);
+//    QTextStream stream(&file);
+//    stream << strMessage << "\r\n";
+//    file.flush();
+//    file.close();
+
+//    // 解锁
+//    mutex.unlock();
+// }
 
 int main(int argc,char* argv[])
 {
@@ -79,7 +82,7 @@ int main(int argc,char* argv[])
     app.setApplicationName("quantu");
     app.setOrganizationName("yiduotech");
     app.setAttribute(Qt::AA_EnableHighDpiScaling);
-    app.setApplicationVersion ("1.0.0");
+    app.setApplicationVersion ("1.0.1");
     app.setWindowIcon(QIcon("logo.ico"));
     app.setQuitOnLastWindowClosed(false);
 
@@ -91,6 +94,13 @@ int main(int argc,char* argv[])
     QSettings settings;
     settings.setObjectName("settings");
     QString user_id = settings.value("user_id").toString();
+
+//    autoStart(true);
+    QSettings reg("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
+//    QSettings *reg=new QSettings("HKEY_LOCAL_MACHINE//SOFTWARE//Microsoft/Windows/CurrentVersion/Run",QSettings::NativeFormat);
+    //开机自动运行
+    QString autostartPath = QApplication::applicationFilePath().replace("/","\\");
+    reg.setValue("quantu", autostartPath);
 
     QQmlApplicationEngine engine;
 

@@ -19,11 +19,15 @@ Rectangle {
     property int allSize: 0
     signal uploadFileSuccessed();
 
+    onVisibleChanged: {
+       bottomtips.text = "选择或拖拽文档上传"
+    }
+
     FileDialog {
         id: fileDialog
         title: qsTr("上传文件")
         selectMultiple: true
-        nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
+        nameFilters: [ "All files (*)" ]
 
         onAccepted: {
             console.log("You chose: " + fileUrls)
@@ -67,7 +71,6 @@ Rectangle {
         msg: qsTr("文件上传完成")
         flag: 1
         okTitle: "确定"
-        cancelTitle: "取消"
     }
 //    MessageDialog {
 //        id: upFinishDialog
@@ -102,23 +105,6 @@ Rectangle {
             color: UI.cUploadTittleBD
             anchors.bottom: parent.bottom
         }
-
-//        MouseArea {
-//            id: dragRegion
-//            anchors.fill: parent
-//            property point clickPos: "0,0"
-//            onPressed: {
-//                clickPos  = Qt.point(mouse.x,mouse.y)
-//            }
-
-//            onPositionChanged: {
-//                //鼠标偏移量
-//                var delta = Qt.point(mouse.x-clickPos.x, mouse.y-clickPos.y)
-//                //如果mainwindow继承自QWidget,用setPos
-//                uploadfile.x = uploadfile.x+delta.x
-//                uploadfile.y = uploadfile.y+delta.y
-//            }
-//        }
 
         LOperButton { source: "qrc:/images/icon/close.png"; width: headbar.height; height: headbar.height-2
 //            z: dragRegion.z+1
@@ -322,7 +308,7 @@ Rectangle {
         }
         LText{
             id: bottomtips
-            text: qsTr("选择或拖拽图片与PDF文档上传")
+            text: qsTr("选择或拖拽文档上传")
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.top: parent.top

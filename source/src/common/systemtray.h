@@ -85,6 +85,7 @@ public slots:
     void showMessage();
     void showCriticalMessage();
     void stopFlash();
+    void startFlash();
 private:
     void createActions();
     void createTrayIcon();

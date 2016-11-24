@@ -89,6 +89,7 @@ Window {
                     anchors.leftMargin: 15
                     anchors.top: parent.top
                     anchors.topMargin: 10
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     text: msg
                 }
             }

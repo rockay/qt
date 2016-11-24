@@ -1037,6 +1037,7 @@ extern "C"
     *  @param msgId       消息id
     */
     WIN_RCSDK_API bool GetMessageById(long msgId, MessageInfoCallback callback);
+
     /**
     *  删除制定id用户消息
     *

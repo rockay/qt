@@ -23,11 +23,19 @@ Window {
     color: UI.cTransparent
     property bool isCodeLogin: false    // 是否验证码登录
     property bool isLogin: false
+    property bool autoLogin: false
 
     Component.onCompleted: {
         LoginJS.getConfig();
         if(settings.token==""){
             isCodeLogin = true;
+        }
+    }
+
+    onAutoLoginChanged: {
+        if(autoLogin && !utilityControl.checkIdIsLogin("9527198609")){
+            // 自动登录,还要是否已经有登录过账号, 9527198609这个账号专门用来判断是否有账号登录了
+            LoginJS.loginLocal();
         }
     }
 

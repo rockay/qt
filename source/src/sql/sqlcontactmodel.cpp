@@ -288,10 +288,12 @@ void SqlContactModel::remove(int row)
     QString user_id = curRecord.value("user_id").toString();
     removeRow(row);
     QString sql = tr("DELETE FROM contacts WHERE user_id='%1' ").arg(user_id);
-    TContactThread::getInstance()->sqlList.push_back(sql);
-    TContactThread::getInstance()->start();
+    QSqlQuery query;
+    query.exec(sql);
+//    TContactThread::getInstance()->sqlList.push_back(sql);
+//    TContactThread::getInstance()->start();
     refresh();
-
+    emit sigRemoveResult(true);
 }
 
 void SqlContactModel::refresh()

@@ -13,6 +13,7 @@ import "qrc:/qml/cloud/"
 import "qrc:/js/UI.js" as UI
 import "qrc:/js/API.js" as API
 import "qrc:/js/login.js" as LoginJS
+import "qrc:/js/Message.js" as MessageJS
 Window {
     id:mainform
     title: qsTr("圈图")
@@ -21,6 +22,26 @@ Window {
     color: UI.cTransparent
     property bool reLogin: false
     property string pphoto: ""
+
+    Connections{ // utilityControl
+        target: utilityControl
+        onSigshow:{
+            // 跳转到会话界面
+            message.visible= true
+            friend.visible= false
+            group.visible = false
+            cloud.visible = false
+            msgbtn.source = "qrc:/images/icon/messagep.png"
+            frdbtn.source = "qrc:/images/icon/friend.png"
+            grpbtn.source = "qrc:/images/icon/group.png"
+            cldbtn.source = "qrc:/images/icon/cloud.png"
+            if(!message.isLoad){
+                message.isLoad = true
+                chooseFriendGroup.isLoad = true
+            }
+
+        }
+    }
 
     onPphotoChanged: {
         console.log("onPphotoChanged:"+pphoto)
@@ -37,8 +58,6 @@ Window {
         friend.visible= false
         group.visible = false
         cloud.visible = false
-
-        message.isLoad = false
         friend.isLoad = false
         group.isLoad = false
         cloud.isLoad = false
@@ -49,6 +68,8 @@ Window {
         message.chatListView.currentIndex = -1;
         message.isLoad = false;
         message.isLoad = true
+        chooseFriendGroup.isLoad = false
+        chooseFriendGroup.isLoad = true
     }
 
     UploadFile{
@@ -82,7 +103,6 @@ Window {
 
             var idx = message.chatListView.currentIndex;
             var retStr = message.chatListView.model.updateContacts(idx,sendtxt);
-            console.log("retStr:"+retStr)
             if(retStr !== ""){
                 var kk = retStr.split("|");
                 if(kk.length !== 3)
@@ -101,6 +121,53 @@ Window {
             }
         }
     }
+
+
+    ChooseFriendGroup{
+        id: chooseFriendGroup
+        property string msgid: ""
+        property var msgtype: ""
+        property string msgcontent: ""
+        width: mainform.width/3
+        height: mainform.height-80
+        x: (parent.width-width)/2
+        y: 40
+        visible: false
+        z: operWinArea.z + 10
+        onChooseFriendGroupClick:{
+            console.log("onChooseFriendGroupClick name:"+name);
+            console.log("onChooseFriendGroupClick type:"+ctype);
+            console.log("onChooseFriendGroupClick msgtype:"+msgtype);
+
+            // 置顶转发的人
+            var idx = -1;
+            for(var i=0; i<message.chatListModel.rowCount(); i++){
+                if(message.chatListModel.getId(i) == id){
+                    idx = i;
+                    break;
+                }
+            }
+
+            var msg = msgcontent;
+            // 如果是图片
+            if(msgtype==5)
+                msg = qsTr("[图片]");
+            else if(msgtype==31)
+                msg = qsTr("[云库文件]");
+
+            //添加或更新
+            if(idx>-1){
+                message.chatListView.model.updateContacts(idx,msg)
+            }else{
+                message.chatListView.model.addContacts(id,name,"",photo,msg,ctype,0) // 群组,空字符是因为群组没有备注
+            }
+
+            message.chatListView.currentIndex = -1; // 引起change事件
+            message.chatListView.currentIndex = 0;
+            chooseFriendGroupAfter(ctype, id, name,photo,msgtype,msgcontent)
+        }
+    }
+
 
     Rectangle{
         anchors.fill: parent;
@@ -153,8 +220,10 @@ Window {
                             frdbtn.source = "qrc:/images/icon/friend.png"
                             grpbtn.source = "qrc:/images/icon/group.png"
                             cldbtn.source = "qrc:/images/icon/cloud.png"
-                            if(!message.isLoad)
+                            if(!message.isLoad){
                                 message.isLoad = true
+                                chooseFriendGroup.isLoad = true
+                            }
                         }
                     }
                 }
@@ -263,20 +332,6 @@ Window {
             onCancelClicked:{
             }
         }
-
-//        MessageDialog {
-//            id: messageDialog
-//            title: "温馨提示"
-//            text: "确定要退出当前帐号？"
-//            icon: StandardIcon.NoIcon
-//            standardButtons:StandardButton.Yes | StandardButton.No
-//            onYes: {
-//                login.isCodeLogin = true;
-//                ryControl.disconnect();
-//                main.hide();
-//                login.show();
-//            }
-//        }
 
         Rectangle{
             id:subview

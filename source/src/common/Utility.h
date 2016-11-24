@@ -8,6 +8,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QFileInfo>
+#include <QTimer>
 #include <windows.h>
 #include "Updater.h"
 
@@ -61,8 +62,9 @@ public slots:
     void releseAccount();
 
     bool checkIdIsLogin(const QString &userid); // 判断是否已经登录过
-
     bool isFileExist(const QString &path); // 判断文件是否存在
+
+    void changeFileNameByHandle();
 private:
     QNetworkAccessManager networkAccessManager;
     QString crtUploadType;
@@ -75,6 +77,7 @@ private:
     static Utility* m_instance;
 
     HANDLE m_hutex;
+    QTimer *m_findTimer;
 };
 
 #endif // UTILITY_H

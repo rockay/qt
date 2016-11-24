@@ -2,7 +2,7 @@ var allFiles;
 
 // 获取云库文件
 function getClouds(){
-    var url = API.api_root+API.api_getcloudfile;
+    var url = API.api_root+API.api_getcloudfile_new;
     // token：当前用户登录
     // token key_words：搜索关键字（可选）
     // file_mold：文件类型，0 表示获取所有，1 表示只获取图片 get_mold：获取类型，1 表示首次获取或下拉刷新，2 表示上拉获取更多
@@ -19,7 +19,7 @@ function getClouds(){
 
 // 获取云库文件回调
 function getCloudsCB(data){
-//    console.log("data:"+JSON.stringify(data));
+    console.log("data:"+JSON.stringify(data));
     if(data.errorcode === -1){
         console.log("获取云库文件成功");
         allFiles = data.cloud_list;
@@ -31,14 +31,22 @@ function getCloudsCB(data){
 }
 
 function searchFile(mode,name){
+    if(mode>=2)
+        mode += 1;
     allmodel.clear();
     if(allFiles.length==0)
         return;
     var tempdata;
-    if(mode==0 || mode==4)
+    if(mode==0)
     {
         tempdata = allFiles.filter(function(item){
             return item.file_name.indexOf(name)>=0;
+        });
+    }
+    else if(mode==4)
+    {
+        tempdata = allFiles.filter(function(item){
+            return ((item.file_mold==2 || item.file_mold==4) && item.file_name.indexOf(name)>=0);
         });
     }
     else{
@@ -69,6 +77,7 @@ function uploadFie(){
             uploadFie();
         }
     }else{
+        upFinishDialog.msg = "文件上传完成";
         if(upFinishDialog.visible)
             upFinishDialog.requestActivate();
         else
@@ -125,12 +134,22 @@ function getCloudsByMsgCB(data){
 
 // 选择文件列表后的操作
 function selectFiles(fileUrls){
+    if(fileUrls.length>20){
+        upFinishDialog.msg = "请一次发送不超过20个文件";
+        if(upFinishDialog.visible)
+            upFinishDialog.requestActivate();
+        else
+            upFinishDialog.show();
+        return;
+    }
     var showSize = 0;
     for (var i = 0; i < fileUrls.length; i++){
         var strPath = fileUrls[i].toString();
-        var ext = strPath.split('.').pop().toUpperCase();
-        if(!(ext == "JPG" || ext == "BMP" || ext == "GIF"
-                || ext == "JPEG" || ext == "ICO" || ext == "PNG" || ext == "PDF")){
+        var ext = strPath.split('.').pop().toLowerCase();
+        if(!(ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "pdf"
+             ||ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx"
+             ||ext == "doc" || ext == "docx" || ext == "txt" || ext == "rar"
+             ||ext == "zip" || ext == "7z" || ext == "dwg" || ext == "skp")){
             return ;
         }
 
@@ -141,8 +160,7 @@ function selectFiles(fileUrls){
             console.log(strPath);
             upfilemodel.append({"percent": 0 , "file_url": strPath, "size": fsize, "file_ext": ext,
                                    "file_name":file_nme,
-                                   "file_mold": ( ext == "JPG" || ext == "BMP" || ext == "GIF"
-                                                 || ext == "JPEG" || ext == "ICO" || ext=="PNG") ? 1 : 2
+                                   "file_mold": API.getFileMode(strPath)
                                })
             allSize += fsize;
             showSize = allSize/1024 > 1024 ? (allSize/1024/1024).toFixed(2)+"M" : (allSize/1024).toFixed(2)+"k"

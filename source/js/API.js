@@ -47,7 +47,8 @@ var api_voiceCode = "api_v3/account/voicecode_send"      // 获取语音验证�
 // 好友相关
 var api_friendlist = "api_v2/friends/friend_list"       //获取通讯录好友
 var api_companyflist = "/api_v3/friends/client_friend"  //获取企业好友
-var api_frienddetail = "/api_v3/friends/search_user"   // 获取好友详情
+var api_frienddetail = "/api_v3/friends/search_user"    // 获取好友详情
+var api_friendgroup = "/api_v3.0.4/friends/friend_group" // 获取好友和群组
 
 
 // 群组相关
@@ -56,7 +57,8 @@ var api_groupfriend = "api_v3/friends/group_friend"     // 获取群内好友列
 var api_groupmember = "api_v2/group/group_detail"       // 获取群内成员和详情
 
 // 云库相关
-var api_getcloudfile = "api_v2/chat/get_file"           // 获取云库文件
+var api_getcloudfile = "/api_v2/chat/get_file"           // 获取云库文件
+var api_getcloudfile_new = "/api_v3.0.4/cloud/file_list"    // 获取云库文件新
 var api_savefile = "/api_v3/cloud/save"                 // 保存上传云库文件
 var api_removefile = "/api_v3/cloud/file_remove"        // 移除云库文件
 
@@ -133,6 +135,26 @@ function compareDate(time1,time2){
     return subTime;
 }
 
+// 获取当前时间
+function getNowFormatDate() {
+    var date = new Date();
+    var seperator1 = "-";
+    var seperator2 = ":";
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if (month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if (strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var currentdate = year + seperator1 + month + seperator1 + strDate
+            + " " + date.getHours() + seperator2 + date.getMinutes()
+            + seperator2 + date.getSeconds();
+    return currentdate;
+}
+
 // 获取坐标
 function getAbsolutePosition(node) {
     var returnPos = {};
@@ -148,11 +170,13 @@ function getAbsolutePosition(node) {
 
 // 验证图片和PDF格式
 function validateFileExtension(filePath) {
-    var ext = filePath.split('.').pop().toUpperCase();
+    var ext = filePath.split('.').pop().toLowerCase();
     var valid = false;
-
-    if(ext == "JPG" || ext == "BMP" || ext == "GIF"
-            || ext == "JPEG" || ext == "ICO" || ext == "PNG" || ext == "PDF") {
+    //  .jpg .jpeg .png .pdf .ppt .pptx .xls .xlsx .doc .docx .txt .rar .zip .7z .dwg .skp
+    if(ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "pdf"
+            ||ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx"
+            ||ext == "doc" || ext == "docx" || ext == "txt" || ext == "rar"
+            ||ext == "zip" || ext == "7z" || ext == "dwg" || ext == "skp") {
         valid = true;
     }
 
@@ -160,15 +184,18 @@ function validateFileExtension(filePath) {
 }
 
 function getFileMode(filePath){
-    var ext = filePath.split('.').pop().toUpperCase();
+    var ext = filePath.split('.').pop().toLowerCase();
     var filemode = 0;
 
-    if(ext == "JPG" || ext == "BMP" || ext == "GIF"
-            || ext == "JPEG" || ext == "ICO" || ext == "PNG") {
+    if(ext == "jpg" || ext == "jpeg" || ext == "png") {
         filemode = 1;
-    }else if(ext == "PDF"){
+    }else if(ext == "pdf"){
         filemode = 2;
-
+    }else if(ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx"
+             ||ext == "doc" || ext == "docx"){
+        filemode = 3;
+    }else{
+        filemode = 4;
     }
 
     return filemode;

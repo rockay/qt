@@ -18,6 +18,7 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QVersionNumber>
+#include <QKeyEvent>
 #include "ryimpl.h"
 #include "qtquickcontrolsapplication.h"
 
@@ -28,6 +29,12 @@ Utility* Utility::m_instance = NULL;
 Utility::Utility(QObject *parent) : QObject()
 {
     Q_UNUSED(parent);
+
+    m_findTimer = new QTimer(this);
+    m_findTimer->setInterval(100);
+    connect(m_findTimer, SIGNAL(timeout()), this, SLOT(changeFileNameByHandle()));
+
+
     updater = new UpdaterHttp;
     QLibrary mylib("PrScrn.dll");
     if(mylib.load()){
@@ -71,16 +78,17 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
     filePath = filePath.replace("file:///","");
     QFileInfo fileinfo(filePath);
     QString fileName = fileinfo.fileName();
-    QString ext =  getFileExt(filePath);
-    if(fileinfo.size() > 20 * 1024 * 1024){ // 20M
+    QString ext =  getFileExt(filePath).toLower();
+    if(fileinfo.size() > 1000 * 1024 * 1024){ // 200M
         emit uploadMaterialRet(1, crtUploadType, "文件过大", filefrom, messageid);
         return false;
     }
     QString cth = "";
-    if(ext == "JPG" || ext == "BMP" || ext == "GIF"
-            || ext == "JPEG" || ext == "ICO" || ext == "PNG") {
+    if(ext == "jpg" || ext == "jpeg" || ext == "png") {
         cth = "image/"+ext;
-    }else if(ext == "PDF"){
+    }else if(ext == "pdf"||ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx"
+             ||ext == "doc" || ext == "docx" || ext == "txt" || ext == "rar"
+             ||ext == "zip" || ext == "7z" || ext == "dwg" || ext == "skp"){
         cth = "application/"+ext;
     }else{
         emit uploadMaterialRet(2, crtUploadType, tr("文件格式不支持"), filefrom, messageid);
@@ -137,9 +145,11 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
 
     QNetworkReply *reply;
     reply = networkAccessManager.post(request,send);
+    emit updateProgress(1, currentUploadsFrom.value(reply),currentUploadsID.value(reply));
     currentUploadsID.insert(reply,messageid);
     currentUploadsFrom.insert(reply,filefrom);
     connect(reply,&QNetworkReply::uploadProgress,this, &Utility::uploadProgress);
+
     return true;
 }
 
@@ -194,7 +204,7 @@ QString Utility::getGuid()
 int Utility::getMessageId()
 {
     QDateTime time = QDateTime::currentDateTime();   //获取当前时间
-    int timeT = time.toMSecsSinceEpoch();   //将当前时间转为时间戳
+    uint timeT = time.toMSecsSinceEpoch();   //将当前时间转为时间戳
     return timeT;
 }
 
@@ -230,7 +240,9 @@ void Utility::shootScreen()
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->clear();
     if (screenshot != NULL){
+        m_findTimer->start();
         int ret = screenshot(0);
+        m_findTimer->stop();
         qDebug()<<"screenshot ret:"<<ret;
         if(ret==1){
             const QMimeData *mimeData = clipboard->mimeData();
@@ -383,6 +395,40 @@ bool Utility::isFileExist(const QString &path)
         return true;
     }
     return false;
+}
+
+BOOL CALLBACK EnumChildProc(HWND hWndChild, LPARAM lParam)
+{
+    TCHAR p[10];
+    TCHAR a[10] = L"Edit";
+    GetClassName(hWndChild,p,10);
+    qDebug()<<"hWndChild p:"<<QString::fromStdWString(p);
+    if ( _wcsicmp(p,a) == 0 )
+    {
+        QString text = QString("圈图截图_"+QDateTime::currentDateTime().addSecs(-1).toString("yyyyMMddhhmmss")+".png");
+        SendMessageW(hWndChild, WM_SETTEXT, NULL, (LPARAM)text.toStdWString().c_str());
+        for(int i=0;i<25;i++)
+            SendMessage(hWndChild, WM_KEYDOWN, VK_RIGHT, 0);
+    }
+//    SendMessageW(hwndChild, WM_PASTE, NULL, NULL);
+
+    return TRUE;
+}
+
+void Utility::changeFileNameByHandle()
+{
+    HWND hwndSave=FindWindow(NULL,L"另存为");
+    if(hwndSave == 0)
+        return;
+    qDebug()<<"HWND:"<<hwndSave;
+    QWindow* winSave=QWindow::fromWinId((WId)hwndSave);
+    if(winSave != NULL){
+        m_findTimer->stop();
+        qDebug()<<"抓到保句柄:"<<winSave;
+
+        //Get a handle for the "=" button
+        EnumChildWindows(hwndSave,EnumChildProc,0);
+    }
 }
 
 

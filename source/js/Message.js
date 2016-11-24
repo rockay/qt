@@ -170,7 +170,7 @@ function sendNtyMsg(userid,categoryid){
     // 根据ID，获取发送过来的消息最新的ID
     var retStr = chatview.chatListModel.getLastMsgId(chatview.user_id);
     if(retStr != ""){
-        console.log("retStr:"+retStr)
+//        console.log("retStr:"+retStr)
         var retList = retStr.split('|');
         if(retList.length==2){
             ryControl.sendNtfMsg(retList[0], userid, categoryid,retList[1]);
@@ -333,11 +333,16 @@ function search(name) {
 
 // 选择文件列表后的操作
 function selectFiles(fileUrls){
+    if(fileUrls.length>5){
+        tips.text ="请一次发送文件不要超过5个文件";
+//        keytimer.start();
+        return;
+    }
+
     for (var i = 0; i < fileUrls.length; i++){
         var strPath = fileUrls[i].toString();
         var ext = strPath.split('.').pop().toUpperCase();
-        if(ext == "JPG" || ext == "BMP" || ext == "GIF"
-                || ext == "JPEG" || ext == "ICO" || ext == "PNG"){// 图片
+        if(ext == "JPG" || ext == "JPEG" || ext == "PNG"){// 图片
             chatview.ctype = 5;
             console.log("message send image path:"+strPath)
             chattool.document.insertImage("strPath",strPath);
