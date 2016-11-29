@@ -177,7 +177,7 @@ Window {
         Rectangle{
             id:leftbar
             width: UI.fWMainL
-            height: mainform.height-50
+            height: mainform.height
             anchors.left: parent.left
             anchors.top: parent.top
             color: UI.cMainLBg
@@ -286,10 +286,11 @@ Window {
             Rectangle{
                 id: exit
                 width: UI.fWMainL
-                height: height
+                height: width
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 10
+                color: UI.cMainLBg
                 LToolButton {
                     id:exitbtn;
                     source: "qrc:/images/icon/exit.png";

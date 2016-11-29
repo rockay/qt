@@ -24,6 +24,7 @@ Item {
             FriendJS.getCompany();
         }
     }
+
     Rectangle{
         id:leftarea
         width: UI.fWMainC
@@ -76,7 +77,7 @@ Item {
                     FriendJS.search(category.currentIndex,search.value)
                 }
             }
-          }
+        }
         StackLayout {
             width: parent.width
             height: parent.height-search.height-category.height-2*UI.fMLsearch-10
@@ -287,6 +288,7 @@ Item {
             id: busimodel
         }
     }
+
     Rectangle{
         id:rightbar
         width: parent.width-leftarea.width
@@ -441,8 +443,4 @@ Item {
         }
     }
 
-//    Component.onCompleted: {
-//        Friend.getContacts();
-//        Friend.getCompany();
-//    }
 }

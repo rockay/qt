@@ -121,6 +121,7 @@ Window {
                 }
 
                 onSourceSizeChanged:  {
+                    console.log("source changed:"+source)
                     showimage.width = Math.min(flickable.width,showimage.sourceSize.width)
                     showimage.height = Math.min(flickable.height,showimage.sourceSize.height)
                     showimage.y = (flickable.height-showimage.height)/2

@@ -86,3 +86,7 @@ FORMS += \
 DISTFILES += \
     icon.rc
 
+# for xp
+#QT_OPENGL=software(qputenv("QT_OPENGL", "software")
+#QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
+

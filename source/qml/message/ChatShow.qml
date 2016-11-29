@@ -60,6 +60,17 @@ Rectangle{
                         fileurl = "" ;
                         filepath = listView.model.get(i).message.split('|')[0];
                     }
+                    else if(listView.model.get(i).message.split('|')[2] == undefined
+                            || listView.model.get(i).message.split('|')[2] == ""){
+                        if(listView.model.get(i).message.split('|')[1] !="" && listView.model.get(i).message.split('|')[1] != undefined){
+                            fileurl = listView.model.get(i).message.split('|')[1] ;
+                            filepath = listView.model.get(i).message.split('|')[1];
+                        }else{
+                            fileurl = "" ;
+                            filepath = listView.model.get(i).message.split('|')[0];
+                        }
+                    }
+
                     else{
                         filepath = listView.model.get(i).message.split('|')[2] ;
                         fileurl = listView.model.get(i).message.split('|')[1] ;
@@ -391,7 +402,7 @@ Rectangle{
                                 imageshow.curIdx = imgIndx;
 
                                 imageshow.imgSrc = ""
-                                imageshow.imgSrc = (model.result==-1 || model.result==0) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2];
+                                imageshow.imgSrc = (model.result==-1 || model.result==0 || model.message.split('|')[2] == undefined) ? "file:///"+model.message.split('|')[0] : "file:///"+model.message.split('|')[2];
                                 imageshow.imgshowList = imgList
                                 imageshow.show();
                                 imageshow.requestActivate();

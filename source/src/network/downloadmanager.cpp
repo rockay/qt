@@ -33,6 +33,9 @@ void DownloadManager::doDownload(const QString &url, const QString &saveFileName
 void DownloadManager::downloadProgress(qint64 up, qint64 toal)
 {
     QNetworkReply *reply = (QNetworkReply *)sender();
+    if(currentDownloadsID.value(reply)==NULL
+            || currentDownloadsID.value(reply) == "")
+        return;
     qDebug()<<"下载进度:"<<up*100/toal;
     if(up == toal){
         emit downProcess(100,currentDownloadsID.value(reply));
@@ -119,6 +122,10 @@ void DownloadManager::sslErrors(const QList<QSslError> &sslErrors)
 
 void DownloadManager::downloadFinished(QNetworkReply *reply)
 {
+    if(currentDownloadsID.value(reply)==NULL
+            || currentDownloadsID.value(reply) == "")
+        return;
+
     /* Check if we need to redirect */
     QUrl redurl = reply->attribute (
                    QNetworkRequest::RedirectionTargetAttribute).toUrl();
