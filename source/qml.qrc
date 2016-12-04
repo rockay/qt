@@ -234,5 +234,14 @@
         <file>qml/message/FileWebview.qml</file>
         <file>controls/LImage.qml</file>
         <file>controls/ChooseFriendGroup.qml</file>
+        <file>images/icon/rotate.png</file>
+        <file>images/icon/savep.png</file>
+        <file>images/icon/rotatep.png</file>
+        <file>images/icon/zoomoutp.png</file>
+        <file>images/icon/zoominp.png</file>
+        <file>images/icon/fullscreenp.png</file>
+        <file>images/icon/closebigp.png</file>
+        <file>images/icon/closebig.png</file>
+        <file>images/icon/smallp.png</file>
     </qresource>
 </RCC>

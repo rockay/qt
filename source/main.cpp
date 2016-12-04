@@ -84,7 +84,7 @@ int main(int argc,char* argv[])
     app.setApplicationName("quantu");
     app.setOrganizationName("yiduotech");
     app.setAttribute(Qt::AA_EnableHighDpiScaling);
-    app.setApplicationVersion ("1.0.1");
+    app.setApplicationVersion ("1.0.2");
     app.setWindowIcon(QIcon("logo.ico"));
     app.setQuitOnLastWindowClosed(false);
 

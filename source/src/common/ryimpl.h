@@ -22,6 +22,7 @@ enum MSGTYPE{
     MSG_VC=6,           // 收到语音消息
     MSG_IMGTXT=7,       // 收到图片文字消息
     MSG_LBS=8,           // 收到位置消息
+    MSG_FILE=9,           // 收到位置消息
     MSG_CLOUDIMG=31,            // 收到云库文件
     MSG_ReceiptMessage = 32     // 群里自定义回执消息
 };

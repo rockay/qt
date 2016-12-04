@@ -6,8 +6,8 @@ IDI_ICON1   ICON DISCARDABLE"logo.ico"
 #include <winver.h>
 #endif
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION 1,0,0,1
-    PRODUCTVERSION 1,0,0,1
+    FILEVERSION 1,0,0,2
+    PRODUCTVERSION 1,0,0,2
     FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
     FILEFLAGS VS_FF_DEBUG
@@ -24,12 +24,12 @@ VS_VERSION_INFO VERSIONINFO
             BEGIN
                 VALUE "CompanyName", "四川壹多联合科技"
                 VALUE "FileDescription", "Quantu"
-                VALUE "FileVersion", "1.0.0.1"
+                VALUE "FileVersion", "1.0.0.2"
                 VALUE "InternalName", "qt.exe"
                 VALUE "LegalCopyright", "Copyright (C)2016-2017 四川壹多联合科技"
                 VALUE "OriginalFilename", "qt.exe"
                 VALUE "ProductName", "圈图"
-                VALUE "ProductVersion", "1.0.0.1"
+                VALUE "ProductVersion", "1.0.0.2"
             END
         END
         BLOCK "VarFileInfo"

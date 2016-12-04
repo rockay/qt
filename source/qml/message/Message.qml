@@ -82,6 +82,7 @@ Item {
                 chatview.chatListModel.deleteMsgByID(msgid)
                 MessageJS.sendMsg(content, chatview.user_type,chatview.ctype)
                 break;
+            case 9: // 融云文件协议
             case 31: // 云
                 var sendtxt = "[发送云库文件]"
                 var strList = content.split("|");
@@ -139,6 +140,7 @@ Item {
             switch(type){
             case 0: // 其他
                 tips.text = ""
+                break;
             case 2: // 输入
                 tips.text = msg
                 keytimer.start();
@@ -151,6 +153,7 @@ Item {
                 break;
             case 4: //文字
             case 31: //云库
+            case 9: // 文件消息
             case 5: //图片
             case 6: // 语音
 //                console.debug ("收到消息:"+msg)
@@ -162,10 +165,12 @@ Item {
                 // 如果是图片
                 if(type==5)
                     msg = qsTr("[图片]");
-                if(type==6)
+                else if(type==6)
                     msg = qsTr("[语音]");
-                if(type==31)
+                else if(type==31)
                     msg = qsTr("[云库文件]");
+                else if(type==9)
+                    msg = qsTr("[文件消息]");
 
                 if(isMetionedMe){ //@我
                     msg = "[有人@我] " + msg;

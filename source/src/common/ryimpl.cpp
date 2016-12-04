@@ -784,7 +784,6 @@ void RYImpl::slotSendMsg()
             else if(className.compare("app:ReceiptMessage")==0) // 回执消息
             {
                 type = MSGTYPE::MSG_ReceiptMessage;
-                qDebug()<<"回执消息:"<<objContent;
                 QString subcontent = objContent.value("content").toString();
                 QString sendUserName= objContent.value("sendUserName").toString();
                 QString sendUserId = objContent.value("sendUserId").toString();
@@ -792,6 +791,7 @@ void RYImpl::slotSendMsg()
                 content = QString("%1|%2|%3|%4").arg(subcontent, sendUserName, sendUserId, groupId);
                 qDebug()<<"回执消息 content:"<<content;
             }
+
         }
         else if (objContent.contains("typingContentType")){
             // 对方正在录入消息
@@ -802,7 +802,27 @@ void RYImpl::slotSendMsg()
             type = MSGTYPE::SENDTIME;
             content = obj.value("m_Message").toString();
             // 消息已读
-        }else{
+        }
+        else if(obj.value("m_ClazzName").toString().toLower().compare("rc:filemsg")==0)  // 文件消息
+        {
+            type = MSGTYPE::MSG_FILE;
+            QString file_ext = objContent.value("type").toString().toLower();
+            int file_mold= 4; //默认先用4 其它
+            if(file_ext == "jpg" || file_ext == "jpeg" || file_ext == "png" || file_ext == "bmp" || file_ext == "ico" || file_ext == "gif") {
+                file_mold = 1;
+            }else if(file_ext == "pdf"){
+                file_mold = 2;
+            }else if(file_ext == "ppt" || file_ext == "pptx" || file_ext == "xls" || file_ext == "xlsx" || file_ext == "doc" || file_ext == "docx"){
+                file_mold = 3;
+            }
+            int file_size = objContent.value("size").toInt();
+            QString file_name  = objContent.value("name").toString();
+            QString file_url = objContent.value("fileUrl").toString();
+            // 保存缩略图路径和远程路径
+            content = QString("%1|%2|%3|%4|%5").arg(file_ext, QString::number(file_mold), QString::number(file_size), file_name, file_url);
+            qDebug()<<"文件消息 content:"<<content;
+        }
+        else{
             content = obj.value("m_Message").toString();
             delayTimer->start();
             // 不知道的格式，直接返回

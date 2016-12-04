@@ -44,6 +44,8 @@ var cTypeBG = "#0099FF"         // 企业类型背景
 var cTabCheckedF = "#3D6599"    // Tab控件选中项的字体颜色
 var cTabUncheckedB = "#666666"  // Tab控件未选中项的下边框色
 var cTabBg = "#8F8F8F"          // Tab控件背景色
+var cImageShowToolBg = "#F3F3F3" // 图片预览工具条背景色
+var cImageShowText = "#999999"  // 片预览工具条文字
 
 // 窗体定义
 var fHLoginClose = 40   // 登陆窗体关闭按钮高
@@ -92,8 +94,8 @@ var cUploadBtnBD = "#F6C85F"    // 上传界面按钮背border
 var cUploadTip = "#B1B1B1"      // 上传界面提示信息字体
 
 // 图片编辑
-var fWBottomTool = 350          // 图片编辑界面工具条宽
-var fHBottomTool = 50           // 图片编辑界面工具条高
+var fWBottomTool = 370          // 图片编辑界面工具条宽
+var fHBottomTool = 45           // 图片编辑界面工具条高
 var fWNextBtn = 40              // 下一张和上一张按钮的宽
 var fItemMargin = 20            //和按钮间的间距
 

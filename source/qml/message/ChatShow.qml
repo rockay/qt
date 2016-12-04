@@ -169,10 +169,10 @@ Rectangle{
 
                 Rectangle { // textarea
                     id: textarearect
-                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 30 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : model.ctype == 31 ? 250: (hidemessageText.width + 24)
+                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 30 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : (model.ctype == 31 || model.ctype == 9) ? 300: (hidemessageText.width + 24)
                                     , listView.width - 2*UI.fChatImgH - messageRow.spacing-30)
                     height:{
-                        model.ctype == 4 ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : model.ctype == 31? 70 : (hidemessageText.height + 24)
+                        model.ctype == 4 ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : (model.ctype == 31 || model.ctype == 9)? 80 : (hidemessageText.height + 24)
                     }
                     color: UI.cTransparent //sentByMe ? UI.cRightBg : UI.cWhite
                     border.color: UI.cLeftBorder
@@ -213,6 +213,7 @@ Rectangle{
                                     break;
                                 case 6: //  语音
                                     break;
+                                case 9:  // 文件消息和云库走一样的协议 lt 2016.12.4
                                 case 31: //  云库
                                     signResendMsg(model.messageid, 31,model.message)
                                     break;
@@ -462,7 +463,7 @@ Rectangle{
                     Rectangle{ // 云文件发送
                         anchors.fill: parent
                         color: UI.cTransparent
-                        visible: model.ctype===31
+                        visible: model.ctype===31 || model.ctype===9
                         LText{
                             id: file_name
                             anchors.left: parent.left
@@ -470,7 +471,7 @@ Rectangle{
                             anchors.top: parent.top
                             anchors.topMargin: 10
                             width: parent.width - iconrect.width- 20
-                            text: model.ctype===31 ? model.message.split('|')[3] : ""
+                            text: (model.ctype===31 || model.ctype===9) ? model.message.split('|')[3] : ""
                         }
                         LText{
                             id: file_size
@@ -479,8 +480,8 @@ Rectangle{
                             anchors.leftMargin: 10
                             anchors.top: file_name.bottom
                             anchors.topMargin: 10
-                            text: model.ctype===31 ? model.message.split('|')[2]>(1024*1024) ? (model.message.split('|')[2]/1024/1024).toFixed(0)+"M" : (model.message.split('|')[2]/1024).toFixed(0) +"kb"  : ""
-                            color: UI.cMainCBg
+                            text: (model.ctype===31 || model.ctype===9) ? model.message.split('|')[2]>(1024*1024) ? (model.message.split('|')[2]/1024/1024).toFixed(0)+"M" : (model.message.split('|')[2]/1024).toFixed(0) +"K"  : ""
+                            color: UI.cWhite
                         }
                         Rectangle{
                             id: iconrect
@@ -496,8 +497,15 @@ Rectangle{
                                 id: file_ext
                                 anchors.centerIn: parent
                                 color: UI.cWhite
-                                pointSize: UI.BigFontPointSize
-                                text: model.ctype===31 ? model.message.split('|')[0].toString().toUpperCase() : ""
+                                pointSize: UI.StandardFontPointSize
+                                Component.onCompleted: {
+                                    if(model.ctype===31 || model.ctype===9){
+                                        var subext = model.message.split('|')[0].toString().toUpperCase();
+                                        file_ext.text = subext.length>3 ?subext.substring(0,3) : subext;
+                                    }else{
+                                        file_ext.text ="NAN";
+                                    }
+                                }
                             }
                         }
                         MouseArea{
@@ -523,7 +531,7 @@ Rectangle{
                                 if( model.message.split('|')[1].toString() === "1") //file_mold：文件类型，1 表示图片类型，2 表示 PDF 类型,3是word,4是其它
                                 {
                                     imageshow.imgSrc = ""
-                                    imageshow.imgSrc = model.ctype===31 ? model.message.split('|')[4] : ""
+                                    imageshow.imgSrc = (model.ctype===31 || model.ctype===9) ? model.message.split('|')[4] : ""
 
                                     // 获取当前图片的index
                                     var imgIndx = 0;
@@ -545,6 +553,7 @@ Rectangle{
 //                                    imageshow.requestActivate();
                                     Qt.openUrlExternally( model.message.split('|')[4]);
                                 }else{
+                                    Qt.openUrlExternally( model.message.split('|')[4]);
                                     console.log("==unsupport file...")
                                 }
                             }

@@ -68,7 +68,7 @@ Window {
     x: (Screen.desktopAvailableWidth-width)/2
     y: (Screen.desktopAvailableHeight-height)/2
 
-    Rectangle{
+    Rectangle{ // transparent 0.5
         anchors.fill: parent
         color: UI.cBlack
         opacity: 0.5
@@ -180,6 +180,7 @@ Window {
             }
         }
     }
+
     Image{
         id: btnNext
         width: UI.fWNextBtn
@@ -210,136 +211,182 @@ Window {
         anchors.left: parent.left
         anchors.leftMargin: (parent.width-width)/2
         anchors.bottom: parent.bottom
-//        anchors.bottomMargin: 10
-        color: UI.cBlack
-        opacity: 0.6
+        anchors.bottomMargin: 5
+        color: UI.cImageShowToolBg
+        radius: height/2
+
         LText{
-            anchors.centerIn: parent
-            pointSize: UI.LargeFontPointSize
-            text: (curIdx+1) + "/" + imgshowList.count
-            color: UI.cMainCBg
-        }
-        Image{
-            id: fullScreen
-            source: "qrc:/images/icon/fullscreen.png"
-            anchors.left: parent.left
-            anchors.leftMargin: UI.fItemMargin/2
-            anchors.top: parent.top
-            anchors.topMargin: (parent.height-height)/2
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    if (imgWindow.visibility === Window.Maximized){
-                        fullScreen.source = "qrc:/images/icon/fullscreen.png"
-                        imgWindow.visibility = Window.AutomaticVisibility
-                    }
-                    else{
-                        imgWindow.visibility = Window.Maximized
-                        fullScreen.source = "qrc:/images/icon/small.png"
-                    }
-
-                    showimage.width = Math.min(flickable.width,showimage.sourceSize.width)
-                    showimage.height = Math.min(flickable.height,showimage.sourceSize.height)
-                    showimage.y = (flickable.height-showimage.height)/2
-                    showimage.x = (flickable.width-showimage.width)/2
-                }
-            }
-        }
-
-        Image{
-            id: zoomin
-            source: "qrc:/images/icon/zoomin.png"
-            anchors.left: fullScreen.right
-            anchors.leftMargin: UI.fItemMargin
-            anchors.top: parent.top
-            anchors.topMargin: (parent.height-height)/2
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("放大")
-                    var percent = 0.1
-                    showimage.width *= (1+percent);
-                    showimage.height *= (1+percent);
-                    showimage.y = Math.max((flickable.height-showimage.height)/2,0) // 防止负数
-                    showimage.x =  Math.max((flickable.width-showimage.width)/2,0)
-
-                }
-            }
-        }
-        Image{
-            id: zoomout
-            source: "qrc:/images/icon/zoomout.png"
-            anchors.left: zoomin.right
-            anchors.leftMargin: UI.fItemMargin
-            anchors.top: parent.top
-            anchors.topMargin: (parent.height-height)/2
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("缩小")
-                    var percent = -0.1
-                    showimage.width *= (1+percent);
-                    showimage.height *= (1+percent);
-                    showimage.y = Math.max((flickable.height-showimage.height)/2,0) // 防止负数
-                    showimage.x =  Math.max((flickable.width-showimage.width)/2,0)
-                }
-            }
-        }
-        Image{
-            id: shareimg
-            source: "qrc:/images/icon/share.png"
+            id: imgcount
             anchors.right: parent.right
-            anchors.rightMargin: UI.fItemMargin
+            anchors.rightMargin: parent.height-20
+            height: parent.height
+            pointSize: UI.StandardFontPointSize
+            text: (curIdx+1) + "/" + imgshowList.count
+            color: UI.cImageShowText
+        }
+        Row{
+            width: parent.width - imgcount.width
+            height: fullScreen.sourceSize.height
+            anchors.left: parent.left
             anchors.top: parent.top
             anchors.topMargin: (parent.height-height)/2
-            visible : false
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("分享")
+            anchors.leftMargin: parent.height -20
+            spacing: 20
+            Image{
+                id: fullScreen
+                source: "qrc:/images/icon/fullscreen.png"
+
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        if (imgWindow.visibility == Window.Maximized){
+                            fullScreen.source = "qrc:/images/icon/fullscreen.png"
+                            imgWindow.visibility = Window.AutomaticVisibility
+                        }
+                        else{
+                            imgWindow.visibility = Window.Maximized
+                            fullScreen.source = "qrc:/images/icon/small.png"
+                        }
+
+                        showimage.width = Math.min(flickable.width,showimage.sourceSize.width)
+                        showimage.height = Math.min(flickable.height,showimage.sourceSize.height)
+                        showimage.y = (flickable.height-showimage.height)/2
+                        showimage.x = (flickable.width-showimage.width)/2
+                    }
+
+                    onEntered: {
+                        bottomTool.visible = true
+                        if(imgWindow.visibility != Window.Maximized)
+                            fullScreen.source = "qrc:/images/icon/fullscreenp.png";
+                        else
+                            fullScreen.source = "qrc:/images/icon/smallp.png"
+                    }
+                    onExited: {
+                        bottomTool.visible = true
+                        if(imgWindow.visibility != Window.Maximized)
+                            fullScreen.source = "qrc:/images/icon/fullscreen.png";
+                        else
+                            fullScreen.source = "qrc:/images/icon/small.png"
+                    }
+                }
+            }
+            Image{
+                id: zoomin
+                source: "qrc:/images/icon/zoomin.png"
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        console.log("放大")
+                        var percent = 0.1
+                        showimage.width *= (1+percent);
+                        showimage.height *= (1+percent);
+                        showimage.y = Math.max((flickable.height-showimage.height)/2,0) // 防止负数
+                        showimage.x =  Math.max((flickable.width-showimage.width)/2,0)
+                    }
+
+                    onEntered: {
+                        bottomTool.visible = true
+                        zoomin.source = "qrc:/images/icon/zoominp.png"
+                    }
+                    onExited: {
+                        bottomTool.visible = true
+                        zoomin.source = "qrc:/images/icon/zoomin.png"
+                    }
+                }
+            }
+            Image{
+                id: zoomout
+                source: "qrc:/images/icon/zoomout.png"
+
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        console.log("缩小")
+                        var percent = -0.1
+                        showimage.width *= (1+percent);
+                        showimage.height *= (1+percent);
+                        showimage.y = Math.max((flickable.height-showimage.height)/2,0) // 防止负数
+                        showimage.x =  Math.max((flickable.width-showimage.width)/2,0)
+                    }
+
+                    onEntered: {
+                        bottomTool.visible = true
+                        zoomout.source = "qrc:/images/icon/zoomoutp.png"
+                    }
+                    onExited: {
+                        bottomTool.visible = true
+                        zoomout.source = "qrc:/images/icon/zoomout.png"
+                    }
+                }
+            }
+            Image{
+                id: shareimg
+                source: "qrc:/images/icon/share.png"
+//                anchors.right: parent.right
+//                anchors.rightMargin: UI.fItemMargin
+//                anchors.top: parent.top
+//                anchors.topMargin: (parent.height-height)/2
+                visible : false
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        console.log("分享")
+                    }
+                }
+            }
+            Image{
+                id: saveimg
+                source: "qrc:/images/icon/save.png"
+
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        console.log("保存")
+                        saveDialog.file_ext = imgshowList.get(imgWindow.curIdx).file_ext
+                        saveDialog.httpurl = imgshowList.get(imgWindow.curIdx).url
+                        saveDialog.open();
+                    }
+
+                    onEntered: {
+                        bottomTool.visible = true
+                        saveimg.source = "qrc:/images/icon/savep.png"
+                    }
+                    onExited: {
+                        bottomTool.visible = true
+                        saveimg.source = "qrc:/images/icon/save.png"
+                    }
+                }
+
+            }
+            Image{
+                id: rotateimg
+                source: "qrc:/images/icon/rotate.png"
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        console.log("旋转")
+                        if(showimage.rotation > -270)
+                            showimage.rotation += -90;
+                        else
+                            showimage.rotation = 0;
+
+                    }
+                    onEntered: {
+                        bottomTool.visible = true
+                        rotateimg.source = "qrc:/images/icon/rotatep.png"
+                    }
+                    onExited: {
+                        bottomTool.visible = true
+                        rotateimg.source = "qrc:/images/icon/rotate.png"
+                    }
                 }
             }
         }
-
-        Image{
-            id: saveimg
-            source: "qrc:/images/icon/save.png"
-            anchors.right: shareimg.left
-            anchors.rightMargin: UI.fItemMargin/2
-            anchors.top: parent.top
-            anchors.topMargin: (parent.height-height)/2
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("保存")
-                    saveDialog.file_ext = imgshowList.get(imgWindow.curIdx).file_ext
-                    saveDialog.httpurl = imgshowList.get(imgWindow.curIdx).url
-                    saveDialog.open();
-                }
-            }
-
-        }
-        Image{
-            id: rotateimg
-            source: "qrc:/images/icon/refresh.png"
-            anchors.right: saveimg.left
-            anchors.rightMargin: UI.fItemMargin
-            anchors.top: parent.top
-            anchors.topMargin: (parent.height-height)/2
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("旋转")
-                    if(showimage.rotation < 360)
-                        showimage.rotation += 90;
-                    else
-                        showimage.rotation = 0;
-
-                }
-            }
-        }
-
     }
 
     Rectangle{
@@ -368,7 +415,7 @@ Window {
         }
         Rectangle{
             id:closeBtn
-            height: UI.fHLoginClose
+            height: UI.fHLoginClose/2
             width: height
             anchors.right: parent.right
             anchors.top: parent.top
@@ -378,10 +425,10 @@ Window {
             Image {
                 id: close
                 anchors.centerIn: parent
-                width: 40
+                width: 15
                 height: width
                 fillMode: Image.PreserveAspectFit
-                source: "qrc:/images/icon/close_loginp.png"
+                source: "qrc:/images/icon/closebig.png"
             }
             MouseArea{
                 anchors.fill: parent
@@ -391,10 +438,10 @@ Window {
                     imageshow.hide()
                 }
                 onEntered: {
-                    close.source = "qrc:/images/icon/close_login.png"
+                    close.source = "qrc:/images/icon/closebigp.png"
                 }
                 onExited: {
-                    close.source = "qrc:/images/icon/close_loginp.png"
+                    close.source = "qrc:/images/icon/closebig.png"
                 }
             }
         }
