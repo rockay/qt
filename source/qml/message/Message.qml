@@ -77,6 +77,7 @@ Item {
             chatview.ctype = type;
             switch(type){
             case 4: // 文字
+            case 32: // 回执类消息
             case 5: // 图片
                 // 删除原来的记录
                 chatview.chatListModel.deleteMsgByID(msgid)
@@ -84,7 +85,7 @@ Item {
                 break;
             case 9: // 融云文件协议
             case 31: // 云
-                var sendtxt = "[发送云库文件]"
+                var sendtxt = "[发送文件消息]"
                 var strList = content.split("|");
                 console.log(content);
                 console.log(strList.length);
@@ -167,8 +168,10 @@ Item {
                     msg = qsTr("[图片]");
                 else if(type==6)
                     msg = qsTr("[语音]");
-                else if(type==31)
-                    msg = qsTr("[云库文件]");
+                else if(type==31){
+                    msg = qsTr("[文件消息]");
+                    type = 9
+                }
                 else if(type==9)
                     msg = qsTr("[文件消息]");
 
@@ -213,28 +216,38 @@ Item {
                 if(itemList.length!=4){
                     return;
                 }
-                var sendUserId = itemList[2] ;
+                var sendUserId = senderid; //itemList[2] ;
                 var groupId = itemList[3];
 
-                var replyContent = "{\"sendUserName\":\""+API.user_name+"\",\"sendUserId\":\""+API.user_id+"\",\"receipSendUserId\":\""+sendUserId+"\",\"groupId\":\""+groupId+"\"}"
-                chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,itemList[0]+"<font color=\"blue\">[回执消息]</font>",targetid,1,4,sendtime); // 4先当普通消息存放
+                var replyContent = "{\"userId\":\""+API.user_id+"\",\"userName\":\""+API.user_name+"\",\"sendReceiptUserId\":\""
+                        +sendUserId+"\",\"receiptContent\":\""+itemList[0]+"\",\"messageUid\":\""+msgUid+"\"}"
+                if(conversationType == 3 &&　targetid == chatview.user_id && main.visible)
+                    chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,itemList[0]+"<font color=\"blue\">[回执消息]</font>",targetid,2,type,sendtime); // 已回发
+                else
+                    chatview.chatListModel.addMessage(msgUid,messageid,API.user_name,senderid,itemList[0]+"<font color=\"blue\">[回执消息]</font>",targetid,1,type,sendtime); // 取消4先当普通消息存放
                 if(type==32)
                     msg = qsTr("[收到回执消息]");
-                if(conversationType == 1) // 单人
+                /*if(conversationType == 1) // 单人 回执消息只有群组才有
                 {
 
                     if(senderid == chatview.user_id && main.visible){ // 如果当前对话框是发消息者,且窗体显示的情况下，则直接回发已收
 //                        console.log("回发消息...");
                         MessageJS.sendNtyMsg(senderid,conversationType);
                         chatListView.model.setCount(senderid, 0);
+
                     }
                     else{ // 不在当前会话列表
                         chatListView.model.addContactById(senderid, msg,1)  // 不在会话列表根据发送者获取基本信息
                         MessageJS.getUserInfoById(senderid, msg)
                     }
                 }
-                else if(conversationType == 3) // 群聊
+                else */if(conversationType == 3) // 群聊
                 {
+                    if(targetid == chatview.user_id && main.visible){
+                        // 发送已读回执消息
+                        if(sendUserId!=API.user_id) // 不是自己发的才回执
+                            ryControl.sendCustMsg(0,targetid,conversationType,replyContent);
+                    }
                     chatListView.model.addContactById(targetid, msg,1) // 不在会话列表根据发送者获取基本信息
                     MessageJS.getGroupInfoById(targetid, msg)
 
@@ -244,8 +257,6 @@ Item {
                 tips.text = "";
                 msgSound.play();
 
-                // 回发消息
-                ryControl.sendCustMsg(0,groupId,conversationType,replyContent);
                 break;
             }
         }
@@ -300,15 +311,16 @@ Item {
             case 5: // 图片
                 MessageJS.sendMsg(msgcontent.split('|')[2], chatview.user_type,chatview.ctype)
                 break;
+            case 9: // 文件协议
             case 31: // 云
-                var sendtxt = "[发送云库文件]"
+                var sendtxt = "[发送文件]"
                 var strList = msgcontent.split("|");
                 console.log(msgcontent);
                 console.log(strList.length);
                 if(strList.length>=5){
-                    message.chatviewp.ctype = 31;
+                    message.chatviewp.ctype = 9;
 
-                    var sendtxt = "[发送云库文件]"
+                    var sendtxt = "[发送文件]"
 
                     var idx = message.chatListView.currentIndex;
                     var retStr = message.chatListView.model.updateContacts(idx,sendtxt);
@@ -321,9 +333,9 @@ Item {
                         var categoryId = kk[2];
 
                         var messgeid = utilityControl.getMessageId();
-                        message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,msgcontent,targetid,0,31,"");
+                        message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,msgcontent,targetid,0,9,"");
                         message.chatviewp.converListView.positionViewAtEnd();
-                        var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,msgcontent,31);
+                        var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,msgcontent,9);
 
                         chooseCloudFile.visible = false;
                     }
@@ -516,6 +528,7 @@ Item {
                         if(model.get(currentIndex).categoryId === 1){ // 只有个人才发已读消息
                             MessageJS.sendNtyMsg(model.get(currentIndex).user_id, model.get(currentIndex).categoryId);
                         }
+
                         console.log("newcount..."+ model.get(currentIndex).newcount)
                         chatListView.model.setCount(model.get(currentIndex).user_id, 0);
                     }

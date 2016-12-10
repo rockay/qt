@@ -20,7 +20,9 @@ Window {
     title: qsTr("登录")
     flags: Qt.FramelessWindowHint | Qt.WindowSystemMenuHint
            | Qt.WindowMinimizeButtonHint| Qt.Window;
-    color: UI.cTransparent
+
+    color: UI.cWhite    // XP
+    // color: UI.cTransparent
     property bool isCodeLogin: false    // 是否验证码登录
     property bool isLogin: false
     property bool autoLogin: false

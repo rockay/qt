@@ -7,7 +7,8 @@ import "qrc:/js/login.js" as LoginJS
 //! [splash-properties]
 Window {
     id: splash
-    color: "transparent"
+    color: UI.cWhite    // XP
+    // color: UI.cTransparent
     title: "Splash Window"
     modality: Qt.ApplicationModal
     flags: Qt.SplashScreen

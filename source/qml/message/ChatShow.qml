@@ -50,7 +50,7 @@ Rectangle{
             imgList.clear()
             for(var i=0; i <listView.model.count; i++){
                 // 添加图片数组
-                if(listView.model.get(i).ctype === 5){
+                if(listView.model.get(i).ctype === 5 ||　listView.model.get(i).ctype === 9){
                     var idx = listView.model.get(i).message.split('|')[0].lastIndexOf(".")
                     var localpath = listView.model.get(i).message.split('|')[0];
                     var file_ext = localpath.substring(idx+1);
@@ -82,6 +82,17 @@ Rectangle{
                     var file_ext1 = listView.model.get(i).message.split('|')[0];
                     imgList.append({"path": filepath1,"file_ext":file_ext1,"url": filepath1})
 
+                }
+
+                // 发送已读回执消息
+                if(listView.model.get(i).ctype==32 && listView.model.get(i).senderid != API.user_id && listView.model.get(i).result !=2 ) // 不是自己发的才回执
+                {
+                    console.log("发回执消息")
+                    var msg = listView.model.get(i).message.replace("<font color=\"blue\">[回执消息]</font>","");
+                    var replyContent = "{\"userId\":\""+API.user_id+"\",\"userName\":\""+API.user_name+"\",\"sendReceiptUserId\":\""
+                            +listView.model.get(i).senderid+"\",\"receiptContent\":\""+msg+"\",\"messageUid\":\""+listView.model.get(i).msgUId+"\"}"
+                    ryControl.sendCustMsg(0,listView.model.get(i).targetid,3,replyContent);
+                    listView.model.updateMsgStatus(listView.model.get(i).messageid,2);
                 }
             }
             // 滚到最新的消息
@@ -169,10 +180,10 @@ Rectangle{
 
                 Rectangle { // textarea
                     id: textarearect
-                    width: Math.min(model.ctype == 4 ? (hidemessageText.implicitWidth+ 30 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : (model.ctype == 31 || model.ctype == 9) ? 300: (hidemessageText.width + 24)
+                    width: Math.min((model.ctype == 4 || model.ctype == 32) ? (hidemessageText.implicitWidth+ 30 ) : model.ctype == 5 ? (messageImg.width + 24) : model.ctype == 6 ? 120 : (model.ctype == 31 || model.ctype == 9) ? 300: (hidemessageText.width + 24)
                                     , listView.width - 2*UI.fChatImgH - messageRow.spacing-30)
                     height:{
-                        model.ctype == 4 ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : (model.ctype == 31 || model.ctype == 9)? 80 : (hidemessageText.height + 24)
+                        (model.ctype == 4 || model.ctype == 32) ? hidemessageText.implicitHeight + 14 : model.ctype == 5 ? (messageImg.height + 24) :  model.ctype == 6 ? 40 : (model.ctype == 31 || model.ctype == 9)? 80 : (hidemessageText.height + 24)
                     }
                     color: UI.cTransparent //sentByMe ? UI.cRightBg : UI.cWhite
                     border.color: UI.cLeftBorder
@@ -205,8 +216,9 @@ Rectangle{
                             onClicked: {
                                 // 重新发送，判断消息类型
                                 switch(model.ctype){
+                                case 32: // 回执消息
                                 case 4: // 文字
-                                    signResendMsg(model.messageid, 4,model.message)
+                                    signResendMsg(model.messageid, model.ctype,model.message)
                                     break;
                                 case 5: //  图片
                                     signResendMsg(model.messageid, 5,model.message.split('|')[0])
@@ -243,7 +255,7 @@ Rectangle{
                             color: sentByMe ? UI.cChatFont : UI.cChatFont
                             anchors.fill: parent
                             wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-                            visible: model.ctype == 4 ? true : false
+                            visible: (model.ctype == 4 ||model.ctype == 32) ? true : false
                             selectByMouse: true
                             textFormat: Text.RichText
                             onLinkActivated: Qt.openUrlExternally(link)
@@ -272,7 +284,7 @@ Rectangle{
                                         chooseFriendGroup.msgcontent = model.message;
                                         saveMenu.x = pp.x;
                                         saveMenu.y = pp.y;
-                                        saveMenu.ctype = 4
+                                        saveMenu.ctype = model.ctype
                                         saveMenu.httpurl = "";
                                         saveMenu.msgid = model.messageid
                                         saveMenu.open()
@@ -320,8 +332,8 @@ Rectangle{
                         LMenuItem {
                             id: copyitem
                             text: qsTr("复制")
-                            height: saveMenu.ctype == 4 ? 25 : 0
-                            visible: saveMenu.ctype == 4 ? true : false
+                            height: (saveMenu.ctype == 4||saveMenu.ctype == 32) ? 25 : 0
+                            visible: (saveMenu.ctype == 4||saveMenu.ctype == 32) ? true : false
                             onTriggered:{
                                 console.log("复制");
                                 // 复制

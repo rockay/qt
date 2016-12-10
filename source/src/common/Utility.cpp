@@ -79,7 +79,7 @@ bool Utility::uploadMaterial(QString url, QString filePath, QString materialType
     QFileInfo fileinfo(filePath);
     QString fileName = fileinfo.fileName();
     QString ext =  getFileExt(filePath).toLower();
-    if(fileinfo.size() > 1000 * 1024 * 1024){ // 200M
+    if(fileinfo.size() > 1000 * 1024 * 1024){ // 1G
         emit uploadMaterialRet(1, crtUploadType, "文件过大", filefrom, messageid);
         return false;
     }

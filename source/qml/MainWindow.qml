@@ -98,8 +98,8 @@ Window {
             console.log("message send clould file path:"+file_url)
 
             //云库文件
-            message.chatviewp.ctype = 31;
-            var sendtxt = "[发送云库文件]"
+            message.chatviewp.ctype = 9;
+            var sendtxt = "[发送文件消息]"
 
             var idx = message.chatListView.currentIndex;
             var retStr = message.chatListView.model.updateContacts(idx,sendtxt);
@@ -113,9 +113,9 @@ Window {
 
                 sendtxt = file_ext+"|"+file_mold+"|"+file_size+"|"+file_name+"|"+file_url
                 var messgeid = utilityControl.getMessageId();
-                message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,sendtxt,targetid,0,31,"");
+                message.chatviewp.chatListModel.addMessage(messgeid,messgeid,targetid,API.user_id,sendtxt,targetid,0, message.chatviewp.ctype,"");
                 message.chatviewp.converListView.positionViewAtEnd();
-                var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt,31);
+                var msgid = ryControl.sendCloudMsg(messgeid,targetid,categoryId,sendtxt, message.chatviewp.ctype);
 
                 chooseCloudFile.visible = false;
             }
@@ -152,8 +152,8 @@ Window {
             // 如果是图片
             if(msgtype==5)
                 msg = qsTr("[图片]");
-            else if(msgtype==31)
-                msg = qsTr("[云库文件]");
+            else if(msgtype==31 || msgtype==31)
+                msg = qsTr("[消息文件]");
 
             //添加或更新
             if(idx>-1){

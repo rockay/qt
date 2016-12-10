@@ -51,7 +51,7 @@ function sendFun(){
             else if(last4=="?pdf"){
                 var strPath = subTxt.substring(4,subTxt.length-4);
                 console.log("pdf:"+strPath)
-                chatview.ctype = 31;
+                chatview.ctype = 9;
                 // 1.上传文件
                 sendCloudMsg(strPath);
                 subTxt = "";
@@ -152,8 +152,8 @@ function sendMsg(sendtxt,user_type,ctype){
         // 如果是图片
         if(ctype==5)
             sendtxt = qsTr("[图片]");
-        else if(ctype==31)
-            sendtxt = qsTr("[云库文件]");
+        else if(ctype==31 || ctype==9)
+            sendtxt = qsTr("[文件消息]");
         contactListView.model.addContactById(targetid, sendtxt,0);
         contactListView.currentIndex = 0;
 
@@ -232,7 +232,7 @@ function saveFileMsgCB(data,messageid){
         var sendtxt = data.cloud_info.file_ext+"|"+data.cloud_info.file_mold+"|"
                 +data.cloud_info.file_size+"|"+data.cloud_info.file_name+"|"+data.cloud_info.file_url
         chatview.chatListModel.updateMsgContent(messageid, sendtxt);
-        var msgid = ryControl.sendCloudMsg(messageid,chatview.user_id,chatview.user_type,sendtxt,31);
+        var msgid = ryControl.sendCloudMsg(messageid,chatview.user_id,chatview.user_type,sendtxt,9);
 
     }else{
 //        upfilemodel.setProperty(curIdx, "percent", -1);
@@ -350,7 +350,7 @@ function selectFiles(fileUrls){
 //            sendMsg(strPath,chatview.user_type,chatview.ctype);
         }else if(ext == "PDF"){ // 图片
             console.log("message send PDF path:"+strPath)
-            chatview.ctype = 31;
+            chatview.ctype = 9;
 //            pdfpng.txtName = strPath.split('/').pop();
 //            var path = ryControl.m_picPath + "/"+pdfpng.txtName+".png";
 //            console.log("path:"+path)
@@ -368,7 +368,7 @@ function selectFiles(fileUrls){
 
 function sendCloudMsg(strPath){
     // 文档先调用上传，再发送云文件
-    chatview.ctype = 31;
+    chatview.ctype = 9;
     // 先把消息入库，后面发送成功再更新既可
     if(contactListView.currentIndex==-1)
         return;
@@ -377,12 +377,12 @@ function sendCloudMsg(strPath){
     var messageid = utilityControl.getMessageId();
     file_messageid = messageid;
     var sendtxt = utilityControl.getFileFullInfo(strPath); // 获取组装的发送格式
-    if(!chatview.chatListModel.addMessage(messageid, messageid, chatview.user_id, API.user_id, sendtxt, chatview.user_id,0,31,"")) // 空为发送时间，CPP中获取
+    if(!chatview.chatListModel.addMessage(messageid, messageid, chatview.user_id, API.user_id, sendtxt, chatview.user_id,0,chatview.ctype,"")) // 空为发送时间，CPP中获取
         return; // 发送失败
 
     chatview.converListView.positionViewAtIndex(chatview.converListView.model.count - 1, ListView.Beginning);
 
-    sendtxt = qsTr("[云库文件]");
+    sendtxt = qsTr("[文件消息]");
     // 更新会话列表
     contactListView.model.addContactById(chatview.user_id, sendtxt,0);
 

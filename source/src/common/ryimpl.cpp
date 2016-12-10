@@ -32,6 +32,7 @@ QJsonObject getJsonObjectFromString(const QString jsonString){
 
 void writeLog(const QString &msg)
 {
+    qDebug()<<"msg:"<<msg;
     QString strDateTime = QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss");
     QString path1 = RYImpl::getInstance()->m_logPath+"timing.log";
     QString path2 = RYImpl::getInstance()->m_logPath+strDateTime.mid(0,8)+".log";
@@ -428,8 +429,8 @@ int RYImpl::sendCloudMsg(int messageId,const QString &targetId,int categoryId, c
     QStringList strList = msg.split("|");
     if(strList.count()!=5)
         qDebug()<<"云文件发送格式不对:"<<msg;
-    QString fmsg= tr("{\"file_url\":\"%1\",\"file_name\":\"%2\",\"file_ext\":\"%3\",\"file_size\":%4,\"file_mold\":%5}")
-            .arg(strList.at(4), strList.at(3), strList.at(0), strList.at(2), strList.at(1));
+    QString fmsg= tr("{\"size\":%1,\"fileUrl\":\"%2\",\"name\":\"%3\",\"type\":\"%4\"}")
+            .arg(strList.at(2),strList.at(4), strList.at(3), strList.at(0));
     const wchar_t * msgw = reinterpret_cast<const wchar_t *>(fmsg.utf16());
 //    qDebug()<<tr("targetid:%1 \t categoryid:%2 \t content:%3").arg(targetId,QString(categoryId),fmsg);
 
@@ -446,7 +447,7 @@ int RYImpl::sendCloudMsg(int messageId,const QString &targetId,int categoryId, c
         emit RYImpl::getInstance()->sendMsgDealCallback(msgUId, result, timestamp);
     };
     if(sendMessage!=NULL){
-        sendMessage(targetId.toUtf8().data(), categoryId, 3, "app:IMFileMessage", msgw, "", "", messageId, sendMessageCallback);
+        sendMessage(targetId.toUtf8().data(), categoryId, 3, "RC:FileMsg", msgw, "", "", messageId, sendMessageCallback);
     }
     return messageId;
 }
@@ -465,7 +466,10 @@ int RYImpl::sendCustMsg(int messageId,const QString &targetId,int categoryId, co
         qDebug()<<"send cust messag callback:"<<retMsg;
     };
     if(sendMessage!=NULL){
-        sendMessage(targetId.toUtf8().data(), categoryId, 3, "app:ReceiptReadMessage", msgw, "", "", messageId, sendMessageCallback);
+        qDebug()<<"targetId:"<<targetId;
+        qDebug()<<"categoryId:"<<categoryId;
+        qDebug()<<"messageId:"<<messageId;
+        sendMessage(targetId.toUtf8().data(), categoryId, 3, "APP:ReadReceiptMessage", msgw, "", "", messageId, sendMessageCallback);
     }
     return messageId;
 }
@@ -781,13 +785,13 @@ void RYImpl::slotSendMsg()
                 // 保存缩略图路径和远程路径
                 content = QString("%1|%2|%3|%4|%5").arg(file_ext, QString::number(file_mold), QString::number(file_size), file_name, file_url);
             }
-            else if(className.compare("app:ReceiptMessage")==0) // 回执消息
+            else if(className.toLower().compare("app:receiptmessage")==0) //|| className.compare("app:readreceiptnessage")==0) // 回执消息
             {
                 type = MSGTYPE::MSG_ReceiptMessage;
                 QString subcontent = objContent.value("content").toString();
-                QString sendUserName= objContent.value("sendUserName").toString();
-                QString sendUserId = objContent.value("sendUserId").toString();
-                QString groupId  = objContent.value("groupId").toString();
+                QString sendUserName= ""; //objContent.value("sendUserName").toString();
+                QString sendUserId = ""; //objContent.value("sendUserId").toString();
+                QString groupId  = objContent.value("userId").toString();
                 content = QString("%1|%2|%3|%4").arg(subcontent, sendUserName, sendUserId, groupId);
                 qDebug()<<"回执消息 content:"<<content;
             }
